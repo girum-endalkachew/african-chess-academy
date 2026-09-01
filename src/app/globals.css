@@ -1,24 +1,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-aca-primary: #87CEEB;
-  --color-aca-hover: #53B4E0;
-  --color-aca-dark: #00A3E0;
-  --color-aca-light: #E6F5FF;
-  --color-aca-border: #DBE9F7;
-  --color-aca-text: #1E293B;
-  --color-aca-bg: #F8FAFC;
-  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  /* ACA Brand Colors */
+  --color-aca-blue: #368AE4;
+  --color-aca-blue-light: #60A5FA;
+  --color-navy: #0B1528;
+  --color-navy-soft: #2C2F48;
+  
+  /* Background & Surfaces */
+  --color-background: #EEF3FA;
+  --color-surface: rgba(255, 255, 255, 0.42);
+  --color-border: rgba(255, 255, 255, 0.6);
+  
+  /* Typography */
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
   }
-
   body {
-    background-color: var(--color-aca-bg);
-    color: var(--color-aca-text);
+    /* Soft warm white + subtle blue gradient from your blueprint */
+    background:
+      radial-gradient(circle at 80% 20%, rgba(54, 138, 228, 0.18), transparent 35%),
+      radial-gradient(circle at 10% 10%, rgba(255, 190, 120, 0.12), transparent 30%),
+      var(--color-background);
+    color: var(--color-navy);
     font-family: var(--font-sans);
+  }
+}
+
+@layer utilities {
+  /* The Master Glass Wrapper for the whole site */
+  .master-glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 20px 60px rgba(30, 60, 100, 0.12);
+  }
+
+  /* The primary blue button from your blueprint */
+  .btn-blue {
+    background: #368AE4;
+    box-shadow: 0 8px 20px -4px rgba(54, 138, 228, 0.4);
   }
 }
