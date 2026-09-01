@@ -1,68 +1,55 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#DBE9F7] bg-white text-[#1E293B]">
-      <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden bg-white">
-                <Image src="/aca-logo.jpg" alt="ACA Logo" width={40} height={40} className="object-cover" />
-              </div>
-              <span className="text-lg font-bold text-[#1E293B]">ACA ACADEMY</span>
-            </Link>
-            <p className="text-sm text-slate-600 leading-relaxed max-w-sm">
-              A unified digital platform for African Chess Academy students, coaches, and chess enthusiasts to learn, play, compete, and grow together.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold text-[#1E293B] uppercase tracking-wider mb-4">Quick Links</h4>
-            <ul className="space-y-2.5 text-sm text-slate-600">
-              <li><Link href="/about" className="hover:text-[#00A3E0] transition-colors">About Us</Link></li>
-              <li><Link href="/programs" className="hover:text-[#00A3E0] transition-colors">Courses & Programs</Link></li>
-              <li><Link href="/coaches" className="hover:text-[#00A3E0] transition-colors">Our Coaches</Link></li>
-              <li><Link href="/news" className="hover:text-[#00A3E0] transition-colors">Latest News</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold text-[#1E293B] uppercase tracking-wider mb-4">Competitions</h4>
-            <ul className="space-y-2.5 text-sm text-slate-600">
-              <li><Link href="/tournaments" className="hover:text-[#00A3E0] transition-colors">Upcoming Tournaments</Link></li>
-              <li><Link href="/events" className="hover:text-[#00A3E0] transition-colors">Webinars & Events</Link></li>
-              <li><Link href="/dashboard" className="hover:text-[#00A3E0] transition-colors">Student Portal</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold text-[#1E293B] uppercase tracking-wider mb-4">Contact</h4>
-            <ul className="space-y-2.5 text-sm text-slate-600">
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[#00A3E0]" />
-                info@africanchessacademy.org
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-[#00A3E0]" />
-                +251 900 000 000
-              </li>
-              <li className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-[#00A3E0] shrink-0 mt-0.5" />
-                Addis Ababa, Ethiopia
-              </li>
-            </ul>
-          </div>
+    <footer className="mt-auto border-t border-white/40 pt-10 pb-8 px-8 sm:px-12 bg-white/20 backdrop-blur-sm">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-10">
+        
+        {/* Brand Column */}
+        <div className="md:col-span-2 space-y-4">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0B1528] text-white">
+              <span className="font-serif text-xl leading-none">♙</span>
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-[13px] font-extrabold tracking-wide text-[#0B1528]">AFRICAN</span>
+              <span className="text-[13px] font-extrabold tracking-wide text-[#0B1528] mt-[2px]">CHESS ACADEMY</span>
+            </div>
+          </Link>
+          <p className="text-[12px] font-medium text-[#64748B] max-w-sm leading-relaxed">
+            A unified digital platform for African Chess Academy students, coaches, and chess enthusiasts to learn, play, and grow together.
+          </p>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-[#DBE9F7] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} African Chess Academy. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link href="/contact" className="hover:text-[#00A3E0]">Privacy Policy</Link>
-            <Link href="/contact" className="hover:text-[#00A3E0]">Terms of Service</Link>
-          </div>
+        {/* Quick Links */}
+        <div>
+          <h4 className="text-[11px] font-extrabold text-[#0B1528] tracking-widest uppercase mb-4">Platform</h4>
+          <ul className="space-y-3">
+            <li><Link href="/programs" className="text-[12px] font-bold text-[#64748B] hover:text-[#368AE4] transition-colors">Courses & Programs</Link></li>
+            <li><Link href="/tournaments" className="text-[12px] font-bold text-[#64748B] hover:text-[#368AE4] transition-colors">Tournaments</Link></li>
+            <li><Link href="/coaches" className="text-[12px] font-bold text-[#64748B] hover:text-[#368AE4] transition-colors">Our Coaches</Link></li>
+          </ul>
+        </div>
+
+        {/* Legal / Contact */}
+        <div>
+          <h4 className="text-[11px] font-extrabold text-[#0B1528] tracking-widest uppercase mb-4">Connect</h4>
+          <ul className="space-y-3">
+            <li><Link href="/contact" className="text-[12px] font-bold text-[#64748B] hover:text-[#368AE4] transition-colors">Contact Us</Link></li>
+            <li><Link href="/login" className="text-[12px] font-bold text-[#64748B] hover:text-[#368AE4] transition-colors">Student Login</Link></li>
+            <li><Link href="/register" className="text-[12px] font-bold text-[#368AE4] flex items-center gap-1 hover:opacity-80">Join Now <ArrowRight className="h-3 w-3"/></Link></li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/40">
+        <p className="text-[10px] font-bold text-[#64748B]">
+          © {new Date().getFullYear()} African Chess Academy. All rights reserved.
+        </p>
+        <div className="flex gap-4">
+          <Link href="/privacy" className="text-[10px] font-bold text-[#64748B] hover:text-[#0B1528]">Privacy</Link>
+          <Link href="/terms" className="text-[10px] font-bold text-[#64748B] hover:text-[#0B1528]">Terms</Link>
         </div>
       </div>
     </footer>

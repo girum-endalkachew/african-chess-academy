@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings, CheckCircle2, Users
-} from "lucide-react";
+, Edit3 } from "lucide-react";
 import { formatDate } from "@/lib/utils/date";
 
 const navItems: NavItem[] = [
@@ -48,7 +48,8 @@ export default function StudentTournamentsPage() {
 
   useEffect(() => {
     loadData();
-  }, [router, supabase]);
+  },
+  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 }, [router, supabase]);
 
   const handleRegister = async (tournamentId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -156,3 +157,4 @@ export default function StudentTournamentsPage() {
     </PortalShell>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -7,14 +7,25 @@ import { createClient } from "@/lib/supabase/client";
 import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
-  LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings, ArrowRight, Swords
+  LayoutDashboard,
+  BookOpen,
+  Trophy,
+  Calendar,
+  Award,
+  User,
+  Settings,
+  ArrowRight,
+  Swords,
+  Edit3,
 } from "lucide-react";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
   { href: "/dashboard/play", label: "Play Computer", icon: Swords },
+  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
   { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
   { href: "/dashboard/events", label: "Events", icon: Calendar },
   { href: "/dashboard/certificates", label: "Certificates", icon: Award },
@@ -61,8 +72,8 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
-        <div className="h-8 w-8 rounded-full border-4 border-[#87CEEB] border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#EEF3FA]">
+        <div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -76,88 +87,115 @@ export default function StudentDashboard() {
 
   return (
     <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-      <div className="space-y-6">
-        <div className="bg-gradient-to-r from-[#00A3E0] to-[#87CEEB] rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <Badge className="bg-white/20 text-white border-0 mb-2">Student Portal</Badge>
-            <h1 className="text-2xl font-bold">Good day, {profile?.full_name}! 👋</h1>
-            <p className="text-white/90 text-xs mt-1">Train with lessons or play the computer.</p>
+      <div className="space-y-6 max-w-7xl mx-auto">
+        <GlassCard className="relative overflow-hidden p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-white/80">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#368AE4]/10 to-transparent pointer-events-none" />
+          <div className="relative z-10">
+            <Badge variant="blue" className="mb-3 px-3 py-1">Student Portal</Badge>
+            <h1 className="text-[28px] font-extrabold text-[#0B1528] tracking-tight">Good day, {profile?.full_name}! 👋</h1>
+            <p className="text-[#64748B] text-[13px] font-medium mt-1">Ready to improve? Train with lessons or play the computer.</p>
           </div>
-          <div className="bg-white/15 backdrop-blur px-5 py-3 rounded-2xl border border-white/20">
-            <p className="text-[10px] text-white/80 uppercase tracking-wider">Current Chess Rating</p>
-            <p className="text-2xl font-bold">{profile?.chess_rating || 1200} <span className="text-xs font-normal text-emerald-200">ELO</span></p>
+          <div className="relative z-10 bg-white/60 backdrop-blur-md px-6 py-4 rounded-[20px] border border-white shadow-sm flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-[#EEF3FA] flex items-center justify-center text-[#368AE4]">
+              <Trophy className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">Chess Rating</p>
+              <p className="text-[24px] font-extrabold text-[#0B1528] leading-none">
+                {profile?.chess_rating || 1200} <span className="text-[12px] font-bold text-[#368AE4]">ELO</span>
+              </p>
+            </div>
           </div>
-        </div>
+        </GlassCard>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {stats.map((s) => (
-            <div key={s.label} className="bg-white border border-[#DBE9F7] rounded-2xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-[#E6F5FF] text-[#00A3E0] flex items-center justify-center">
+            <GlassCard key={s.label} className="p-5" hoverEffect>
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-[#EEF3FA] text-[#368AE4] flex items-center justify-center shrink-0">
                   <s.icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">{s.label}</p>
-                  <p className="text-lg font-bold text-[#1E293B]">{s.value}</p>
+                  <p className="text-[20px] font-extrabold text-[#0B1528] leading-none">{s.value}</p>
+                  <p className="text-[11px] font-bold text-[#64748B] mt-1">{s.label}</p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           ))}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white border border-[#DBE9F7] rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-[#1E293B]">My active learning</h2>
-              <Link href="/dashboard/learning" className="text-xs font-semibold text-[#00A3E0] flex items-center gap-1">
-                View all <ArrowRight className="h-3.5 w-3.5" />
+          <GlassCard className="lg:col-span-2 p-7">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
+                <h2 className="text-[16px] font-extrabold text-[#0B1528]">My active learning</h2>
+              </div>
+              <Link href="/dashboard/learning" className="text-[12px] font-bold text-[#368AE4] hover:underline flex items-center gap-1">
+                View all <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
+
             {enrollments.length === 0 ? (
-              <div className="text-center py-8 space-y-2">
-                <p className="text-sm text-slate-500">No enrolled courses yet.</p>
-                <Link href="/dashboard/learning"><Button size="sm" variant="outline" className="rounded-xl">Browse Catalog</Button></Link>
+              <div className="text-center py-10 bg-white/40 rounded-[20px] border border-white/60">
+                <div className="h-12 w-12 rounded-full bg-[#EEF3FA] flex items-center justify-center mx-auto mb-3">
+                  <BookOpen className="h-5 w-5 text-[#368AE4]" />
+                </div>
+                <p className="text-[13px] font-bold text-[#0B1528] mb-1">No enrolled courses yet</p>
+                <p className="text-[11px] text-[#64748B] mb-4">Start your journey by joining a course.</p>
+                <Link href="/dashboard/learning">
+                  <Button variant="primary" size="sm">Browse Catalog</Button>
+                </Link>
               </div>
             ) : (
               <div className="space-y-4">
                 {enrollments.map((e) => (
-                  <div key={e.id} className="p-3.5 rounded-xl border border-slate-100 bg-slate-50">
-                    <div className="flex justify-between text-sm mb-1.5">
-                      <span className="text-[#1E293B] font-medium">{e.courses?.title}</span>
-                      <span className="text-xs text-[#00A3E0] font-semibold">{e.progress}%</span>
+                  <div key={e.id} className="p-4 rounded-[16px] border border-white/80 bg-white/50 backdrop-blur-sm transition hover:bg-white/70">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-[14px] font-bold text-[#0B1528]">{e.courses?.title}</span>
+                      <Badge variant="default">{e.progress}% Complete</Badge>
                     </div>
-                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div className="h-full bg-[#00A3E0]" style={{ width: `${e.progress}%` }} />
+                    <div className="h-2 bg-[#EEF3FA] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#368AE4] rounded-full" style={{ width: `${e.progress}%` }} />
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </GlassCard>
 
-          <div className="bg-white border border-[#DBE9F7] rounded-2xl p-6 space-y-4">
-            <h2 className="font-semibold text-[#1E293B]">Quick Actions</h2>
-            <div className="space-y-2">
+          <GlassCard className="p-7">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
+              <h2 className="text-[16px] font-extrabold text-[#0B1528]">Quick Actions</h2>
+            </div>
+            <div className="space-y-3">
               <Link href="/dashboard/play" className="block">
-                <Button className="w-full justify-between rounded-xl text-xs font-semibold gap-2">
-                  <span>Play vs Computer</span>
+                <Button variant="primary" className="w-full justify-between h-14 rounded-2xl px-5">
+                  <span className="text-[13px]">Play vs Computer</span>
                   <Swords className="h-4 w-4" />
                 </Button>
               </Link>
+              <Link href="/dashboard/editor" className="block">
+                <Button variant="glass" className="w-full justify-between h-14 rounded-2xl px-5">
+                  <span className="text-[13px]">Open Board Editor</span>
+                  <Edit3 className="h-4 w-4 text-[#368AE4]" />
+                </Button>
+              </Link>
               <Link href="/dashboard/learning" className="block">
-                <Button variant="outline" className="w-full justify-between rounded-xl text-xs font-semibold">
-                  <span>Browse Courses</span>
-                  <BookOpen className="h-4 w-4 text-[#00A3E0]" />
+                <Button variant="glass" className="w-full justify-between h-14 rounded-2xl px-5">
+                  <span className="text-[13px]">Browse Courses</span>
+                  <BookOpen className="h-4 w-4 text-[#368AE4]" />
                 </Button>
               </Link>
               <Link href="/dashboard/tournaments" className="block">
-                <Button variant="outline" className="w-full justify-between rounded-xl text-xs font-semibold">
-                  <span>Register Tournament</span>
-                  <Trophy className="h-4 w-4 text-[#00A3E0]" />
+                <Button variant="glass" className="w-full justify-between h-14 rounded-2xl px-5">
+                  <span className="text-[13px]">Find Tournaments</span>
+                  <Trophy className="h-4 w-4 text-[#368AE4]" />
                 </Button>
               </Link>
             </div>
-          </div>
+          </GlassCard>
         </div>
       </div>
     </PortalShell>

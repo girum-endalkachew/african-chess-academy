@@ -8,77 +8,134 @@ import { GlassCard } from "@/components/ui/glass-card";
 
 export default function HomePage() {
   return (
-    <div className="px-8 pb-20">
+    <div className="px-5 sm:px-8 pb-20">
       
       {/* ──────── HERO SECTION ──────── */}
-      <section className="relative grid lg:grid-cols-12 gap-10 items-center pt-12 pb-20">
-        
-        {/* 1. Left Text Content */}
-        <div className="lg:col-span-5 space-y-8 relative z-20">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/40 border border-white/60 px-4 py-2 text-[11px] font-bold tracking-[0.1em] text-[#64748B] uppercase backdrop-blur-md shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-[#368AE4]" />
-            Building Champions. Shaping Leaders.
-          </div>
+<section className="relative pt-8 pb-16 lg:pt-10 lg:pb-20 overflow-hidden">
+  <div className="grid lg:grid-cols-12 gap-8 lg:gap-0 items-center">
 
-          <h1 className="text-[3.5rem] lg:text-[4.2rem] font-extrabold tracking-tight text-[#0B1528] leading-[1.05]">
-            Where African<br />
-            Chess Talent<br />
-            Becomes <span className="text-[#368AE4]">Global<br />Excellence.</span>
-          </h1>
+    {/* LEFT COPY — tighter, less empty air */}
+    <div className="lg:col-span-5 xl:col-span-5 space-y-6 relative z-30 pr-0 lg:pr-4">
+      <div className="inline-flex items-center gap-2 rounded-full bg-white/40 border border-white/60 px-4 py-2 text-[11px] font-bold tracking-[0.1em] text-[#64748B] uppercase backdrop-blur-md shadow-sm">
+        <span className="h-2 w-2 rounded-full bg-[#368AE4]" />
+        Building Champions. Shaping Leaders.
+      </div>
 
-          <p className="text-base text-[#64748B] max-w-[420px] leading-relaxed font-medium">
-            Learn from experienced coaches, compete in meaningful tournaments, and develop the strategic mindset to reach your full potential.
-          </p>
+      <h1 className="text-[3rem] sm:text-[3.4rem] lg:text-[3.8rem] xl:text-[4.1rem] font-extrabold tracking-tight text-[#0B1528] leading-[1.02]">
+        Where African
+        <br />
+        Chess Talent
+        <br />
+        Becomes{" "}
+        <span className="text-[#368AE4]">
+          Global
+          <br />
+          Excellence.
+        </span>
+      </h1>
 
-          <div className="flex flex-wrap gap-4 pt-4">
-            <Link href="/programs" className="btn-blue inline-flex items-center gap-2 rounded-full px-7 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5">
-              Explore Programs <ArrowRight className="h-4 w-4 ml-1" />
-            </Link>
-            <Link href="/register" className="inline-flex items-center gap-2 rounded-full bg-white/50 border border-white/80 px-7 py-4 text-sm font-bold text-[#0B1528] shadow-sm backdrop-blur transition hover:bg-white/70 hover:-translate-y-0.5">
-              Join the Academy <User className="h-4 w-4 ml-1 text-[#64748B]" />
-            </Link>
+      <p className="text-[15px] text-[#64748B] max-w-[400px] leading-relaxed font-medium">
+        Learn from experienced coaches, compete in meaningful tournaments,
+        and develop the strategic mindset to reach your full potential.
+      </p>
+
+      <div className="flex flex-wrap gap-3 pt-2">
+        <Link
+          href="/programs"
+          className="btn-blue inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5"
+        >
+          Explore Programs <ArrowRight className="h-4 w-4" />
+        </Link>
+        <Link
+          href="/register"
+          className="inline-flex items-center gap-2 rounded-full bg-white/50 border border-white/80 px-6 py-3.5 text-sm font-bold text-[#0B1528] shadow-sm backdrop-blur transition hover:bg-white/70 hover:-translate-y-0.5"
+        >
+          Join the Academy <User className="h-4 w-4 text-[#64748B]" />
+        </Link>
+      </div>
+    </div>
+
+    {/* RIGHT: KNIGHT STAGE + ORBITING STATS */}
+    <div className="lg:col-span-7 relative z-10">
+      <div className="relative mx-auto h-[460px] w-full max-w-[620px] sm:h-[520px] lg:h-[560px] lg:max-w-none lg:-ml-6">
+
+        {/* soft stage glow */}
+        <div className="absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-[48%] rounded-full bg-[#368AE4]/20 blur-[90px]" />
+        <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-[48%] rounded-full border border-white/50" />
+        <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-[48%] rounded-full border border-white/25" />
+
+        {/* pedestal */}
+        <div className="absolute bottom-[14%] left-1/2 h-10 w-56 -translate-x-1/2 rounded-full bg-white/70 blur-2xl" />
+        <div className="absolute bottom-[16%] left-1/2 h-3 w-40 -translate-x-1/2 rounded-full bg-[#368AE4]/25 blur-lg" />
+
+        {/* KNIGHT — shifted toward true center of this stage */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative h-[92%] w-[92%] sm:h-[95%] sm:w-[95%]">
+            <Image
+              src="/hero-knight.png"
+              alt="3D Chess Knight"
+              fill
+              priority
+              className="object-contain drop-shadow-[0_25px_50px_rgba(54,138,228,0.28)]"
+              sizes="(max-width: 1024px) 90vw, 560px"
+            />
           </div>
         </div>
 
-        {/* 2. Center Stats Stack */}
-        <div className="lg:col-span-3 relative z-30 flex flex-col gap-4 lg:-mr-12 mt-12 lg:mt-0">
-          {[
-            { icon: Users, val: "500+", lbl: "Students" },
-            { icon: GraduationCap, val: "20+", lbl: "Expert Coaches" },
-            { icon: Globe2, val: "15", lbl: "Countries" },
-            { icon: Trophy, val: "100+", lbl: "Tournaments" },
-          ].map((stat) => (
-            <GlassCard key={stat.lbl} className="flex items-center gap-4 px-5 py-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#EEF3FA] shrink-0">
-                <stat.icon className="h-5 w-5 text-[#368AE4]" />
-              </div>
-              <div>
-                <p className="text-[22px] font-extrabold text-[#0B1528] leading-none">{stat.val}</p>
-                <p className="text-[12px] font-bold text-[#64748B] mt-1.5">{stat.lbl}</p>
-              </div>
-            </GlassCard>
-          ))}
-        </div>
+        {/* decorative chips */}
+        <div className="absolute right-[12%] top-[16%] h-10 w-10 rounded-2xl bg-white/35 border border-white/70 backdrop-blur-md" />
+        <div className="absolute left-[18%] top-[22%] h-6 w-6 rounded-xl bg-white/30 border border-white/60 backdrop-blur-md" />
+        <div className="absolute right-[22%] top-[28%] h-2 w-2 rounded-full bg-[#368AE4] shadow-[0_0_12px_#368AE4]" />
+        <div className="absolute left-[30%] bottom-[30%] h-1.5 w-1.5 rounded-full bg-[#368AE4] shadow-[0_0_10px_#368AE4]" />
 
-        {/* 3. Right 3D Knight Scene */}
-        <div className="lg:col-span-4 relative z-10 h-[500px] lg:h-[600px] flex items-center justify-center">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] bg-[#368AE4]/15 blur-[80px] rounded-full pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[380px] w-[380px] rounded-full border border-white/60 pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full border border-white/30 pointer-events-none" />
-          <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 h-8 w-[240px] bg-white/80 blur-xl rounded-full" />
-
-          <div className="absolute inset-0 flex items-center justify-center -mt-6">
-            <div className="relative h-[115%] w-[115%] pointer-events-none">
-              <Image src="/hero-knight.png" alt="3D Chess Knight" fill priority className="object-contain drop-shadow-[0_20px_40px_rgba(54,138,228,0.25)]" />
-            </div>
+        {/* ========== ORBITING STAT CARDS ========== */}
+        {/* top */}
+        <GlassCard className="absolute left-1/2 top-[6%] z-20 flex -translate-x-1/2 items-center gap-3 px-4 py-3 min-w-[150px] shadow-lg shadow-blue-500/5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF3FA]">
+            <Users className="h-4 w-4 text-[#368AE4]" />
           </div>
+          <div>
+            <p className="text-lg font-extrabold text-[#0B1528] leading-none">500+</p>
+            <p className="text-[11px] font-bold text-[#64748B] mt-1">Students</p>
+          </div>
+        </GlassCard>
 
-          <div className="absolute top-24 right-4 h-14 w-14 rounded-2xl bg-white/30 border border-white/60 backdrop-blur-md shadow-sm pointer-events-none" />
-          <div className="absolute bottom-1/3 left-4 h-8 w-8 rounded-xl bg-white/40 border border-white/60 backdrop-blur-md shadow-sm pointer-events-none" />
-          <div className="absolute top-1/4 right-20 h-2 w-2 rounded-full bg-[#368AE4] shadow-[0_0_12px_#368AE4] pointer-events-none" />
-          <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 rounded-full bg-[#368AE4] shadow-[0_0_12px_#368AE4] pointer-events-none" />
-        </div>
-      </section>
+        {/* right */}
+        <GlassCard className="absolute right-0 top-[34%] z-20 flex items-center gap-3 px-4 py-3 min-w-[150px] shadow-lg shadow-blue-500/5 sm:right-[2%]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF3FA]">
+            <GraduationCap className="h-4 w-4 text-[#368AE4]" />
+          </div>
+          <div>
+            <p className="text-lg font-extrabold text-[#0B1528] leading-none">20+</p>
+            <p className="text-[11px] font-bold text-[#64748B] mt-1">Expert Coaches</p>
+          </div>
+        </GlassCard>
+
+        {/* bottom */}
+        <GlassCard className="absolute left-1/2 bottom-[8%] z-20 flex -translate-x-1/2 items-center gap-3 px-4 py-3 min-w-[150px] shadow-lg shadow-blue-500/5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF3FA]">
+            <Trophy className="h-4 w-4 text-[#368AE4]" />
+          </div>
+          <div>
+            <p className="text-lg font-extrabold text-[#0B1528] leading-none">100+</p>
+            <p className="text-[11px] font-bold text-[#64748B] mt-1">Tournaments</p>
+          </div>
+        </GlassCard>
+
+        {/* left */}
+        <GlassCard className="absolute left-0 top-[36%] z-20 flex items-center gap-3 px-4 py-3 min-w-[150px] shadow-lg shadow-blue-500/5 sm:left-[2%]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF3FA]">
+            <Globe2 className="h-4 w-4 text-[#368AE4]" />
+          </div>
+          <div>
+            <p className="text-lg font-extrabold text-[#0B1528] leading-none">15</p>
+            <p className="text-[11px] font-bold text-[#64748B] mt-1">Countries</p>
+          </div>
+        </GlassCard>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ──────── PARTNERS STRIP ──────── */}
       <GlassCard className="px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-8 mb-10">

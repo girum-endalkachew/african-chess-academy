@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings, CheckCircle2
-} from "lucide-react";
+, Edit3 } from "lucide-react";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,7 +40,8 @@ export default function StudentProfilePage() {
       setFullName(prof?.full_name || "");
       setLoading(false);
     })();
-  }, [router, supabase]);
+  },
+  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 }, [router, supabase]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,3 +118,4 @@ export default function StudentProfilePage() {
     </PortalShell>
   );
 }
+

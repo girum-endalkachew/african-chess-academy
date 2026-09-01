@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,7 @@ import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings, Swords, LogOut
-} from "lucide-react";
+, Edit3 } from "lucide-react";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,7 +34,8 @@ export default function SettingsPage() {
       setProfile(data || { full_name: "Student" });
       setLoading(false);
     })();
-  }, [router, supabase]);
+  },
+  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 }, [router, supabase]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -78,3 +79,4 @@ export default function SettingsPage() {
     </PortalShell>
   );
 }
+

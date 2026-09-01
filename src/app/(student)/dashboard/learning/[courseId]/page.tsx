@@ -1,31 +1,23 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PortalShell, NavItem } from "@/components/layout/portal-shell";
-import { LessonBoard } from "@/components/chess/lesson-board";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { GlassCard } from "@/components/ui/glass-card";
 import {
-  LayoutDashboard,
-  BookOpen,
-  Trophy,
-  Calendar,
-  Award,
-  User,
-  Settings,
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Clock,
-  List,
+  LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings,
+  Swords, Edit3, ArrowLeft, PlayCircle, CheckCircle2, Circle, Lock,
 } from "lucide-react";
 
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
+  { href: "/dashboard/play", label: "Play Computer", icon: Swords },
+  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
   { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
   { href: "/dashboard/events", label: "Events", icon: Calendar },
   { href: "/dashboard/certificates", label: "Certificates", icon: Award },
@@ -33,400 +25,327 @@ const navItems: NavItem[] = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
-export default function CoursePlayerPage() {
-  const params = useParams();
-  const courseId = params.courseId as string;
+type Lesson = {
+  id: string;
+  course_id: string;
+  title: string;
+  summary?: string | null;
+  content?: string | null;
+  duration_minutes?: number | null;
+  sort_order?: number | null;
+  is_published?: boolean | null;
+  board_fen?: string | null;
+  board_note?: string | null;
+};
+
+export default function CoursePage() {
+  const { courseId } = useParams<{ courseId: string }>();
   const router = useRouter();
+  const supabase = createClient();
 
   const [profile, setProfile] = useState<any>(null);
   const [course, setCourse] = useState<any>(null);
-  const [lessons, setLessons] = useState<any[]>([]);
-  const [completedIds, setCompletedIds] = useState<string[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [enrollment, setEnrollment] = useState<any>(null);
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [showList, setShowList] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Load ONCE per courseId — stable deps only
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
+    (async () => {
       try {
-        setLoading(true);
-        setError(null);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return router.push("/login");
 
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+        setProfile(prof || { full_name: user.email?.split("@")[0] });
 
-        if (!user) {
-          router.push("/login");
-          return;
-        }
-
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        const { data: courseData } = await supabase
+        const { data: courseData, error: courseErr } = await supabase
           .from("courses")
           .select("*")
           .eq("id", courseId)
           .single();
+        if (courseErr) setErrorMsg(courseErr.message);
+        setCourse(courseData);
 
-        // ensure enrollment (ignore conflict)
-        await supabase.from("course_enrollments").upsert(
-          {
-            user_id: user.id,
-            course_id: courseId,
-            progress: 0,
-            status: "active",
-          },
-          { onConflict: "user_id,course_id" }
-        );
-
-        const { data: lessonData, error: lessonErr } = await supabase
+        // CORRECT SCHEMA: sort_order, is_published, board_fen, summary
+        const { data: lessonRows, error: lessonErr } = await supabase
           .from("lessons")
           .select("*")
           .eq("course_id", courseId)
+          .eq("is_published", true)
           .order("sort_order", { ascending: true });
 
-        if (lessonErr) throw lessonErr;
-
-        const { data: progressData } = await supabase
-          .from("lesson_progress")
-          .select("lesson_id")
-          .eq("user_id", user.id)
-          .eq("course_id", courseId);
-
-        if (cancelled) return;
-
-        setProfile(prof || { full_name: "Student" });
-        setCourse(courseData);
-        setLessons(lessonData || []);
-        setCompletedIds((progressData || []).map((p: any) => p.lesson_id));
-
-        // Start at first incomplete lesson (no loop)
-        const list = lessonData || [];
-        const done = new Set((progressData || []).map((p: any) => p.lesson_id));
-        let start = 0;
-        for (let i = 0; i < list.length; i++) {
-          if (!done.has(list[i].id)) {
-            start = i;
-            break;
-          }
+        if (lessonErr) {
+          // fallback without is_published filter
+          const { data: fallback, error: fallbackErr } = await supabase
+            .from("lessons")
+            .select("*")
+            .eq("course_id", courseId)
+            .order("sort_order", { ascending: true });
+          if (fallbackErr) setErrorMsg(fallbackErr.message);
+          setLessons((fallback || []) as Lesson[]);
+        } else {
+          setLessons((lessonRows || []) as Lesson[]);
         }
-        setActiveIndex(start);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || "Failed to load course");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
 
-    if (courseId) load();
-    return () => {
-      cancelled = true;
-    };
-  }, [courseId, router]);
-
-  const activeLesson = lessons[activeIndex] || null;
-  const doneCount = completedIds.length;
-  const pct = lessons.length ? Math.round((doneCount / lessons.length) * 100) : 0;
-  const isDone = activeLesson ? completedIds.includes(activeLesson.id) : false;
-
-  const goTo = (index: number) => {
-    if (index < 0 || index >= lessons.length) return;
-    setActiveIndex(index);
-  };
-
-  const markComplete = async () => {
-    if (!activeLesson || saving) return;
-
-    setSaving(true);
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      await supabase.from("lesson_progress").upsert(
-        {
-          user_id: user.id,
-          lesson_id: activeLesson.id,
-          course_id: courseId,
-          completed: true,
-          completed_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,lesson_id" }
-      );
-
-      // local update (no reload)
-      const nextCompleted = completedIds.includes(activeLesson.id)
-        ? completedIds
-        : [...completedIds, activeLesson.id];
-      setCompletedIds(nextCompleted);
-
-      const progress = lessons.length
-        ? Math.round((nextCompleted.length / lessons.length) * 100)
-        : 0;
-
-      await supabase.from("course_enrollments").upsert(
-        {
-          user_id: user.id,
-          course_id: courseId,
-          progress,
-          status: progress >= 100 ? "completed" : "active",
-        },
-        { onConflict: "user_id,course_id" }
-      );
-
-      if (progress >= 100 && course?.title) {
-        const title = `${course.title} Certificate`;
-        const { data: existing } = await supabase
-          .from("certificates")
-          .select("id")
+        const { data: enroll } = await supabase
+          .from("course_enrollments")
+          .select("*")
           .eq("user_id", user.id)
-          .eq("title", title)
+          .eq("course_id", courseId)
           .maybeSingle();
+        setEnrollment(enroll);
 
-        if (!existing) {
-          await supabase.from("certificates").insert({
-            user_id: user.id,
-            course_id: courseId,
-            title,
-          });
+        const { data: progress } = await supabase
+          .from("lesson_progress")
+          .select("lesson_id, completed")
+          .eq("user_id", user.id);
+
+        if (progress) {
+          setCompletedIds(
+            new Set(
+              progress
+                .filter((p: any) => p.completed)
+                .map((p: any) => p.lesson_id)
+            )
+          );
         }
+      } catch (e: any) {
+        setErrorMsg(e?.message || "Failed to load course");
+      } finally {
+        setLoading(false);
       }
+    })();
+  }, [courseId, router, supabase]);
 
-      // auto-advance without reload
-      if (activeIndex < lessons.length - 1) {
-        setActiveIndex((i) => i + 1);
-      }
-    } finally {
-      setSaving(false);
-    }
+  const progressPct = useMemo(() => {
+    if (!lessons.length) return enrollment?.progress || 0;
+    const done = lessons.filter((l) => completedIds.has(l.id)).length;
+    return Math.round((done / lessons.length) * 100);
+  }, [lessons, completedIds, enrollment]);
+
+  const nextLesson = useMemo(() => {
+    if (!lessons.length) return null;
+    return lessons.find((l) => !completedIds.has(l.id)) || lessons[0];
+  }, [lessons, completedIds]);
+
+  const handleEnroll = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setEnrolling(true);
+    const { data, error } = await supabase
+      .from("course_enrollments")
+      .insert({
+        user_id: user.id,
+        course_id: courseId,
+        progress: 0,
+        status: "active",
+      })
+      .select("*")
+      .single();
+    if (error) setErrorMsg(error.message);
+    setEnrollment(data);
+    setEnrolling(false);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
-        <div className="h-8 w-8 rounded-full border-4 border-[#87CEEB] border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#EEF3FA]">
+        <div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" />
       </div>
     );
   }
 
-  if (error) {
+  if (!course) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-6">
-        <div className="bg-white border border-red-200 rounded-2xl p-6 max-w-md text-center space-y-3">
-          <p className="font-semibold text-red-600">Could not load course</p>
-          <p className="text-sm text-slate-600">{error}</p>
+      <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
+        <GlassCard className="p-8 text-center max-w-xl mx-auto space-y-3">
+          <h1 className="text-xl font-extrabold text-[#0B1528]">Course not found</h1>
+          {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
           <Link href="/dashboard/learning">
-            <Button className="rounded-xl">Back to My Learning</Button>
+            <Button variant="primary">Back to Learning</Button>
           </Link>
-        </div>
-      </div>
+        </GlassCard>
+      </PortalShell>
     );
   }
 
   return (
     <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <Link
-              href="/dashboard/learning"
-              className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-[#00A3E0] mb-1"
-            >
-              <ArrowLeft className="h-4 w-4" /> My Learning
-            </Link>
-            <h1 className="text-xl sm:text-2xl font-bold text-[#1E293B]">{course?.title}</h1>
-            <div className="flex flex-wrap items-center gap-2 mt-1">
-              <Badge variant="accent">{course?.level}</Badge>
-              <span className="text-xs text-slate-500">
-                {doneCount}/{lessons.length} lessons · {pct}%
-              </span>
+      <div className="mx-auto max-w-7xl space-y-6">
+        <Link
+          href="/dashboard/learning"
+          className="inline-flex items-center gap-2 text-[13px] font-bold text-[#64748B] hover:text-[#368AE4]"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to My Learning
+        </Link>
+
+        {errorMsg && (
+          <GlassCard className="p-4 border-red-200 bg-red-50 text-red-700 text-sm font-bold">
+            {errorMsg}
+          </GlassCard>
+        )}
+
+        <GlassCard className="relative overflow-hidden p-7 sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#368AE4]/10 to-transparent pointer-events-none" />
+          <div className="relative z-10 grid lg:grid-cols-12 gap-6 items-center">
+            <div className="lg:col-span-8 space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="blue">{course.level || "All levels"}</Badge>
+                <Badge variant="outline" className="normal-case tracking-normal">
+                  {lessons.length || course.total_lessons || 0} lessons
+                </Badge>
+                {enrollment ? (
+                  <Badge variant="success">Enrolled</Badge>
+                ) : (
+                  <Badge variant="warning">Not enrolled</Badge>
+                )}
+              </div>
+              <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#0B1528] tracking-tight">
+                {course.title}
+              </h1>
+              <p className="text-[14px] font-medium text-[#64748B] max-w-2xl leading-relaxed">
+                {course.description}
+              </p>
             </div>
-          </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="rounded-xl gap-2 lg:hidden"
-            onClick={() => setShowList((v) => !v)}
-          >
-            <List className="h-4 w-4" />
-            Lessons
-          </Button>
-        </div>
-
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#00A3E0] transition-all duration-300"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-
-        <div className="grid lg:grid-cols-12 gap-4">
-          {/* Sidebar list */}
-          <aside
-            className={`${showList ? "block" : "hidden"} lg:block lg:col-span-3 bg-white border border-[#DBE9F7] rounded-2xl overflow-hidden`}
-          >
-            <div className="px-4 py-3 border-b border-[#DBE9F7] text-sm font-semibold text-[#1E293B]">
-              Lessons
-            </div>
-            <div className="max-h-[55vh] lg:max-h-[70vh] overflow-y-auto p-2 space-y-1">
-              {lessons.map((lesson, index) => {
-                const done = completedIds.includes(lesson.id);
-                const active = index === activeIndex;
-                return (
-                  <button
-                    key={lesson.id}
-                    type="button"
-                    onClick={() => {
-                      goTo(index);
-                      if (typeof window !== "undefined" && window.innerWidth < 1024) {
-                        setShowList(false);
-                      }
-                    }}
-                    className={`w-full text-left rounded-xl px-3 py-2.5 border transition-colors ${
-                      active
-                        ? "bg-[#E6F5FF] border-[#87CEEB]"
-                        : "border-transparent hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div
-                        className={`mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                          done
-                            ? "bg-emerald-100 text-emerald-600"
-                            : active
-                            ? "bg-[#00A3E0] text-white"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
-                      >
-                        {done ? "✓" : lesson.sort_order}
-                      </div>
-                      <div className="min-w-0">
-                        <p className={`text-xs font-semibold truncate ${active ? "text-[#00A3E0]" : "text-[#1E293B]"}`}>
-                          {lesson.title}
-                        </p>
-                        <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3" /> {lesson.duration_minutes || 15} min
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-              {lessons.length === 0 && (
-                <p className="text-xs text-slate-500 p-3">No lessons found. Run the lessons SQL seed.</p>
-              )}
-            </div>
-          </aside>
-
-          {/* Player */}
-          <section className="lg:col-span-9 bg-white border border-[#DBE9F7] rounded-2xl p-4 sm:p-6">
-            {!activeLesson ? (
-              <div className="py-16 text-center text-slate-500 text-sm">Select a lesson to begin.</div>
-            ) : (
-              <div className="space-y-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold text-slate-400 mb-1">
-                      Lesson {activeLesson.sort_order} of {lessons.length}
-                    </p>
-                    <h2 className="text-xl sm:text-2xl font-bold text-[#1E293B]">{activeLesson.title}</h2>
-                    {activeLesson.summary && (
-                      <p className="text-sm text-slate-500 mt-1">{activeLesson.summary}</p>
-                    )}
-                  </div>
-                  {isDone && (
-                    <Badge variant="success" className="gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Completed
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-5 items-start">
-                  {/* ALWAYS show board */}
-                  <LessonBoard
-                    fen={activeLesson.board_fen}
-                    note={activeLesson.board_note || activeLesson.summary}
-                  />
-
-                  <div className="space-y-4">
-                    <div className="rounded-2xl border border-[#DBE9F7] bg-[#F8FAFC] p-4 sm:p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                        Lesson content
-                      </p>
-                      <div className="text-sm sm:text-[15px] leading-relaxed text-[#1E293B] whitespace-pre-wrap">
-                        {activeLesson.content}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="rounded-xl gap-1"
-                          disabled={activeIndex === 0}
-                          onClick={() => goTo(activeIndex - 1)}
-                        >
-                          <ArrowLeft className="h-4 w-4" /> Prev
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="rounded-xl gap-1"
-                          disabled={activeIndex >= lessons.length - 1}
-                          onClick={() => goTo(activeIndex + 1)}
-                        >
-                          Next <ArrowRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      {isDone ? (
-                        <Button
-                          type="button"
-                          className="rounded-xl"
-                          disabled={activeIndex >= lessons.length - 1}
-                          onClick={() => goTo(activeIndex + 1)}
-                        >
-                          Continue
-                        </Button>
-                      ) : (
-                        <Button
-                          type="button"
-                          className="rounded-xl font-semibold gap-2"
-                          onClick={markComplete}
-                          disabled={saving}
-                        >
-                          {saving ? "Saving..." : "Mark complete"}
-                          <CheckCircle2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-
-                    {pct >= 100 && (
-                      <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-sm text-emerald-700 font-medium">
-                        Course complete — certificate unlocked in Certificates.
-                      </div>
-                    )}
-                  </div>
+            <div className="lg:col-span-4 space-y-3">
+              <div className="rounded-2xl bg-white/60 border border-white/80 p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-1">
+                  Progress
+                </p>
+                <p className="text-2xl font-extrabold text-[#0B1528] mb-2">{progressPct}%</p>
+                <div className="h-2 rounded-full bg-[#EEF3FA] overflow-hidden">
+                  <div className="h-full bg-[#368AE4]" style={{ width: `${progressPct}%` }} />
                 </div>
               </div>
+
+              {!enrollment ? (
+                <Button
+                  variant="primary"
+                  className="w-full h-12 rounded-2xl"
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                >
+                  {enrolling ? "Enrolling..." : "Enroll in Course"}
+                </Button>
+              ) : nextLesson ? (
+                <Link
+                  href={`/dashboard/learning/${courseId}/lesson/${nextLesson.id}`}
+                  className="block"
+                >
+                  <Button variant="primary" className="w-full h-12 rounded-2xl">
+                    <PlayCircle className="h-4 w-4" /> Continue Learning
+                  </Button>
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        </GlassCard>
+
+        <div className="grid lg:grid-cols-12 gap-6">
+          <GlassCard className="lg:col-span-8 p-6 sm:p-7">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
+              <h2 className="text-lg font-extrabold text-[#0B1528]">Curriculum</h2>
+            </div>
+
+            {lessons.length === 0 ? (
+              <div className="text-center py-12 space-y-2">
+                <p className="text-sm font-bold text-[#0B1528]">No published lessons found</p>
+                <p className="text-xs text-[#64748B]">
+                  Check that lessons exist for this course and <code>is_published = true</code>.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {lessons.map((lesson, idx) => {
+                  const done = completedIds.has(lesson.id);
+                  const locked = !enrollment;
+                  return (
+                    <div
+                      key={lesson.id}
+                      className="flex items-center gap-4 rounded-2xl border border-white/70 bg-white/45 px-4 py-3.5"
+                    >
+                      <div
+                        className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          done
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-[#EEF3FA] text-[#368AE4]"
+                        }`}
+                      >
+                        {done ? (
+                          <CheckCircle2 className="h-5 w-5" />
+                        ) : locked ? (
+                          <Lock className="h-4 w-4" />
+                        ) : (
+                          <Circle className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-extrabold text-[#0B1528] truncate">
+                          {idx + 1}. {lesson.title}
+                        </p>
+                        <p className="text-[11px] font-medium text-[#64748B] truncate">
+                          {lesson.summary ||
+                            lesson.board_note ||
+                            (lesson.duration_minutes
+                              ? `${lesson.duration_minutes} min`
+                              : "Lesson content")}
+                        </p>
+                      </div>
+                      {locked ? (
+                        <Button size="sm" variant="outline" disabled>
+                          Enroll first
+                        </Button>
+                      ) : (
+                        <Link href={`/dashboard/learning/${courseId}/lesson/${lesson.id}`}>
+                          <Button size="sm" variant={done ? "outline" : "primary"}>
+                            {done ? "Review" : "Start"}
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
-          </section>
+          </GlassCard>
+
+          <div className="lg:col-span-4 space-y-4">
+            <GlassCard className="p-6 space-y-3">
+              <h3 className="text-sm font-extrabold text-[#0B1528]">Course info</h3>
+              <div className="text-[12px] font-medium text-[#64748B] space-y-2">
+                <p>
+                  <span className="font-bold text-[#0B1528]">Level:</span>{" "}
+                  {course.level || "All levels"}
+                </p>
+                <p>
+                  <span className="font-bold text-[#0B1528]">Lessons:</span> {lessons.length}
+                </p>
+                <p>
+                  <span className="font-bold text-[#0B1528]">Status:</span>{" "}
+                  {enrollment ? "Active enrollment" : "Locked"}
+                </p>
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6 space-y-3">
+              <h3 className="text-sm font-extrabold text-[#0B1528]">Practice tools</h3>
+              <Link href="/dashboard/play" className="block">
+                <Button variant="glass" className="w-full justify-between">
+                  Play Computer <Swords className="h-4 w-4 text-[#368AE4]" />
+                </Button>
+              </Link>
+              <Link href="/dashboard/editor" className="block">
+                <Button variant="glass" className="w-full justify-between">
+                  Board Editor <Edit3 className="h-4 w-4 text-[#368AE4]" />
+                </Button>
+              </Link>
+            </GlassCard>
+          </div>
         </div>
       </div>
     </PortalShell>

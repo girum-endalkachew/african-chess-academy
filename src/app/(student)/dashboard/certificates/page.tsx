@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,7 +7,7 @@ import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings, ShieldCheck
-} from "lucide-react";
+, Edit3 } from "lucide-react";
 import { formatDate } from "@/lib/utils/date";
 
 const navItems: NavItem[] = [
@@ -40,7 +40,8 @@ export default function StudentCertificatesPage() {
 
       setLoading(false);
     })();
-  }, [router, supabase]);
+  },
+  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 }, [router, supabase]);
 
   if (loading) {
     return (
@@ -88,3 +89,4 @@ export default function StudentCertificatesPage() {
     </PortalShell>
   );
 }
+
