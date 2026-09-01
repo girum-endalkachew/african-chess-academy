@@ -58,7 +58,10 @@ export default function PlayComputerPage() {
   const supabase = createClient();
 
   const gameRef = useRef(new Chess());
-  const [fen, setFen] = useState(gameRef.current.fen());
+  const boardWrapRef = useRef<HTMLDivElement | null>(null);
+  const scrollLockY = useRef<number>(0);
+
+  const [fen, setFen] = useState(() => gameRef.current.fen());
   const [history, setHistory] = useState<string[]>([]);
   const [status, setStatus] = useState("Your move (White)");
   const [thinking, setThinking] = useState(false);
@@ -72,14 +75,44 @@ export default function PlayComputerPage() {
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // Move lights
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalSquares, setLegalSquares] = useState<Record<string, React.CSSProperties>>({});
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+  const [boardWidth, setBoardWidth] = useState(480);
+
+  // Keep board width stable and responsive without layout jump
+  useEffect(() => {
+    const el = boardWrapRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const w = Math.floor(el.getBoundingClientRect().width);
+      // only update when meaningful change happens
+      setBoardWidth((prev) => (Math.abs(prev - w) > 2 ? w : prev));
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Prevent scroll jump around state updates
+  const lockScroll = useCallback(() => {
+    scrollLockY.current = window.scrollY;
+  }, []);
+
+  const unlockScroll = useCallback(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: scrollLockY.current, behavior: "auto" });
+    });
+  }, []);
 
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return router.push("/login");
 
       const { data: prof } = await supabase
@@ -98,87 +131,95 @@ export default function PlayComputerPage() {
     setLegalSquares({});
   }, []);
 
-  const getMoveOptions = useCallback((square: Square) => {
-    const g = gameRef.current;
-    const piece = g.get(square);
-    if (!piece || piece.color !== playerColor || g.turn() !== playerColor) {
-      clearLights();
-      return false;
-    }
-
-    const moves = g.moves({ square, verbose: true });
-    if (!moves.length) {
-      clearLights();
-      return false;
-    }
-
-    const styles: Record<string, React.CSSProperties> = {};
-
-    // Selected piece glow
-    styles[square] = {
-      background:
-        "radial-gradient(circle, rgba(54,138,228,0.55) 0%, rgba(54,138,228,0.22) 55%, transparent 70%)",
-    };
-
-    for (const m of moves) {
-      const targetHasEnemy = !!g.get(m.to) && g.get(m.to)?.color !== playerColor;
-      if (targetHasEnemy) {
-        // capture ring
-        styles[m.to] = {
-          background:
-            "radial-gradient(circle, rgba(239,68,68,0.0) 0%, rgba(239,68,68,0.0) 55%, rgba(239,68,68,0.55) 56%, rgba(239,68,68,0.25) 100%)",
-          borderRadius: "50%",
-        };
-      } else {
-        // empty legal square dot
-        styles[m.to] = {
-          background:
-            "radial-gradient(circle, rgba(15,23,42,0.22) 0%, rgba(15,23,42,0.22) 28%, transparent 30%)",
-          borderRadius: "50%",
-        };
+  const getMoveOptions = useCallback(
+    (square: Square) => {
+      const g = gameRef.current;
+      const piece = g.get(square);
+      if (!piece || piece.color !== playerColor || g.turn() !== playerColor) {
+        clearLights();
+        return false;
       }
-    }
 
-    setSelectedSquare(square);
-    setLegalSquares(styles);
-    return true;
-  }, [playerColor, clearLights]);
+      const moves = g.moves({ square, verbose: true });
+      if (!moves.length) {
+        clearLights();
+        return false;
+      }
+
+      const styles: Record<string, React.CSSProperties> = {};
+      styles[square] = {
+        background:
+          "radial-gradient(circle, rgba(54,138,228,0.55) 0%, rgba(54,138,228,0.22) 55%, transparent 70%)",
+      };
+
+      for (const m of moves) {
+        const targetHasEnemy = !!g.get(m.to) && g.get(m.to)?.color !== playerColor;
+        if (targetHasEnemy) {
+          styles[m.to] = {
+            background:
+              "radial-gradient(circle, rgba(239,68,68,0.0) 0%, rgba(239,68,68,0.0) 55%, rgba(239,68,68,0.55) 56%, rgba(239,68,68,0.25) 100%)",
+            borderRadius: "50%",
+          };
+        } else {
+          styles[m.to] = {
+            background:
+              "radial-gradient(circle, rgba(15,23,42,0.22) 0%, rgba(15,23,42,0.22) 28%, transparent 30%)",
+            borderRadius: "50%",
+          };
+        }
+      }
+
+      setSelectedSquare(square);
+      setLegalSquares(styles);
+      return true;
+    },
+    [playerColor, clearLights]
+  );
 
   const syncBoard = useCallback(() => {
     setFen(gameRef.current.fen());
     setHistory(gameRef.current.history());
   }, []);
 
-  const finishGame = useCallback(async (r: GameResult) => {
-    setGameOver(true);
-    setResult(r);
-    setThinking(false);
-    clearLights();
+  const finishGame = useCallback(
+    async (r: GameResult) => {
+      lockScroll();
+      setGameOver(true);
+      setResult(r);
+      setThinking(false);
+      clearLights();
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const opp = opponentRating(difficulty);
-      const { newRating, delta } = computeElo(rating, opp, r);
+        const opp = opponentRating(difficulty);
+        const { newRating, delta } = computeElo(rating, opp, r);
 
-      await supabase.from("profiles").update({ chess_rating: newRating }).eq("id", user.id);
-      await supabase.from("chess_games").insert({
-        user_id: user.id,
-        player_color: playerColor,
-        difficulty,
-        result: r,
-        moves_pgn: gameRef.current.pgn(),
-        moves_count: gameRef.current.history().length,
-        rating_before: rating,
-        rating_after: newRating,
-        rating_delta: delta,
-      });
+        await supabase.from("profiles").update({ chess_rating: newRating }).eq("id", user.id);
+        await supabase.from("chess_games").insert({
+          user_id: user.id,
+          player_color: playerColor,
+          difficulty,
+          result: r,
+          moves_pgn: gameRef.current.pgn(),
+          moves_count: gameRef.current.history().length,
+          rating_before: rating,
+          rating_after: newRating,
+          rating_delta: delta,
+        });
 
-      setRating(newRating);
-      setLastDelta(delta);
-    } catch {}
-  }, [difficulty, playerColor, rating, supabase, clearLights]);
+        setRating(newRating);
+        setLastDelta(delta);
+      } catch {
+      } finally {
+        unlockScroll();
+      }
+    },
+    [difficulty, playerColor, rating, supabase, clearLights, lockScroll, unlockScroll]
+  );
 
   const checkGameEnd = useCallback(() => {
     const g = gameRef.current;
@@ -187,7 +228,12 @@ export default function PlayComputerPage() {
       finishGame(r);
       return true;
     }
-    if (g.isDraw() || g.isStalemate() || g.isThreefoldRepetition() || g.isInsufficientMaterial()) {
+    if (
+      g.isDraw() ||
+      g.isStalemate() ||
+      g.isThreefoldRepetition() ||
+      g.isInsufficientMaterial()
+    ) {
       finishGame("draw");
       return true;
     }
@@ -198,6 +244,7 @@ export default function PlayComputerPage() {
     const g = gameRef.current;
     if (g.isGameOver() || g.turn() === playerColor) return;
 
+    lockScroll();
     setThinking(true);
     setStatus("Computer is thinking...");
     clearLights();
@@ -213,55 +260,83 @@ export default function PlayComputerPage() {
       if (!checkGameEnd()) {
         setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
       }
-    }, 150);
-  }, [difficulty, playerColor, syncBoard, checkGameEnd, clearLights]);
+      unlockScroll();
+    }, 120);
+  }, [difficulty, playerColor, syncBoard, checkGameEnd, clearLights, lockScroll, unlockScroll]);
 
-  const tryMove = useCallback((from: Square, to: Square) => {
-    if (thinking || gameOver) return false;
-    const g = gameRef.current;
-    if (g.turn() !== playerColor) return false;
+  const tryMove = useCallback(
+    (from: Square, to: Square) => {
+      if (thinking || gameOver) return false;
+      const g = gameRef.current;
+      if (g.turn() !== playerColor) return false;
 
-    const move = g.move({ from, to, promotion: "q" });
-    if (!move) return false;
-
-    setLastMove({ from, to });
-    clearLights();
-    syncBoard();
-
-    if (!checkGameEnd()) {
-      triggerComputerMove();
-    }
-    return true;
-  }, [thinking, gameOver, playerColor, clearLights, syncBoard, checkGameEnd, triggerComputerMove]);
-
-  const onDrop = useCallback((source: string, target: string) => {
-    return tryMove(source as Square, target as Square);
-  }, [tryMove]);
-
-  const onSquareClick = useCallback((square: Square) => {
-    if (thinking || gameOver) return;
-    const g = gameRef.current;
-    if (g.turn() !== playerColor) return;
-
-    // If a piece is selected and user clicks a legal destination -> move
-    if (selectedSquare) {
-      const legal = g.moves({ square: selectedSquare, verbose: true }).some((m) => m.to === square);
-      if (legal) {
-        tryMove(selectedSquare, square);
-        return;
+      lockScroll();
+      const move = g.move({ from, to, promotion: "q" });
+      if (!move) {
+        unlockScroll();
+        return false;
       }
-    }
 
-    // Otherwise select this square (if own piece)
-    getMoveOptions(square);
-  }, [thinking, gameOver, playerColor, selectedSquare, getMoveOptions, tryMove]);
+      setLastMove({ from, to });
+      clearLights();
+      syncBoard();
 
-  const onPieceDragBegin = useCallback((_piece: string, sourceSquare: string) => {
-    if (thinking || gameOver) return;
-    getMoveOptions(sourceSquare as Square);
-  }, [thinking, gameOver, getMoveOptions]);
+      if (!checkGameEnd()) {
+        triggerComputerMove();
+      } else {
+        unlockScroll();
+      }
+      return true;
+    },
+    [
+      thinking,
+      gameOver,
+      playerColor,
+      clearLights,
+      syncBoard,
+      checkGameEnd,
+      triggerComputerMove,
+      lockScroll,
+      unlockScroll,
+    ]
+  );
+
+  const onDrop = useCallback(
+    (source: string, target: string) => tryMove(source as Square, target as Square),
+    [tryMove]
+  );
+
+  const onSquareClick = useCallback(
+    (square: Square) => {
+      if (thinking || gameOver) return;
+      const g = gameRef.current;
+      if (g.turn() !== playerColor) return;
+
+      if (selectedSquare) {
+        const legal = g
+          .moves({ square: selectedSquare, verbose: true })
+          .some((m) => m.to === square);
+        if (legal) {
+          tryMove(selectedSquare, square);
+          return;
+        }
+      }
+
+      getMoveOptions(square);
+    },
+    [thinking, gameOver, playerColor, selectedSquare, getMoveOptions, tryMove]
+  );
+
+  const onPieceDragBegin = useCallback(
+    (_piece: string, sourceSquare: string) => {
+      if (thinking || gameOver) return;
+      getMoveOptions(sourceSquare as Square);
+    },
+    [thinking, gameOver, getMoveOptions]
+  );
 
   const startNewGame = (asColor: PlayerColor) => {
+    lockScroll();
     gameRef.current = new Chess();
     setPlayerColor(asColor);
     setOrientation(asColor === "w" ? "white" : "black");
@@ -275,9 +350,10 @@ export default function PlayComputerPage() {
 
     if (asColor === "b") {
       setStatus("Computer is thinking (White)...");
-      setTimeout(() => triggerComputerMove(), 200);
+      setTimeout(() => triggerComputerMove(), 150);
     } else {
       setStatus("Your move (White)");
+      unlockScroll();
     }
   };
 
@@ -287,21 +363,14 @@ export default function PlayComputerPage() {
     setStatus("You resigned");
   };
 
-  // Highlight layers: last move + check + legal lights
   const customSquareStyles = useMemo(() => {
     const styles: Record<string, React.CSSProperties> = {};
 
-    // last move
     if (lastMove) {
-      styles[lastMove.from] = {
-        backgroundColor: "rgba(54, 138, 228, 0.28)",
-      };
-      styles[lastMove.to] = {
-        backgroundColor: "rgba(54, 138, 228, 0.38)",
-      };
+      styles[lastMove.from] = { backgroundColor: "rgba(54, 138, 228, 0.28)" };
+      styles[lastMove.to] = { backgroundColor: "rgba(54, 138, 228, 0.38)" };
     }
 
-    // check glow on king
     const g = gameRef.current;
     if (g.inCheck()) {
       const turn = g.turn();
@@ -320,11 +389,9 @@ export default function PlayComputerPage() {
       }
     }
 
-    // legal move lights override on top
     Object.assign(styles, legalSquares);
-
     return styles;
-  }, [lastMove, legalSquares, fen]); // fen keeps check styles fresh after moves
+  }, [lastMove, legalSquares, fen]);
 
   if (loadingUser) {
     return (
@@ -339,7 +406,7 @@ export default function PlayComputerPage() {
 
   return (
     <PortalShell role="Student" userName={playerName} navItems={navItems}>
-      <div className="mx-auto max-w-7xl space-y-5">
+      <div className="mx-auto max-w-7xl space-y-5 overflow-anchor-none">
         <GlassCard className="p-5 sm:p-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
@@ -377,15 +444,22 @@ export default function PlayComputerPage() {
             </div>
           </div>
 
-          {thinking && (
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#368AE4] px-4 py-3 text-white">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm font-bold">Computer is calculating…</span>
+          {/* FIXED HEIGHT status strip: prevents page jump when thinking toggles */}
+          <div className="mt-4 h-12">
+            {thinking ? (
+              <div className="h-12 flex items-center justify-between gap-3 rounded-2xl bg-[#368AE4] px-4 text-white">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm font-bold">Computer is calculating…</span>
+                </div>
+                <Badge className="bg-white/20 text-white border-0">AI Active</Badge>
               </div>
-              <Badge className="bg-white/20 text-white border-0">AI Active</Badge>
-            </div>
-          )}
+            ) : (
+              <div className="h-12 flex items-center rounded-2xl bg-white/40 border border-white/70 px-4">
+                <p className="text-sm font-bold text-[#0B1528] truncate">{status}</p>
+              </div>
+            )}
+          </div>
         </GlassCard>
 
         <div className="grid lg:grid-cols-12 gap-5 items-start">
@@ -398,37 +472,47 @@ export default function PlayComputerPage() {
                 <div>
                   <p className="text-sm font-extrabold text-[#0B1528]">ACA Engine</p>
                   <p className="text-[11px] font-bold text-[#64748B]">
-                    {difficulty[0].toUpperCase() + difficulty.slice(1)} · {playerColor === "w" ? "Black" : "White"}
+                    {difficulty[0].toUpperCase() + difficulty.slice(1)} ·{" "}
+                    {playerColor === "w" ? "Black" : "White"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Circle className={`h-2.5 w-2.5 fill-current ${thinking ? "text-amber-400" : "text-[#64748B]/40"}`} />
-                <span className="text-[11px] font-bold text-[#64748B]">{thinking ? "Thinking" : "Waiting"}</span>
+                <Circle
+                  className={`h-2.5 w-2.5 fill-current ${
+                    thinking ? "text-amber-400" : "text-[#64748B]/40"
+                  }`}
+                />
+                <span className="text-[11px] font-bold text-[#64748B]">
+                  {thinking ? "Thinking" : "Waiting"}
+                </span>
               </div>
             </GlassCard>
 
-            {/* overflow-hidden prevents floating drag ghosts outside board */}
             <GlassCard className="p-3 sm:p-4 overflow-hidden">
-              <div className="relative w-full max-w-[640px] mx-auto overflow-hidden rounded-2xl">
-                <Chessboard
-                  id="aca-play-board"
-                  position={fen}
-                  onPieceDrop={onDrop}
-                  onSquareClick={onSquareClick}
-                  onPieceDragBegin={onPieceDragBegin}
-                  boardOrientation={orientation}
-                  arePiecesDraggable={isPlayerTurn}
-                  customLightSquareStyle={{ backgroundColor: "#EAF2FB" }}
-                  customDarkSquareStyle={{ backgroundColor: "#368AE4" }}
-                  customSquareStyles={customSquareStyles}
-                  animationDuration={180}
-                  customBoardStyle={{
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    boxShadow: "0 12px 40px rgba(54,138,228,0.15)",
-                  }}
-                />
+              {/* Stable square box: no reflow after moves */}
+              <div ref={boardWrapRef} className="relative w-full max-w-[640px] mx-auto">
+                <div className="w-full aspect-square overflow-hidden rounded-2xl contain-layout contain-paint">
+                  <Chessboard
+                    id="aca-play-board"
+                    position={fen}
+                    onPieceDrop={onDrop}
+                    onSquareClick={onSquareClick}
+                    onPieceDragBegin={onPieceDragBegin}
+                    boardOrientation={orientation}
+                    boardWidth={Math.max(boardWidth, 280)}
+                    arePiecesDraggable={isPlayerTurn}
+                    animationDuration={120}
+                    customLightSquareStyle={{ backgroundColor: "#EAF2FB" }}
+                    customDarkSquareStyle={{ backgroundColor: "#368AE4" }}
+                    customSquareStyles={customSquareStyles}
+                    customBoardStyle={{
+                      borderRadius: "16px",
+                      overflow: "hidden",
+                      boxShadow: "0 12px 40px rgba(54,138,228,0.15)",
+                    }}
+                  />
+                </div>
               </div>
             </GlassCard>
 
@@ -445,7 +529,11 @@ export default function PlayComputerPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Circle className={`h-2.5 w-2.5 fill-current ${isPlayerTurn ? "text-emerald-500" : "text-[#64748B]/40"}`} />
+                <Circle
+                  className={`h-2.5 w-2.5 fill-current ${
+                    isPlayerTurn ? "text-emerald-500" : "text-[#64748B]/40"
+                  }`}
+                />
                 <span className="text-[11px] font-bold text-[#64748B]">
                   {isPlayerTurn ? "Your turn" : gameOver ? "Game over" : "Wait"}
                 </span>
@@ -455,8 +543,10 @@ export default function PlayComputerPage() {
 
           <div className="lg:col-span-5 space-y-4">
             <GlassCard className="p-5 sm:p-6 space-y-5">
-              <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-1">Status</p>
+              <div className="min-h-[52px]">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-1">
+                  Status
+                </p>
                 <p className="text-base font-extrabold text-[#0B1528]">{status}</p>
               </div>
 
@@ -497,20 +587,23 @@ export default function PlayComputerPage() {
                 </Button>
               </div>
 
-              {gameOver && result && (
-                <div
-                  className={`rounded-2xl p-4 border text-sm font-extrabold ${
-                    result === "win"
-                      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                      : result === "draw"
-                      ? "bg-white/60 border-white/80 text-[#0B1528]"
-                      : "bg-red-50 border-red-200 text-red-700"
-                  }`}
-                >
-                  Game over · {result.toUpperCase()}
-                  <div className="mt-1 text-xs font-bold opacity-80">ELO now {rating}</div>
-                </div>
-              )}
+              {/* Reserve result box space so layout doesn't jump */}
+              <div className="min-h-[76px]">
+                {gameOver && result ? (
+                  <div
+                    className={`rounded-2xl p-4 border text-sm font-extrabold ${
+                      result === "win"
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                        : result === "draw"
+                        ? "bg-white/60 border-white/80 text-[#0B1528]"
+                        : "bg-red-50 border-red-200 text-red-700"
+                    }`}
+                  >
+                    Game over · {result.toUpperCase()}
+                    <div className="mt-1 text-xs font-bold opacity-80">ELO now {rating}</div>
+                  </div>
+                ) : null}
+              </div>
             </GlassCard>
 
             <GlassCard className="p-5 sm:p-6">
@@ -524,7 +617,8 @@ export default function PlayComputerPage() {
                 </Badge>
               </div>
 
-              <div className="max-h-64 overflow-y-auto rounded-2xl bg-white/35 border border-white/60 p-3">
+              {/* Fixed height list: grows inside, page does not move */}
+              <div className="h-64 overflow-y-auto overscroll-contain rounded-2xl bg-white/35 border border-white/60 p-3">
                 {history.length === 0 ? (
                   <p className="text-xs font-medium text-[#64748B] py-6 text-center">
                     No moves yet — click a piece to see lights.
