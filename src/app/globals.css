@@ -1,18 +1,15 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 @theme {
-  /* ACA Brand Colors */
   --color-aca-blue: #368AE4;
   --color-aca-blue-light: #60A5FA;
   --color-navy: #0B1528;
   --color-navy-soft: #2C2F48;
-  
-  /* Background & Surfaces */
+
   --color-background: #EEF3FA;
   --color-surface: rgba(255, 255, 255, 0.42);
   --color-border: rgba(255, 255, 255, 0.6);
-  
-  /* Typography */
+
   --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -46,7 +43,6 @@
     box-shadow: 0 8px 20px -4px rgba(54, 138, 228, 0.4);
   }
 
-  /* Prevent drag image overflows on touchscreens */
   .contain-board {
     touch-action: manipulation;
     max-width: 100%;
