@@ -1,37 +1,27 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
 import { LessonBoard } from "@/components/chess/lesson-board";
+import { ContentLoader } from "@/components/ui/content-loader";
 import {
-  LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings,
-  Swords, Edit3, ArrowLeft, ArrowRight, CheckCircle2, PlayCircle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  PlayCircle,
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
-  { href: "/dashboard/play", label: "Play Computer", icon: Swords },
-  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
-  { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
-  { href: "/dashboard/events", label: "Events", icon: Calendar },
-  { href: "/dashboard/certificates", label: "Certificates", icon: Award },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-];
 
 export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const router = useRouter();
   const supabase = createClient();
+  const [isPending, startTransition] = useTransition();
 
-  const [profile, setProfile] = useState<any>(null);
   const [course, setCourse] = useState<any>(null);
   const [lessons, setLessons] = useState<any[]>([]);
   const [lesson, setLesson] = useState<any>(null);
@@ -40,61 +30,66 @@ export default function LessonPage() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return router.push("/login");
+  const load = useCallback(async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
 
-        const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-        setProfile(prof || { full_name: user.email?.split("@")[0] });
+      const { data: courseData } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("id", courseId)
+        .single();
+      setCourse(courseData);
 
-        const { data: courseData } = await supabase
-          .from("courses")
-          .select("*")
-          .eq("id", courseId)
-          .single();
-        setCourse(courseData);
+      let list: any[] = [];
+      const q1 = await supabase
+        .from("lessons")
+        .select("*")
+        .eq("course_id", courseId)
+        .eq("is_published", true)
+        .order("sort_order", { ascending: true });
 
-        // CORRECT SCHEMA
-        let list: any[] = [];
-        const q1 = await supabase
+      if (q1.error) {
+        const q2 = await supabase
           .from("lessons")
           .select("*")
           .eq("course_id", courseId)
-          .eq("is_published", true)
           .order("sort_order", { ascending: true });
-
-        if (q1.error) {
-          const q2 = await supabase
-            .from("lessons")
-            .select("*")
-            .eq("course_id", courseId)
-            .order("sort_order", { ascending: true });
-          if (q2.error) setErrorMsg(q2.error.message);
-          list = q2.data || [];
-        } else {
-          list = q1.data || [];
-        }
-
-        setLessons(list);
-        const current = list.find((l: any) => l.id === lessonId) || null;
-        setLesson(current);
-
-        const { data: prog } = await supabase
-          .from("lesson_progress")
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("lesson_id", lessonId)
-          .maybeSingle();
-        setCompleted(!!prog?.completed);
-      } catch (e: any) {
-        setErrorMsg(e?.message || "Failed to load lesson");
-      } finally {
-        setLoading(false);
+        if (q2.error) setErrorMsg(q2.error.message);
+        list = q2.data || [];
+      } else {
+        list = q1.data || [];
       }
-    })();
+
+      setLessons(list);
+      const current = list.find((l: any) => l.id === lessonId) || null;
+      setLesson(current);
+
+      const { data: prog } = await supabase
+        .from("lesson_progress")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("lesson_id", lessonId)
+        .maybeSingle();
+      setCompleted(!!prog?.completed);
+    } catch (e: any) {
+      setErrorMsg(e?.message || "Failed to load lesson");
+    } finally {
+      setLoading(false);
+    }
   }, [courseId, lessonId, router, supabase]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const index = useMemo(
     () => lessons.findIndex((l) => l.id === lessonId),
@@ -103,8 +98,17 @@ export default function LessonPage() {
   const prev = index > 0 ? lessons[index - 1] : null;
   const next = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;
 
+  // Soft navigation — keeps layout/sidebar mounted
+  const goToLesson = (id: string) => {
+    startTransition(() => {
+      router.push(`/dashboard/learning/${courseId}/lesson/${id}`);
+    });
+  };
+
   const markComplete = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     setSaving(true);
 
@@ -143,156 +147,156 @@ export default function LessonPage() {
 
     setCompleted(true);
     setSaving(false);
+
+    // Auto-advance softly to next lesson
+    if (next) {
+      setTimeout(() => goToLesson(next.id), 400);
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#EEF3FA]">
-        <div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <ContentLoader label="Loading lesson..." />;
 
   if (!lesson) {
     return (
-      <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-        <GlassCard className="p-8 text-center max-w-xl mx-auto space-y-4">
-          <h1 className="text-xl font-extrabold text-[#0B1528]">Lesson not found</h1>
-          {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
-          <Link href={`/dashboard/learning/${courseId}`}>
-            <Button variant="primary">Back to course</Button>
-          </Link>
-        </GlassCard>
-      </PortalShell>
+      <GlassCard className="p-8 text-center max-w-xl mx-auto space-y-4">
+        <h1 className="text-xl font-extrabold text-[#0B1528]">Lesson not found</h1>
+        {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
+        <Link href={`/dashboard/learning/${courseId}`}>
+          <Button variant="primary">Back to course</Button>
+        </Link>
+      </GlassCard>
     );
   }
 
   return (
-    <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-      <div className="mx-auto max-w-7xl space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href={`/dashboard/learning/${courseId}`}
-            className="inline-flex items-center gap-2 text-[13px] font-bold text-[#64748B] hover:text-[#368AE4]"
-          >
-            <ArrowLeft className="h-4 w-4" /> {course?.title || "Course"}
-          </Link>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="normal-case tracking-normal">
-              Lesson {Math.max(index + 1, 1)} / {Math.max(lessons.length, 1)}
-            </Badge>
-            {completed && <Badge variant="success">Completed</Badge>}
-          </div>
-        </div>
-
-        {errorMsg && (
-          <GlassCard className="p-4 border-red-200 bg-red-50 text-red-700 text-sm font-bold">
-            {errorMsg}
-          </GlassCard>
-        )}
-
-        <GlassCard className="p-6 sm:p-7">
-          <h1 className="text-2xl font-extrabold text-[#0B1528] tracking-tight mb-2">
-            {lesson.title}
-          </h1>
-          <p className="text-[13px] font-medium text-[#64748B]">
-            {lesson.summary || "Study the concept, review the board, then mark complete."}
-          </p>
-          {lesson.duration_minutes ? (
-            <p className="text-[11px] font-bold text-[#368AE4] mt-2">
-              {lesson.duration_minutes} min
-            </p>
-          ) : null}
-        </GlassCard>
-
-        <div className="grid lg:grid-cols-12 gap-5 items-start">
-          <div className="lg:col-span-6 space-y-4">
-            <GlassCard className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="h-4 w-1.5 rounded-full bg-[#368AE4]" />
-                <h2 className="text-sm font-extrabold text-[#0B1528]">Lesson notes</h2>
-              </div>
-              <p className="text-[14px] font-medium leading-relaxed whitespace-pre-wrap text-[#334155]">
-                {lesson.content ||
-                  "No written notes for this lesson yet. Use the board position and practice tools."}
-              </p>
-            </GlassCard>
-
-            <GlassCard className="p-5 flex flex-wrap gap-2">
-              {!completed ? (
-                <Button
-                  variant="primary"
-                  onClick={markComplete}
-                  disabled={saving}
-                  className="rounded-2xl"
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  {saving ? "Saving..." : "Mark Complete"}
-                </Button>
-              ) : (
-                <Button variant="outline" disabled className="rounded-2xl">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Completed
-                </Button>
-              )}
-
-              {prev && (
-                <Link href={`/dashboard/learning/${courseId}/lesson/${prev.id}`}>
-                  <Button variant="glass" className="rounded-2xl">
-                    <ArrowLeft className="h-4 w-4" /> Previous
-                  </Button>
-                </Link>
-              )}
-              {next && (
-                <Link href={`/dashboard/learning/${courseId}/lesson/${next.id}`}>
-                  <Button variant="glass" className="rounded-2xl">
-                    Next <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              )}
-              <Link href="/dashboard/play">
-                <Button variant="ghost" className="rounded-2xl">
-                  <PlayCircle className="h-4 w-4" /> Practice vs Computer
-                </Button>
-              </Link>
-            </GlassCard>
-          </div>
-
-          <div className="lg:col-span-6 space-y-4">
-            <GlassCard className="p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="h-4 w-1.5 rounded-full bg-[#368AE4]" />
-                  <h2 className="text-sm font-extrabold text-[#0B1528]">Interactive board</h2>
-                </div>
-                <Badge variant="blue">Study</Badge>
-              </div>
-              <LessonBoard fen={lesson.board_fen} note={lesson.board_note || null} />
-            </GlassCard>
-
-            <GlassCard className="p-5">
-              <p className="text-[12px] font-bold text-[#64748B] mb-3">Continue path</p>
-              <div className="space-y-2 max-h-56 overflow-y-auto">
-                {lessons.map((l: any, i: number) => (
-                  <Link
-                    key={l.id}
-                    href={`/dashboard/learning/${courseId}/lesson/${l.id}`}
-                    className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[12px] font-bold border ${
-                      l.id === lessonId
-                        ? "bg-white border-[#368AE4] text-[#368AE4]"
-                        : "bg-white/40 border-white/70 text-[#0B1528] hover:bg-white/70"
-                    }`}
-                  >
-                    <span className="truncate">
-                      {i + 1}. {l.title}
-                    </span>
-                    {l.id === lessonId ? <Badge variant="blue">Now</Badge> : null}
-                  </Link>
-                ))}
-              </div>
-            </GlassCard>
-          </div>
+    <div className={`mx-auto max-w-7xl space-y-5 transition-opacity ${isPending ? "opacity-60" : "opacity-100"}`}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href={`/dashboard/learning/${courseId}`}
+          className="inline-flex items-center gap-2 text-[13px] font-bold text-[#64748B] hover:text-[#368AE4]"
+        >
+          <ArrowLeft className="h-4 w-4" /> {course?.title || "Course"}
+        </Link>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="normal-case tracking-normal">
+            Lesson {Math.max(index + 1, 1)} / {Math.max(lessons.length, 1)}
+          </Badge>
+          {completed && <Badge variant="success">Completed</Badge>}
+          {isPending && <Badge variant="blue">Loading…</Badge>}
         </div>
       </div>
-    </PortalShell>
+
+      {errorMsg && (
+        <GlassCard className="p-4 border-red-200 bg-red-50 text-red-700 text-sm font-bold">
+          {errorMsg}
+        </GlassCard>
+      )}
+
+      <GlassCard className="p-6 sm:p-7">
+        <h1 className="text-2xl font-extrabold text-[#0B1528] tracking-tight mb-2">
+          {lesson.title}
+        </h1>
+        <p className="text-[13px] font-medium text-[#64748B]">
+          {lesson.summary || "Study the concept, review the board, then mark complete."}
+        </p>
+        {lesson.duration_minutes ? (
+          <p className="text-[11px] font-bold text-[#368AE4] mt-2">{lesson.duration_minutes} min</p>
+        ) : null}
+      </GlassCard>
+
+      <div className="grid lg:grid-cols-12 gap-5 items-start">
+        <div className="lg:col-span-6 space-y-4">
+          <GlassCard className="p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-1.5 rounded-full bg-[#368AE4]" />
+              <h2 className="text-sm font-extrabold text-[#0B1528]">Lesson notes</h2>
+            </div>
+            <p className="text-[14px] font-medium leading-relaxed whitespace-pre-wrap text-[#334155]">
+              {lesson.content ||
+                "No written notes for this lesson yet. Use the board position and practice tools."}
+            </p>
+          </GlassCard>
+
+          <GlassCard className="p-5 flex flex-wrap gap-2">
+            {!completed ? (
+              <Button variant="primary" onClick={markComplete} disabled={saving} className="rounded-2xl">
+                <CheckCircle2 className="h-4 w-4" />
+                {saving ? "Saving..." : "Mark Complete"}
+              </Button>
+            ) : (
+              <Button variant="outline" disabled className="rounded-2xl">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Completed
+              </Button>
+            )}
+
+            {prev && (
+              <Button
+                type="button"
+                variant="glass"
+                className="rounded-2xl"
+                disabled={isPending}
+                onClick={() => goToLesson(prev.id)}
+              >
+                <ArrowLeft className="h-4 w-4" /> Previous
+              </Button>
+            )}
+            {next && (
+              <Button
+                type="button"
+                variant="glass"
+                className="rounded-2xl"
+                disabled={isPending}
+                onClick={() => goToLesson(next.id)}
+              >
+                Next <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
+            <Link href="/dashboard/play">
+              <Button variant="ghost" className="rounded-2xl">
+                <PlayCircle className="h-4 w-4" /> Practice vs Computer
+              </Button>
+            </Link>
+          </GlassCard>
+        </div>
+
+        <div className="lg:col-span-6 space-y-4">
+          <GlassCard className="p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="h-4 w-1.5 rounded-full bg-[#368AE4]" />
+                <h2 className="text-sm font-extrabold text-[#0B1528]">Interactive board</h2>
+              </div>
+              <Badge variant="blue">Study</Badge>
+            </div>
+            <LessonBoard fen={lesson.board_fen} note={lesson.board_note || null} />
+          </GlassCard>
+
+          <GlassCard className="p-5">
+            <p className="text-[12px] font-bold text-[#64748B] mb-3">Continue path</p>
+            <div className="space-y-2 max-h-56 overflow-y-auto">
+              {lessons.map((l: any, i: number) => (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => goToLesson(l.id)}
+                  disabled={isPending}
+                  className={`w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-[12px] font-bold border text-left transition ${
+                    l.id === lessonId
+                      ? "bg-white border-[#368AE4] text-[#368AE4]"
+                      : "bg-white/40 border-white/70 text-[#0B1528] hover:bg-white/70"
+                  }`}
+                >
+                  <span className="truncate">
+                    {i + 1}. {l.title}
+                  </span>
+                  {l.id === lessonId ? <Badge variant="blue">Now</Badge> : null}
+                </button>
+              ))}
+            </div>
+          </GlassCard>
+        </div>
+      </div>
+    </div>
   );
 }
+

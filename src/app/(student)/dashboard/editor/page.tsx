@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { Chess, Square } from "chess.js";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -23,18 +22,6 @@ import {
   RotateCcw,
   Shuffle,
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
-  { href: "/dashboard/play", label: "Play Computer", icon: Swords },
-  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
-  { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
-  { href: "/dashboard/events", label: "Events", icon: Calendar },
-  { href: "/dashboard/certificates", label: "Certificates", icon: Award },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-];
 
 const Chessboard = dynamic(
   () => import("react-chessboard").then((m) => m.Chessboard),
@@ -166,8 +153,8 @@ export default function BoardEditorPage() {
   };
 
   return (
-    <PortalShell role="Student" userName="Player" navItems={navItems}>
-      <div className="mx-auto max-w-6xl space-y-6">
+    <>
+<div className="mx-auto max-w-6xl space-y-6">
         <GlassCard className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -294,7 +281,7 @@ export default function BoardEditorPage() {
           </div>
         </div>
       </div>
-    </PortalShell>
+    </>
   );
 }
 
@@ -367,3 +354,4 @@ function PiecePalette({
     </div>
   );
 }
+

@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -11,18 +10,6 @@ import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings,
   Swords, Edit3, Search, Bell, Loader2, Clock, Video, Users
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
-  { href: "/dashboard/play", label: "Play Computer", icon: Swords },
-  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
-  { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
-  { href: "/dashboard/events", label: "Events", icon: Calendar },
-  { href: "/dashboard/certificates", label: "Certificates", icon: Award },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-];
 
 export default function EventsPage() {
   const router = useRouter();
@@ -67,8 +54,8 @@ export default function EventsPage() {
   const firstName = (profile?.full_name || "Student").split(" ")[0];
 
   return (
-    <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-      <div className="mx-auto max-w-[1400px]">
+    <>
+<div className="mx-auto max-w-[1400px]">
         <div className="flex items-center gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
@@ -135,6 +122,8 @@ export default function EventsPage() {
           )}
         </GlassCard>
       </div>
-    </PortalShell>
+    </>
   );
 }
+
+

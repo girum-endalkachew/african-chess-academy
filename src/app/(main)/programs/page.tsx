@@ -1,49 +1,42 @@
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+﻿import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { BookOpen, ArrowRight } from "lucide-react";
 
-export default async function ProgramsPage() {
-  const supabase = await createClient();
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("*")
-    .order("created_at", { ascending: true });
-
+export default function ProgramsPage() {
   return (
-    <div className="bg-[#F8FAFC]">
-      <section className="border-b border-[#DBE9F7] bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <Badge className="mb-4">Programs</Badge>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#1E293B]">Courses & learning paths</h1>
-          <p className="mt-3 text-slate-600 max-w-2xl">Structured programs for beginners to advanced players.</p>
-        </div>
-      </section>
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      <GlassCard className="p-8 text-center max-w-3xl mx-auto">
+        <Badge variant="blue" className="mb-3">Academy Programs</Badge>
+        <h1 className="text-4xl font-extrabold text-[#0B1528]">Structured Chess Courses</h1>
+        <p className="text-sm font-medium text-[#64748B] mt-2">Clear progression paths for beginner, intermediate, and advanced players.</p>
+      </GlassCard>
 
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {(courses || []).map((c) => (
-            <div key={c.id} className="bg-white border border-[#DBE9F7] rounded-2xl p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="accent">{c.level || "All levels"}</Badge>
-                <BookOpen className="h-4 w-4 text-[#00A3E0]" />
+      <div className="grid md:grid-cols-3 gap-6">
+        {[
+          { title: "Beginner Fundamentals", level: "Level 1", lessons: "12 Lessons", desc: "Piece moves, basic checkmates, opening principles." },
+          { title: "Intermediate Strategy", level: "Level 2", lessons: "18 Lessons", desc: "Tactical patterns, middlegame planning, pawn structures." },
+          { title: "Advanced Mastery", level: "Level 3", lessons: "24 Lessons", desc: "Positional play, endgame technique, tournament preparation." },
+        ].map((p) => (
+          <GlassCard key={p.title} className="p-6 flex flex-col justify-between" hoverEffect>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <Badge variant="blue">{p.level}</Badge>
+                <BookOpen className="h-5 w-5 text-[#368AE4]" />
               </div>
-              <h2 className="font-bold text-lg text-[#1E293B]">{c.title}</h2>
-              <p className="text-sm text-slate-600 mt-2 flex-1">{c.description}</p>
-              <p className="text-xs text-slate-500 mt-4 mb-4">{c.total_lessons} lessons</p>
+              <h3 className="text-lg font-extrabold text-[#0B1528] mb-2">{p.title}</h3>
+              <p className="text-xs font-medium text-[#64748B] leading-relaxed mb-4">{p.desc}</p>
+            </div>
+            <div className="pt-4 border-t border-white/60 flex items-center justify-between">
+              <span className="text-xs font-bold text-[#64748B]">{p.lessons}</span>
               <Link href="/register">
-                <Button variant="outline" className="w-full rounded-xl gap-2">
-                  Enroll <ArrowRight className="h-4 w-4" />
-                </Button>
+                <Button size="sm" variant="primary">Enroll <ArrowRight className="h-3.5 w-3.5 ml-1" /></Button>
               </Link>
             </div>
-          ))}
-        </div>
-        {(!courses || courses.length === 0) && (
-          <p className="text-center text-slate-500 py-10">No courses yet. Seed data in Supabase.</p>
-        )}
-      </section>
+          </GlassCard>
+        ))}
+      </div>
     </div>
   );
 }

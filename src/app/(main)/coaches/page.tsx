@@ -1,55 +1,37 @@
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+﻿import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { GraduationCap, Star } from "lucide-react";
 
-export default async function CoachesPage() {
-  const supabase = await createClient();
-  const { data: coaches } = await supabase
-    .from("coaches")
-    .select("*")
-    .order("chess_rating", { ascending: false });
-
+export default function PublicCoachesPage() {
   return (
-    <div className="bg-[#F8FAFC]">
-      <section className="border-b border-[#DBE9F7] bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <Badge className="mb-4">Coaches</Badge>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#1E293B]">Meet our coaches</h1>
-          <p className="mt-3 text-slate-600 max-w-2xl">Experienced mentors dedicated to student growth.</p>
-        </div>
-      </section>
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      <GlassCard className="p-8 text-center max-w-3xl mx-auto">
+        <Badge variant="blue" className="mb-3">Expert Mentors</Badge>
+        <h1 className="text-4xl font-extrabold text-[#0B1528]">Learn from FIDE Certified Coaches</h1>
+        <p className="text-sm font-medium text-[#64748B] mt-2">Dedicated Grandmasters and International Masters guiding your growth.</p>
+      </GlassCard>
 
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {(coaches || []).map((c) => (
-            <div key={c.id} className="bg-white border border-[#DBE9F7] rounded-2xl p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#87CEEB] to-[#00A3E0] text-white font-bold text-lg flex items-center justify-center">
-                  {c.full_name?.split(" ").pop()?.charAt(0)}
-                </div>
-                <div>
-                  <h2 className="font-bold text-[#1E293B]">{c.full_name}</h2>
-                  <p className="text-sm text-slate-500">{c.title}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 text-amber-500 mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" />
-                ))}
-              </div>
-              <p className="text-sm text-slate-600 mb-3">{c.specialties || c.bio}</p>
-              <Badge>ELO {c.chess_rating}</Badge>
+      <div className="grid md:grid-cols-3 gap-6">
+        {[
+          { name: "Coach Kidane", title: "Tactics & Blitz Specialist", rating: "2140" },
+          { name: "Coach Sara", title: "Youth & Fundamentals", rating: "1980" },
+          { name: "Coach Abel", title: "Strategy & Tournament Prep", rating: "2265" },
+        ].map((c) => (
+          <GlassCard key={c.name} className="p-6 text-center space-y-4" hoverEffect>
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#368AE4] to-[#60A5FA] text-white font-extrabold text-2xl flex items-center justify-center mx-auto shadow-md">
+              {c.name.split(" ").pop()?.charAt(0)}
             </div>
-          ))}
-        </div>
-        <div className="mt-8">
-          <Link href="/register">
-            <Button className="rounded-xl">Train with ACA coaches</Button>
-          </Link>
-        </div>
-      </section>
+            <div>
+              <h3 className="text-lg font-extrabold text-[#0B1528]">{c.name}</h3>
+              <p className="text-xs font-bold text-[#64748B] mt-0.5">{c.title}</p>
+            </div>
+            <div className="flex items-center justify-center gap-1 text-amber-400">
+              {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+            </div>
+            <Badge variant="blue">{c.rating} ELO</Badge>
+          </GlassCard>
+        ))}
+      </div>
     </div>
   );
 }

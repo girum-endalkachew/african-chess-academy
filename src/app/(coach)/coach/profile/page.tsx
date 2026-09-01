@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,17 +10,6 @@ import { GlassCard } from "@/components/ui/glass-card";
 import {
   LayoutDashboard, Users, BookOpen, Calendar, MessageSquare, User, Settings, Swords, Trophy
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/coach", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/coach/students", label: "My Students", icon: Users },
-  { href: "/coach/courses", label: "My Courses", icon: BookOpen },
-  { href: "/coach/play", label: "Play Computer", icon: Swords },
-  { href: "/coach/sessions", label: "Sessions", icon: Calendar },
-  { href: "/coach/messages", label: "Messages", icon: MessageSquare },
-  { href: "/coach/profile", label: "Profile", icon: User },
-  { href: "/coach/settings", label: "Settings", icon: Settings },
-];
 
 export default function CoachProfilePage() {
   const router = useRouter();
@@ -54,8 +42,7 @@ export default function CoachProfilePage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#EEF3FA]"><div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" /></div>;
 
   return (
-    <PortalShell role="Coach" userName={fullName || profile?.full_name || "Coach"} navItems={navItems}>
-      <div className="mx-auto max-w-3xl space-y-6">
+    <>`n<div className="mx-auto max-w-3xl space-y-6">
         <GlassCard className="p-7 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold text-[#0B1528]">Coach Profile</h1>
@@ -70,6 +57,7 @@ export default function CoachProfilePage() {
           {msg && <p className="text-sm font-bold text-emerald-600">{msg}</p>}
         </GlassCard>
       </div>
-    </PortalShell>
+    </>
   );
 }
+

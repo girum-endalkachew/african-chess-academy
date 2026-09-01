@@ -1,10 +1,11 @@
 ﻿"use client";
 
+
+import { ContentLoader } from "@/components/ui/content-loader";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -29,18 +30,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
-  { href: "/dashboard/play", label: "Play Computer", icon: Swords },
-  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
-  { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
-  { href: "/dashboard/events", label: "Events", icon: Calendar },
-  { href: "/dashboard/certificates", label: "Certificates", icon: Award },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-];
 
 // Calendar helpers
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -196,13 +185,7 @@ export default function StudentDashboard() {
     else setCalMonth(calMonth + 1);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#EEF3FA]">
-        <div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  if (loading) { return <ContentLoader />; }
 
   const rating = profile?.chess_rating || 1200;
   const firstName = (profile?.full_name || "Player").split(" ")[0];
@@ -210,8 +193,8 @@ export default function StudentDashboard() {
     day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
 
   return (
-    <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-      <div className="mx-auto max-w-[1400px]">
+    <>
+<div className="mx-auto max-w-[1400px]">
         {/* Top bar: search + notifications */}
         <div className="flex items-center gap-4 mb-6">
           <div className="flex-1 relative">
@@ -554,6 +537,8 @@ export default function StudentDashboard() {
           </div>
         </div>
       </div>
-    </PortalShell>
+    </>
   );
 }
+
+

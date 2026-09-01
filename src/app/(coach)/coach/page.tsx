@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -20,17 +19,6 @@ import {
   Trophy,
   ArrowRight,
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/coach", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/coach/students", label: "My Students", icon: Users },
-  { href: "/coach/courses", label: "My Courses", icon: BookOpen },
-  { href: "/coach/play", label: "Play Computer", icon: Swords },
-  { href: "/coach/sessions", label: "Sessions", icon: Calendar },
-  { href: "/coach/messages", label: "Messages", icon: MessageSquare },
-  { href: "/coach/profile", label: "Profile", icon: User },
-  { href: "/coach/settings", label: "Settings", icon: Settings },
-];
 
 export default function CoachDashboard() {
   const router = useRouter();
@@ -69,8 +57,7 @@ export default function CoachDashboard() {
   }
 
   return (
-    <PortalShell role="Coach" userName={profile?.full_name || "Coach"} navItems={navItems}>
-      <div className="mx-auto max-w-7xl space-y-6">
+    <>`n<div className="mx-auto max-w-7xl space-y-6">
         <GlassCard className="relative overflow-hidden p-7 sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-r from-[#368AE4]/10 to-transparent pointer-events-none" />
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -141,6 +128,7 @@ export default function CoachDashboard() {
           </GlassCard>
         </div>
       </div>
-    </PortalShell>
+    </>
   );
 }
+

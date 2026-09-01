@@ -1,55 +1,36 @@
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+﻿import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Video } from "lucide-react";
-import { formatDate } from "@/lib/utils/date";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Calendar, ArrowRight } from "lucide-react";
 
-export default async function EventsPage() {
-  const supabase = await createClient();
-  const { data: events } = await supabase
-    .from("events")
-    .select("*")
-    .order("event_date", { ascending: true });
-
+export default function PublicEventsPage() {
   return (
-    <div className="bg-[#F8FAFC]">
-      <section className="border-b border-[#DBE9F7] bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <Badge className="mb-4">Events & Webinars</Badge>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#1E293B]">Learn live with ACA</h1>
-          <p className="mt-3 text-slate-600 max-w-2xl">Upcoming webinars, clinics, and community sessions.</p>
-        </div>
-      </section>
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
+      <GlassCard className="p-8 text-center max-w-3xl mx-auto">
+        <Badge variant="blue" className="mb-3">Live Sessions</Badge>
+        <h1 className="text-4xl font-extrabold text-[#0B1528]">Events & Webinars</h1>
+        <p className="text-sm font-medium text-[#64748B] mt-2">Masterclasses and interactive clinics with grandmasters.</p>
+      </GlassCard>
 
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-2 gap-5">
-          {(events || []).map((e) => (
-            <div key={e.id} className="bg-white border border-[#DBE9F7] rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-11 w-11 rounded-xl bg-[#E6F5FF] text-[#00A3E0] flex items-center justify-center">
-                  <Video className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="font-bold text-[#1E293B]">{e.title}</h2>
-                  <p className="text-sm text-slate-500">{e.event_type}</p>
-                </div>
-              </div>
-              <p className="text-sm text-slate-600 mb-4">{e.description}</p>
-              <div className="flex flex-wrap gap-2 mb-5">
-                <Badge variant="outline" className="gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {formatDate(e.event_date)}
-                </Badge>
-                <Badge>{e.max_seats} seats</Badge>
-              </div>
-              <Link href="/login">
-                <Button variant="outline" className="rounded-xl">Register for event</Button>
-              </Link>
+      <div className="grid md:grid-cols-2 gap-6">
+        {[
+          { title: "Opening Preparation Masterclass", host: "Grandmaster Clinic" },
+          { title: "Middlegame Calculation Workshop", host: "Tactics Deep Dive" },
+        ].map((e) => (
+          <GlassCard key={e.title} className="p-6 space-y-4" hoverEffect>
+            <div className="flex items-center justify-between">
+              <Badge variant="blue">Webinar</Badge>
+              <Calendar className="h-5 w-5 text-[#368AE4]" />
             </div>
-          ))}
-        </div>
-      </section>
+            <h3 className="text-xl font-extrabold text-[#0B1528]">{e.title}</h3>
+            <p className="text-xs font-bold text-[#64748B]">{e.host}</p>
+            <Link href="/register">
+              <Button variant="outline" className="w-full">Reserve Seat <ArrowRight className="h-4 w-4 ml-1" /></Button>
+            </Link>
+          </GlassCard>
+        ))}
+      </div>
     </div>
   );
 }

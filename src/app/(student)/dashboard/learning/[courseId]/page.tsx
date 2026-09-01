@@ -1,10 +1,11 @@
 ﻿"use client";
 
+
+import { ContentLoader } from "@/components/ui/content-loader";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -12,18 +13,6 @@ import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings,
   Swords, Edit3, ArrowLeft, PlayCircle, CheckCircle2, Circle, Lock,
 } from "lucide-react";
-
-const navItems: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
-  { href: "/dashboard/play", label: "Play Computer", icon: Swords },
-  { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
-  { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
-  { href: "/dashboard/events", label: "Events", icon: Calendar },
-  { href: "/dashboard/certificates", label: "Certificates", icon: Award },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
-];
 
 type Lesson = {
   id: string;
@@ -150,31 +139,25 @@ export default function CoursePage() {
     setEnrolling(false);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#EEF3FA]">
-        <div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" />
-      </div>
-    );
-  }
+  if (loading) { return <ContentLoader />; }
 
   if (!course) {
     return (
-      <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-        <GlassCard className="p-8 text-center max-w-xl mx-auto space-y-3">
+      <>
+<GlassCard className="p-8 text-center max-w-xl mx-auto space-y-3">
           <h1 className="text-xl font-extrabold text-[#0B1528]">Course not found</h1>
           {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
           <Link href="/dashboard/learning">
             <Button variant="primary">Back to Learning</Button>
           </Link>
         </GlassCard>
-      </PortalShell>
+      </>
     );
   }
 
   return (
-    <PortalShell role="Student" userName={profile?.full_name || "Student"} navItems={navItems}>
-      <div className="mx-auto max-w-7xl space-y-6">
+    <>
+<div className="mx-auto max-w-7xl space-y-6">
         <Link
           href="/dashboard/learning"
           className="inline-flex items-center gap-2 text-[13px] font-bold text-[#64748B] hover:text-[#368AE4]"
@@ -348,6 +331,8 @@ export default function CoursePage() {
           </div>
         </div>
       </div>
-    </PortalShell>
+    </>
   );
 }
+
+
