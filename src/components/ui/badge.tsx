@@ -14,6 +14,7 @@ const badgeVariants = cva(
         success: "bg-emerald-50 text-emerald-600",
         warning: "bg-amber-50 text-amber-600",
         danger: "bg-red-50 text-red-600",
+        accent: "bg-[#E8F2FF] text-[#368AE4]",
       },
     },
     defaultVariants: {
