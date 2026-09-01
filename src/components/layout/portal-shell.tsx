@@ -1,5 +1,7 @@
 ﻿"use client";
 
+
+import Image from "next/image";
 import { useState, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,9 +66,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
       >
         <div className={`h-16 sm:h-20 border-b border-white/50 flex items-center justify-between shrink-0 ${collapsed ? "px-4" : "px-5"}`}>
           <Link href="/" className="flex items-center gap-3 overflow-hidden">
-            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-[#0B1528] text-white shadow-sm shrink-0">
-              <span className="font-serif text-lg sm:text-xl leading-none">♙</span>
-            </div>
+            <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100 shrink-0"><Image src="/aca-logo.jpg" alt="ACA Logo" width={40} height={40} className="object-cover h-full w-full" /></div>
             {!collapsed && (
               <div className="flex flex-col leading-none min-w-0">
                 <span className="font-extrabold text-[#0B1528] text-[13px] truncate">ACA {role}</span>
@@ -162,3 +162,4 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
     </div>
   );
 }
+

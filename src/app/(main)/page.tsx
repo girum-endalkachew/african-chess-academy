@@ -54,11 +54,11 @@ export default function HomePage() {
               {/* Africa Map Image */}
               <div className="relative h-[90%] w-[90%] flex items-center justify-center">
                 <Image
-                  src="/aca-logo.jpg"
+                  src="/africa-map.png"
                   alt="African Continent Map"
                   fill
                   priority
-                  className="object-contain p-6 sm:p-10 drop-shadow-[0_20px_40px_rgba(54,138,228,0.25)]"
+                  className="object-contain drop-shadow-[0_20px_40px_rgba(54,138,228,0.25)]"
                 />
               </div>
 
@@ -235,4 +235,5 @@ export default function HomePage() {
     </div>
   );
 }
+
 

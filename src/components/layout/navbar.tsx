@@ -1,5 +1,7 @@
-"use client";
+﻿"use client";
 
+
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
@@ -14,7 +16,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 relative z-50">
           <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#0B1528] text-white shadow-sm shrink-0">
-            <span className="font-serif text-xl sm:text-2xl leading-none">♙</span>
+            <span className="font-serif text-xl sm:text-2xl leading-none">â™™</span>
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528]">
