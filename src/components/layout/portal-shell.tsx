@@ -25,11 +25,15 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Load collapsed state from localStorage (persists across navigation)
+  // Read saved state BEFORE turning on transition animations
   useEffect(() => {
     const saved = localStorage.getItem("aca_sidebar_collapsed");
-    if (saved === "true") setCollapsed(true);
+    if (saved === "true") {
+      setCollapsed(true);
+    }
+    setMounted(true);
   }, []);
 
   const toggleCollapsed = () => {
@@ -55,7 +59,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
           ${sidebarWidth}
           bg-white/40 backdrop-blur-xl border-r border-white/60 
           flex flex-col
-          transform transition-all duration-300 ease-in-out
+          ${mounted ? "transition-all duration-300 ease-in-out" : ""}
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"} 
           lg:translate-x-0
           shadow-[4px_0_24px_rgba(30,60,100,0.04)]
@@ -90,7 +94,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </button>
 
-        {/* Nav (scrollable if long) */}
+        {/* Nav */}
         <nav className="flex-1 overflow-y-auto overscroll-contain py-6 space-y-1.5">
           {navItems.map((item) => {
             const active = pathname === item.href;

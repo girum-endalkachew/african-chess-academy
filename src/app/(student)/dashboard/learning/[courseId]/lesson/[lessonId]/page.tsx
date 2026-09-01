@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -20,34 +20,33 @@ export default function LessonPage() {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const router = useRouter();
   const supabase = createClient();
-  const [isPending, startTransition] = useTransition();
 
   const [course, setCourse] = useState<any>(null);
   const [lessons, setLessons] = useState<any[]>([]);
   const [lesson, setLesson] = useState<any>(null);
   const [completed, setCompleted] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loadingCourse, setLoadingCourse] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  // 1. Fetch course + all lessons once per courseId
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoadingCourse(true);
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.replace("/login");
         return;
       }
+      if (mounted) setUserId(user.id);
 
       const { data: courseData } = await supabase
         .from("courses")
         .select("*")
         .eq("id", courseId)
         .single();
-      setCourse(courseData);
+      if (mounted) setCourse(courseData);
 
       let list: any[] = [];
       const q1 = await supabase
@@ -63,33 +62,41 @@ export default function LessonPage() {
           .select("*")
           .eq("course_id", courseId)
           .order("sort_order", { ascending: true });
-        if (q2.error) setErrorMsg(q2.error.message);
         list = q2.data || [];
       } else {
         list = q1.data || [];
       }
 
-      setLessons(list);
-      const current = list.find((l: any) => l.id === lessonId) || null;
-      setLesson(current);
+      if (mounted) {
+        setLessons(list);
+        setLoadingCourse(false);
+      }
+    })();
 
-      const { data: prog } = await supabase
-        .from("lesson_progress")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("lesson_id", lessonId)
-        .maybeSingle();
-      setCompleted(!!prog?.completed);
-    } catch (e: any) {
-      setErrorMsg(e?.message || "Failed to load lesson");
-    } finally {
-      setLoading(false);
-    }
-  }, [courseId, lessonId, router, supabase]);
+    return () => { mounted = false; };
+  }, [courseId, router, supabase]);
 
+  // 2. Instant client-side lesson switch when lessonId changes (0ms lag!)
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!lessons.length) return;
+    const current = lessons.find((l) => l.id === lessonId);
+    if (current) {
+      setLesson(current);
+    }
+
+    // Silent background fetch for lesson completion status
+    if (userId && lessonId) {
+      supabase
+        .from("lesson_progress")
+        .select("completed")
+        .eq("user_id", userId)
+        .eq("lesson_id", lessonId)
+        .maybeSingle()
+        .then(({ data }) => {
+          setCompleted(!!data?.completed);
+        });
+    }
+  }, [lessonId, lessons, userId, supabase]);
 
   const index = useMemo(
     () => lessons.findIndex((l) => l.id === lessonId),
@@ -98,24 +105,21 @@ export default function LessonPage() {
   const prev = index > 0 ? lessons[index - 1] : null;
   const next = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;
 
-  // Soft navigation — keeps layout/sidebar mounted
   const goToLesson = (id: string) => {
-    startTransition(() => {
-      router.push(`/dashboard/learning/${courseId}/lesson/${id}`);
-    });
+    // Instantly update state before router push
+    const target = lessons.find((l) => l.id === id);
+    if (target) setLesson(target);
+    router.push(`/dashboard/learning/${courseId}/lesson/${id}`, { scroll: false });
   };
 
   const markComplete = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!userId || !lessonId) return;
     setSaving(true);
 
     try {
       await supabase.from("lesson_progress").upsert(
         {
-          user_id: user.id,
+          user_id: userId,
           lesson_id: lessonId,
           course_id: courseId,
           completed: true,
@@ -130,7 +134,7 @@ export default function LessonPage() {
       const { data: allProg } = await supabase
         .from("lesson_progress")
         .select("lesson_id, completed")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("completed", true);
 
       const doneSet = new Set((allProg || []).map((p: any) => p.lesson_id));
@@ -141,26 +145,24 @@ export default function LessonPage() {
       await supabase
         .from("course_enrollments")
         .update({ progress: pct })
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("course_id", courseId);
     } catch {}
 
     setCompleted(true);
     setSaving(false);
 
-    // Auto-advance softly to next lesson
     if (next) {
-      setTimeout(() => goToLesson(next.id), 400);
+      setTimeout(() => goToLesson(next.id), 300);
     }
   };
 
-  if (loading) return <ContentLoader label="Loading lesson..." />;
+  if (loadingCourse) return <ContentLoader label="Loading course..." />;
 
   if (!lesson) {
     return (
       <GlassCard className="p-8 text-center max-w-xl mx-auto space-y-4">
         <h1 className="text-xl font-extrabold text-[#0B1528]">Lesson not found</h1>
-        {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
         <Link href={`/dashboard/learning/${courseId}`}>
           <Button variant="primary">Back to course</Button>
         </Link>
@@ -169,7 +171,7 @@ export default function LessonPage() {
   }
 
   return (
-    <div className={`mx-auto max-w-7xl space-y-5 transition-opacity ${isPending ? "opacity-60" : "opacity-100"}`}>
+    <div className="mx-auto max-w-7xl space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={`/dashboard/learning/${courseId}`}
@@ -182,15 +184,8 @@ export default function LessonPage() {
             Lesson {Math.max(index + 1, 1)} / {Math.max(lessons.length, 1)}
           </Badge>
           {completed && <Badge variant="success">Completed</Badge>}
-          {isPending && <Badge variant="blue">Loading…</Badge>}
         </div>
       </div>
-
-      {errorMsg && (
-        <GlassCard className="p-4 border-red-200 bg-red-50 text-red-700 text-sm font-bold">
-          {errorMsg}
-        </GlassCard>
-      )}
 
       <GlassCard className="p-6 sm:p-7">
         <h1 className="text-2xl font-extrabold text-[#0B1528] tracking-tight mb-2">
@@ -234,7 +229,6 @@ export default function LessonPage() {
                 type="button"
                 variant="glass"
                 className="rounded-2xl"
-                disabled={isPending}
                 onClick={() => goToLesson(prev.id)}
               >
                 <ArrowLeft className="h-4 w-4" /> Previous
@@ -245,7 +239,6 @@ export default function LessonPage() {
                 type="button"
                 variant="glass"
                 className="rounded-2xl"
-                disabled={isPending}
                 onClick={() => goToLesson(next.id)}
               >
                 Next <ArrowRight className="h-4 w-4" />
@@ -279,7 +272,6 @@ export default function LessonPage() {
                   key={l.id}
                   type="button"
                   onClick={() => goToLesson(l.id)}
-                  disabled={isPending}
                   className={`w-full flex items-center justify-between rounded-xl px-3 py-2.5 text-[12px] font-bold border text-left transition ${
                     l.id === lessonId
                       ? "bg-white border-[#368AE4] text-[#368AE4]"
@@ -299,4 +291,3 @@ export default function LessonPage() {
     </div>
   );
 }
-
