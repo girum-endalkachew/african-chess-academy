@@ -1,486 +1,201 @@
 ﻿import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Trophy,
-  Users,
-  BookOpen,
-  Target,
-  Calendar,
-  Newspaper,
-  ArrowRight,
-  Star,
-  Shield,
-  Sparkles,
-  Play,
-  Award,
-  TrendingUp,
-  CheckCircle2,
+import Image from "next/image";
+import { 
+  ArrowRight, User, Users, GraduationCap, Globe2, Trophy, 
+  BookOpen, Star 
 } from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
 
 export default function HomePage() {
   return (
-    <div className="bg-[#F8FAFC]">
-      {/* HERO */}
-      <section className="relative overflow-hidden border-b border-[#DBE9F7] bg-gradient-to-br from-white via-[#E6F5FF] to-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <Badge className="w-fit">African Chess Academy · Digital Platform</Badge>
-
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#1E293B] leading-[1.1]">
-                  Learn. Play.
-                  <span className="block text-[#00A3E0]">Compete. Improve.</span>
-                </h1>
-                <p className="text-lg text-slate-600 max-w-xl leading-relaxed">
-                  A unified digital platform for African Chess Academy — learn with expert coaches,
-                  manage your journey, join tournaments, and grow with the community.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link href="/register">
-                  <Button size="lg" variant="primary" className="w-full sm:w-auto gap-2">
-                    Get Started
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/programs">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
-                    <Play className="h-4 w-4" />
-                    Explore Programs
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap gap-6 pt-2 text-sm text-slate-600">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#00A3E0]" />
-                  Student portal
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#00A3E0]" />
-                  Live tournaments
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-[#00A3E0]" />
-                  Expert coaches
-                </div>
-              </div>
-            </div>
-
-            {/* Hero visual card */}
-            <div className="relative">
-              <div className="absolute -inset-4 bg-[#87CEEB]/20 blur-3xl rounded-full" />
-              <Card className="relative overflow-hidden border-[#DBE9F7] shadow-xl">
-                <CardContent className="p-0">
-                  <div className="bg-gradient-to-br from-[#87CEEB] to-[#00A3E0] p-8 text-white">
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur">
-                          <Shield className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-lg leading-none">ACA Academy</p>
-                          <p className="text-white/80 text-sm">Student Journey</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-white/20 text-white border-0">MVP</Badge>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-2xl bg-white/15 backdrop-blur p-4">
-                        <p className="text-white/80 text-xs mb-1">Programs</p>
-                        <p className="text-2xl font-bold">12+</p>
-                      </div>
-                      <div className="rounded-2xl bg-white/15 backdrop-blur p-4">
-                        <p className="text-white/80 text-xs mb-1">Coaches</p>
-                        <p className="text-2xl font-bold">25+</p>
-                      </div>
-                      <div className="rounded-2xl bg-white/15 backdrop-blur p-4">
-                        <p className="text-white/80 text-xs mb-1">Tournaments</p>
-                        <p className="text-2xl font-bold">40+</p>
-                      </div>
-                      <div className="rounded-2xl bg-white/15 backdrop-blur p-4">
-                        <p className="text-white/80 text-xs mb-1">Students</p>
-                        <p className="text-2xl font-bold">1k+</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-6 space-y-4 bg-white">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-[#E6F5FF] flex items-center justify-center">
-                        <TrendingUp className="h-5 w-5 text-[#00A3E0]" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-[#1E293B]">Track your progress</p>
-                        <p className="text-sm text-slate-500">Courses, rating, certificates & results</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-[#E6F5FF] flex items-center justify-center">
-                        <Trophy className="h-5 w-5 text-[#00A3E0]" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-[#1E293B]">Compete with purpose</p>
-                        <p className="text-sm text-slate-500">Register, play, climb the leaderboard</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+    <div className="px-8 pb-20">
+      
+      {/* ──────── HERO SECTION ──────── */}
+      <section className="relative grid lg:grid-cols-12 gap-10 items-center pt-12 pb-20">
+        
+        {/* 1. Left Text Content */}
+        <div className="lg:col-span-5 space-y-8 relative z-20">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/40 border border-white/60 px-4 py-2 text-[11px] font-bold tracking-[0.1em] text-[#64748B] uppercase backdrop-blur-md shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-[#368AE4]" />
+            Building Champions. Shaping Leaders.
           </div>
-        </div>
-      </section>
 
-      {/* ABOUT ACA */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <Badge variant="default">About ACA</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#1E293B]">
-                Building Africa’s next generation of chess champions
-              </h2>
-              <p className="text-slate-600 leading-relaxed">
-                African Chess Academy is more than a school — it’s a complete ecosystem for learning,
-                competing, and community. This platform brings courses, coaches, tournaments, webinars,
-                and student progress into one modern experience.
-              </p>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {[
-                  "Structured learning paths",
-                  "Verified coaches",
-                  "Tournament management",
-                  "Events & webinars",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <CheckCircle2 className="h-4 w-4 text-[#00A3E0]" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-              <Link href="/about">
-                <Button variant="outline" className="gap-2 mt-2">
-                  Learn more about ACA
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+          <h1 className="text-[3.5rem] lg:text-[4.2rem] font-extrabold tracking-tight text-[#0B1528] leading-[1.05]">
+            Where African<br />
+            Chess Talent<br />
+            Becomes <span className="text-[#368AE4]">Global<br />Excellence.</span>
+          </h1>
 
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: BookOpen, label: "Courses", desc: "From fundamentals to mastery" },
-                { icon: Users, label: "Community", desc: "Learn and grow together" },
-                { icon: Trophy, label: "Tournaments", desc: "Local & academy events" },
-                { icon: Award, label: "Certificates", desc: "Celebrate milestones" },
-              ].map((item) => (
-                <Card key={item.label} className="p-5 hover:border-[#87CEEB]">
-                  <div className="h-11 w-11 rounded-xl bg-[#E6F5FF] flex items-center justify-center mb-4">
-                    <item.icon className="h-5 w-5 text-[#00A3E0]" />
-                  </div>
-                  <h3 className="font-bold text-[#1E293B]">{item.label}</h3>
-                  <p className="text-sm text-slate-500 mt-1">{item.desc}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+          <p className="text-base text-[#64748B] max-w-[420px] leading-relaxed font-medium">
+            Learn from experienced coaches, compete in meaningful tournaments, and develop the strategic mindset to reach your full potential.
+          </p>
 
-      {/* PROGRAMS */}
-      <section className="py-16 lg:py-20 bg-white border-y border-[#DBE9F7]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-            <div className="space-y-3">
-              <Badge>Programs</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#1E293B]">Courses built for real improvement</h2>
-              <p className="text-slate-600 max-w-2xl">
-                Clear paths for beginners, intermediate players, and advanced competitors.
-              </p>
-            </div>
-            <Link href="/programs">
-              <Button variant="secondary" className="gap-2">
-                View all programs <ArrowRight className="h-4 w-4" />
-              </Button>
+          <div className="flex flex-wrap gap-4 pt-4">
+            <Link href="/programs" className="btn-blue inline-flex items-center gap-2 rounded-full px-7 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5">
+              Explore Programs <ArrowRight className="h-4 w-4 ml-1" />
+            </Link>
+            <Link href="/register" className="inline-flex items-center gap-2 rounded-full bg-white/50 border border-white/80 px-7 py-4 text-sm font-bold text-[#0B1528] shadow-sm backdrop-blur transition hover:bg-white/70 hover:-translate-y-0.5">
+              Join the Academy <User className="h-4 w-4 ml-1 text-[#64748B]" />
             </Link>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              { title: "Chess Fundamentals", level: "Beginner", lessons: "12 Lessons", progress: "Perfect start" },
-              { title: "Tactical Patterns", level: "Intermediate", lessons: "18 Lessons", progress: "Sharpen tactics" },
-              { title: "Middlegame Strategy", level: "Advanced", lessons: "20 Lessons", progress: "Positional mastery" },
-              { title: "Endgame Mastery", level: "Advanced", lessons: "16 Lessons", progress: "Convert wins" },
-            ].map((course) => (
-              <Card key={course.title} className="group hover:border-[#87CEEB]">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="accent">{course.level}</Badge>
-                    <BookOpen className="h-4 w-4 text-[#00A3E0]" />
-                  </div>
-                  <CardTitle className="text-lg">{course.title}</CardTitle>
-                  <CardDescription>{course.lessons} · {course.progress}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href="/programs">
-                    <Button variant="outline" size="sm" className="w-full group-hover:border-[#87CEEB]">
-                      Explore course
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
-      </section>
 
-      {/* WHY LEARN CHESS */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-            <Badge>Why Learn Chess</Badge>
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#1E293B]">Skills that go beyond the board</h2>
-            <p className="text-slate-600">
-              Chess trains focus, patience, calculation, and confident decision-making — for school, work, and life.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: Target, title: "Strategic Thinking", desc: "Learn to plan ahead, evaluate options, and execute with purpose." },
-              { icon: Sparkles, title: "Focus & Discipline", desc: "Build mental endurance through structured practice and play." },
-              { icon: TrendingUp, title: "Measurable Growth", desc: "Track ratings, course progress, tournament results, and certificates." },
-            ].map((item) => (
-              <Card key={item.title} className="p-6 text-center">
-                <div className="mx-auto h-14 w-14 rounded-2xl bg-[#E6F5FF] flex items-center justify-center mb-5">
-                  <item.icon className="h-6 w-6 text-[#00A3E0]" />
-                </div>
-                <h3 className="text-xl font-bold text-[#1E293B] mb-2">{item.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURED COACHES */}
-      <section className="py-16 lg:py-20 bg-white border-y border-[#DBE9F7]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-            <div className="space-y-3">
-              <Badge>Featured Coaches</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#1E293B]">Learn from dedicated mentors</h2>
-            </div>
-            <Link href="/coaches">
-              <Button variant="secondary" className="gap-2">
-                Meet all coaches <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              { name: "Coach Kidane", title: "Tactics & Blitz Specialist", rating: "2140" },
-              { name: "Coach Sara", title: "Fundamentals & Youth Training", rating: "1980" },
-              { name: "Coach Abel", title: "Strategy & Tournament Prep", rating: "2265" },
-            ].map((coach) => (
-              <Card key={coach.name} className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[#87CEEB] to-[#00A3E0] flex items-center justify-center text-white font-bold text-lg">
-                    {coach.name.split(" ").pop()?.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-[#1E293B]">{coach.name}</h3>
-                    <p className="text-sm text-slate-500">{coach.title}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-amber-500">
-                    <Star className="h-4 w-4 fill-current" />
-                    <Star className="h-4 w-4 fill-current" />
-                    <Star className="h-4 w-4 fill-current" />
-                    <Star className="h-4 w-4 fill-current" />
-                    <Star className="h-4 w-4 fill-current" />
-                  </div>
-                  <Badge>ELO {coach.rating}</Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* UPCOMING TOURNAMENT + WEBINAR */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-[#00A3E0] to-[#87CEEB] p-6 text-white">
-                <div className="flex items-center gap-2 mb-3">
-                  <Trophy className="h-5 w-5" />
-                  <span className="text-sm font-semibold uppercase tracking-wide">Upcoming Tournament</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-2">ACA Monthly Blitz</h3>
-                <p className="text-white/90 text-sm">Open · Online · Swiss System</p>
+        {/* 2. Center Stats Stack */}
+        <div className="lg:col-span-3 relative z-30 flex flex-col gap-4 lg:-mr-12 mt-12 lg:mt-0">
+          {[
+            { icon: Users, val: "500+", lbl: "Students" },
+            { icon: GraduationCap, val: "20+", lbl: "Expert Coaches" },
+            { icon: Globe2, val: "15", lbl: "Countries" },
+            { icon: Trophy, val: "100+", lbl: "Tournaments" },
+          ].map((stat) => (
+            <GlassCard key={stat.lbl} className="flex items-center gap-4 px-5 py-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#EEF3FA] shrink-0">
+                <stat.icon className="h-5 w-5 text-[#368AE4]" />
               </div>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  <Badge>May 18, 2025</Badge>
-                  <Badge variant="outline">Blitz</Badge>
-                  <Badge variant="success">32/64 filled</Badge>
-                </div>
-                <p className="text-sm text-slate-600">
-                  Fast-paced academy blitz event. Register early, meet players, and climb the leaderboard.
-                </p>
-                <Link href="/tournaments">
-                  <Button variant="primary" className="w-full sm:w-auto gap-2">
-                    View tournament <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="overflow-hidden">
-              <div className="bg-[#1E293B] p-6 text-white">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="h-5 w-5 text-[#87CEEB]" />
-                  <span className="text-sm font-semibold uppercase tracking-wide">Upcoming Webinar</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Opening Preparation Masterclass</h3>
-                <p className="text-white/80 text-sm">Live session with ACA coaches</p>
+              <div>
+                <p className="text-[22px] font-extrabold text-[#0B1528] leading-none">{stat.val}</p>
+                <p className="text-[12px] font-bold text-[#64748B] mt-1.5">{stat.lbl}</p>
               </div>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex flex-wrap gap-2">
-                  <Badge>May 22, 2025</Badge>
-                  <Badge variant="outline">Webinar</Badge>
-                  <Badge variant="warning">Limited seats</Badge>
-                </div>
-                <p className="text-sm text-slate-600">
-                  Practical opening ideas, common traps, and a study plan you can use immediately.
-                </p>
-                <Link href="/events">
-                  <Button className="w-full sm:w-auto gap-2">
-                    View event details <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            </GlassCard>
+          ))}
+        </div>
+
+        {/* 3. Right 3D Knight Scene */}
+        <div className="lg:col-span-4 relative z-10 h-[500px] lg:h-[600px] flex items-center justify-center">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] bg-[#368AE4]/15 blur-[80px] rounded-full pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[380px] w-[380px] rounded-full border border-white/60 pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full border border-white/30 pointer-events-none" />
+          <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 h-8 w-[240px] bg-white/80 blur-xl rounded-full" />
+
+          <div className="absolute inset-0 flex items-center justify-center -mt-6">
+            <div className="relative h-[115%] w-[115%] pointer-events-none">
+              <Image src="/hero-knight.png" alt="3D Chess Knight" fill priority className="object-contain drop-shadow-[0_20px_40px_rgba(54,138,228,0.25)]" />
+            </div>
           </div>
+
+          <div className="absolute top-24 right-4 h-14 w-14 rounded-2xl bg-white/30 border border-white/60 backdrop-blur-md shadow-sm pointer-events-none" />
+          <div className="absolute bottom-1/3 left-4 h-8 w-8 rounded-xl bg-white/40 border border-white/60 backdrop-blur-md shadow-sm pointer-events-none" />
+          <div className="absolute top-1/4 right-20 h-2 w-2 rounded-full bg-[#368AE4] shadow-[0_0_12px_#368AE4] pointer-events-none" />
+          <div className="absolute bottom-1/4 left-1/3 h-1.5 w-1.5 rounded-full bg-[#368AE4] shadow-[0_0_12px_#368AE4] pointer-events-none" />
         </div>
       </section>
 
-      {/* STUDENT SUCCESS */}
-      <section className="py-16 lg:py-20 bg-white border-y border-[#DBE9F7]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-            <Badge>Student Success</Badge>
-            <h2 className="text-3xl lg:text-4xl font-bold text-[#1E293B]">Real progress from real students</h2>
+      {/* ──────── PARTNERS STRIP ──────── */}
+      <GlassCard className="px-10 py-6 flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
+        <p className="text-[14px] font-extrabold text-[#0B1528] shrink-0 leading-snug">
+          Building the future of<br />chess across <span className="text-[#368AE4]">Africa.</span>
+        </p>
+        <div className="hidden md:block h-12 w-px bg-white/80" />
+        <div className="flex flex-wrap items-center justify-around gap-10 flex-1">
+          {["FIDE", "AUSC", "ECF", "CHESS AFRICA", "lichess.org"].map((name) => (
+            <span key={name} className="text-[14px] font-extrabold text-[#64748B]/60 tracking-widest uppercase">
+              {name}
+            </span>
+          ))}
+        </div>
+      </GlassCard>
+
+      {/* ──────── PROGRAMS & WHY ACA ──────── */}
+      <div className="grid lg:grid-cols-12 gap-8 mb-10">
+        
+        {/* PROGRAMS (Left Side - 7 Cols) */}
+        <GlassCard className="lg:col-span-7 p-8">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <span className="h-6 w-1.5 rounded-full bg-[#368AE4]" />
+              <h2 className="text-lg font-extrabold text-[#0B1528]">Our Programs</h2>
+            </div>
+            <Link href="/programs" className="text-xs font-bold text-[#368AE4] hover:underline">View All Programs</Link>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-3 gap-5">
             {[
-              { name: "Girum E.", result: "+180 rating in 3 months", quote: "The structured courses and tournament practice changed how I think about every position." },
-              { name: "Hanna T.", result: "Won ACA Junior qualifier", quote: "Coaches made endgames simple. I finally converted winning positions with confidence." },
-              { name: "Samuel K.", result: "Completed 4 certificates", quote: "I love tracking my lessons, events, and results in one clean student dashboard." },
-            ].map((item) => (
-              <Card key={item.name} className="p-6">
-                <div className="flex items-center gap-1 text-amber-500 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <p className="text-slate-600 text-sm leading-relaxed mb-5">“{item.quote}”</p>
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-bold text-[#1E293B]">{item.name}</p>
-                    <p className="text-xs text-[#00A3E0] font-medium">{item.result}</p>
+              { t: "Beginner Chess", d: "Learn the fundamentals and build a strong foundation.", l: "Level 1", icon: "♙", bars: 1 },
+              { t: "Intermediate Strategy", d: "Develop your tactics and strategic thinking.", l: "Level 2", icon: "♘", bars: 2 },
+              { t: "Advanced Mastery", d: "Master advanced concepts and competitive play.", l: "Level 3", icon: "♔", bars: 3 },
+            ].map((p) => (
+              <div key={p.t} className="bg-white/40 border border-white/60 rounded-[24px] p-5 flex flex-col relative overflow-hidden transition-transform hover:-translate-y-1 cursor-pointer">
+                {/* Huge faint background watermark icon */}
+                <span className="absolute -right-4 -bottom-6 text-[100px] text-[#368AE4] opacity-[0.05] leading-none pointer-events-none select-none">{p.icon}</span>
+                
+                <div className="relative z-10 flex-1">
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-b from-[#EEF3FA] to-white flex items-center justify-center text-[#368AE4] text-2xl shadow-sm mb-4">
+                    {p.icon}
                   </div>
-                  <div className="h-10 w-10 rounded-full bg-[#E6F5FF] flex items-center justify-center text-[#00A3E0] font-bold">
-                    {item.name.charAt(0)}
+                  <h3 className="text-[14px] font-extrabold text-[#0B1528] mb-2">{p.t}</h3>
+                  <p className="text-[11px] font-medium text-[#64748B] leading-relaxed mb-6">{p.d}</p>
+                </div>
+                
+                <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/60">
+                  <span className="text-[10px] font-extrabold text-[#64748B]">⏱ {p.l}</span>
+                  <div className="flex gap-1">
+                    {[1,2,3].map(b => (
+                      <span key={b} className={`h-1.5 w-3 rounded-full ${b <= p.bars ? "bg-[#368AE4]" : "bg-[#64748B]/20"}`} />
+                    ))}
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </GlassCard>
 
-      {/* LATEST NEWS */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-            <div className="space-y-3">
-              <Badge>Latest News</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#1E293B]">Academy updates & stories</h2>
-            </div>
-            <Link href="/news">
-              <Button variant="secondary" className="gap-2">
-                All news <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+        {/* WHY ACA (Right Side - 5 Cols) */}
+        <GlassCard className="lg:col-span-5 p-8">
+          <div className="flex items-center gap-3 mb-8">
+            <span className="h-6 w-1.5 rounded-full bg-[#368AE4]" />
+            <h2 className="text-lg font-extrabold text-[#0B1528]">Why ACA?</h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
             {[
-              { title: "ACA Open Championship registrations are live", date: "May 10, 2025", tag: "Tournament" },
-              { title: "New intermediate tactics path released", date: "May 6, 2025", tag: "Courses" },
-              { title: "Coach clinic: calculating under pressure", date: "May 1, 2025", tag: "Webinar" },
-            ].map((news) => (
-              <Card key={news.title} className="group hover:border-[#87CEEB]">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">{news.tag}</Badge>
-                    <Newspaper className="h-4 w-4 text-slate-400" />
-                  </div>
-                  <CardTitle className="text-lg leading-snug group-hover:text-[#00A3E0] transition-colors">
-                    {news.title}
-                  </CardTitle>
-                  <CardDescription>{news.date}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href="/news" className="text-sm font-semibold text-[#00A3E0] inline-flex items-center gap-1">
-                    Read more <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </CardContent>
-              </Card>
+              { i: User, t: "Expert Coaching", d: "Learn from FIDE-certified coaches and grandmasters." },
+              { i: BookOpen, t: "Structured Learning", d: "Curriculum designed for real progress and results." },
+              { i: Trophy, t: "Competitive Tournaments", d: "Regular tournaments to test and improve your skills." },
+              { i: Globe2, t: "Global Community", d: "Join a network of passionate players worldwide." }
+            ].map(w => (
+              <div key={w.t} className="bg-white/40 border border-white/60 rounded-[20px] p-4 flex gap-4 items-start">
+                <div className="h-10 w-10 rounded-[12px] bg-[#EEF3FA] flex items-center justify-center text-[#368AE4] shrink-0">
+                  <w.i className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-[13px] font-extrabold text-[#0B1528] mb-1">{w.t}</h3>
+                  <p className="text-[11px] font-medium text-[#64748B] leading-relaxed">{w.d}</p>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </GlassCard>
+      </div>
 
-      {/* CTA */}
-      <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#00A3E0] via-[#53B4E0] to-[#87CEEB] p-10 lg:p-14 text-white shadow-xl">
-            <div className="relative z-10 max-w-2xl space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-bold leading-tight">
-                Ready to start your ACA journey?
-              </h2>
-              <p className="text-white/90 text-lg">
-                Join students across Africa learning with structure, competing with confidence, and tracking real progress.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link href="/register">
-                  <Button size="lg" className="bg-white text-[#00A3E0] hover:bg-slate-50 font-bold w-full sm:w-auto">
-                    Create free account
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 w-full sm:w-auto">
-                    Contact ACA
-                  </Button>
-                </Link>
-              </div>
+      {/* ──────── TESTIMONIAL ──────── */}
+      <GlassCard className="px-10 py-8 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="flex items-center gap-6 flex-1">
+          <span className="text-6xl text-[#368AE4] font-serif leading-none opacity-20 mt-4">“</span>
+          <p className="text-[16px] font-bold text-[#0B1528] leading-relaxed">
+            ACA changed the way I think. Chess is not just a game,<br className="hidden md:block"/>it&apos;s a way of life.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4 shrink-0 md:mr-10">
+          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#368AE4] to-[#60A5FA] border-2 border-white shadow-md flex items-center justify-center text-white text-base font-extrabold">
+            SK
+          </div>
+          <div>
+            <p className="text-[14px] font-extrabold text-[#0B1528]">Samuel K.</p>
+            <p className="text-[11px] font-bold text-[#64748B] mb-1">ACA Student</p>
+            <div className="flex gap-1">
+              {[...Array(5)].map((_, i) => <Star key={i} className="h-3 w-3 fill-[#368AE4] text-[#368AE4]" />)}
             </div>
-            <div className="absolute -right-10 -bottom-10 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
           </div>
         </div>
-      </section>
+
+        <div className="flex gap-2 shrink-0">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#368AE4]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#64748B]/30" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#64748B]/30" />
+        </div>
+      </GlassCard>
+
     </div>
   );
 }
