@@ -40,12 +40,11 @@ export function getBestMove(fen: string, difficulty: Difficulty): { from: string
 
   // For Easy: random or simple captures
   if (difficulty === "easy") {
-    // Truly forgiving: 60% random, avoid capturing player pieces unnecessarily
-    const nonCaptures = moves.filter(m => !m.captured);
+    // Truly forgiving AI
+    const nonCaptures = moves.filter((m) => !m.captured);
     let pool = moves;
-    if (Math.random() < 0.7 && nonCaptures.length > 0) {
-      pool = nonCaptures;
-    }
+    if (Math.random() < 0.75 && nonCaptures.length > 0) pool = nonCaptures;
+    // occasionally pick a weak random move even from captures
     const chosen = pool[Math.floor(Math.random() * pool.length)];
     return { from: chosen.from, to: chosen.to, promotion: chosen.promotion || "q" };
   }
@@ -100,3 +99,4 @@ export function getBestMove(fen: string, difficulty: Difficulty): { from: string
 
   return { from: bestMove.from, to: bestMove.to, promotion: bestMove.promotion || "q" };
 }
+
