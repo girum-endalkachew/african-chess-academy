@@ -56,8 +56,8 @@ export default function HomePage() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative h-[92%] w-[92%]">
                   <Image
-                    src="/hero-knight.png"
-                    alt="Chess Knight"
+                    src="/africa-map.png"
+                    alt="African Continent Map"
                     fill
                     priority
                     className="object-contain drop-shadow-[0_25px_50px_rgba(54,138,228,0.28)]"
@@ -334,3 +334,4 @@ export default function HomePage() {
     </div>
   );
 }
+
