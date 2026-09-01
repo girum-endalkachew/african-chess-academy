@@ -1,4 +1,4 @@
-import { Chess, Move, PieceSymbol } from "chess.js";
+﻿import { Chess, Move, PieceSymbol } from "chess.js";
 
 const VAL: Record<PieceSymbol, number> = {
   p: 100,
@@ -40,10 +40,13 @@ export function getBestMove(fen: string, difficulty: Difficulty): { from: string
 
   // For Easy: random or simple captures
   if (difficulty === "easy") {
-    const captures = moves.filter(m => m.captured);
-    const chosen = captures.length > 0 && Math.random() > 0.4 
-      ? captures[Math.floor(Math.random() * captures.length)]
-      : moves[Math.floor(Math.random() * moves.length)];
+    // Truly forgiving: 60% random, avoid capturing player pieces unnecessarily
+    const nonCaptures = moves.filter(m => !m.captured);
+    let pool = moves;
+    if (Math.random() < 0.7 && nonCaptures.length > 0) {
+      pool = nonCaptures;
+    }
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
     return { from: chosen.from, to: chosen.to, promotion: chosen.promotion || "q" };
   }
 

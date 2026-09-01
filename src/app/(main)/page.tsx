@@ -43,7 +43,7 @@ export default function HomePage() {
 
           {/* RIGHT: Map Scene */}
           <div className="lg:col-span-7 relative z-10">
-            <div className="relative mx-auto h-[320px] sm:h-[480px] lg:h-[560px] w-full max-w-[580px] flex items-center justify-center">
+            <div className="relative mx-auto h-[420px] sm:h-[520px] lg:h-[600px] w-full max-w-[580px] flex items-center justify-center">
               {/* Background ambient glows */}
               <div className="absolute left-1/2 top-1/2 h-[260px] sm:h-[380px] w-[260px] sm:w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#368AE4]/20 blur-[60px] sm:blur-[100px]" />
               <div className="absolute left-1/2 top-1/2 h-[300px] sm:h-[440px] w-[300px] sm:w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/60" />
@@ -63,48 +63,28 @@ export default function HomePage() {
               </div>
 
               {/* DESKTOP/TABLET ORBITING CARDS (hidden on small mobile to prevent clipping) */}
-              <GlassCard className="hidden sm:flex absolute left-1/2 top-[2%] z-20 -translate-x-1/2 items-center gap-3 px-4 py-2.5 shadow-lg">
-                <div className="h-9 w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><Users className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-base font-extrabold text-[#0B1528] leading-none">500+</p><p className="text-[10px] font-bold text-[#64748B] mt-0.5">Students</p></div>
+              <GlassCard className="flex absolute left-1/2 top-[2%] z-20 -translate-x-1/2 items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 shadow-lg">
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><Users className="h-4 w-4 text-[#368AE4]" /></div>
+                <div><p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">500+</p><p className="text-[9px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Students</p></div>
               </GlassCard>
 
-              <GlassCard className="hidden sm:flex absolute right-0 top-[28%] z-20 items-center gap-3 px-4 py-2.5 shadow-lg">
-                <div className="h-9 w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><GraduationCap className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-base font-extrabold text-[#0B1528] leading-none">20+</p><p className="text-[10px] font-bold text-[#64748B] mt-0.5">Coaches</p></div>
+              <GlassCard className="flex absolute right-0 top-[28%] z-20 items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 shadow-lg">
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><GraduationCap className="h-4 w-4 text-[#368AE4]" /></div>
+                <div><p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">20+</p><p className="text-[9px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Coaches</p></div>
               </GlassCard>
 
-              <GlassCard className="hidden sm:flex absolute left-1/2 bottom-[2%] z-20 -translate-x-1/2 items-center gap-3 px-4 py-2.5 shadow-lg">
-                <div className="h-9 w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><Trophy className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-base font-extrabold text-[#0B1528] leading-none">100+</p><p className="text-[10px] font-bold text-[#64748B] mt-0.5">Tournaments</p></div>
+              <GlassCard className="flex absolute left-1/2 bottom-[2%] z-20 -translate-x-1/2 items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 shadow-lg">
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><Trophy className="h-4 w-4 text-[#368AE4]" /></div>
+                <div><p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">100+</p><p className="text-[9px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Tournaments</p></div>
               </GlassCard>
 
-              <GlassCard className="hidden sm:flex absolute left-0 top-[28%] z-20 items-center gap-3 px-4 py-2.5 shadow-lg">
-                <div className="h-9 w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><Globe2 className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-base font-extrabold text-[#0B1528] leading-none">15</p><p className="text-[10px] font-bold text-[#64748B] mt-0.5">Countries</p></div>
+              <GlassCard className="flex absolute left-0 top-[28%] z-20 items-center gap-3 px-3 py-2 sm:px-4 sm:py-2.5 shadow-lg">
+                <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center"><Globe2 className="h-4 w-4 text-[#368AE4]" /></div>
+                <div><p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">15</p><p className="text-[9px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Countries</p></div>
               </GlassCard>
             </div>
 
-            {/* MOBILE ONLY STATS GRID (Clean 2x2 grid for mobile phones) */}
-            <div className="grid grid-cols-2 gap-2.5 sm:hidden mt-4">
-              <GlassCard className="p-3 flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-[#EEF3FA] flex items-center justify-center shrink-0"><Users className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-sm font-extrabold text-[#0B1528] leading-none">500+</p><p className="text-[9px] font-bold text-[#64748B] mt-0.5">Students</p></div>
-              </GlassCard>
-              <GlassCard className="p-3 flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-[#EEF3FA] flex items-center justify-center shrink-0"><GraduationCap className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-sm font-extrabold text-[#0B1528] leading-none">20+</p><p className="text-[9px] font-bold text-[#64748B] mt-0.5">Coaches</p></div>
-              </GlassCard>
-              <GlassCard className="p-3 flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-[#EEF3FA] flex items-center justify-center shrink-0"><Trophy className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-sm font-extrabold text-[#0B1528] leading-none">100+</p><p className="text-[9px] font-bold text-[#64748B] mt-0.5">Tournaments</p></div>
-              </GlassCard>
-              <GlassCard className="p-3 flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-[#EEF3FA] flex items-center justify-center shrink-0"><Globe2 className="h-4 w-4 text-[#368AE4]" /></div>
-                <div><p className="text-sm font-extrabold text-[#0B1528] leading-none">15</p><p className="text-[9px] font-bold text-[#64748B] mt-0.5">Countries</p></div>
-              </GlassCard>
             </div>
-          </div>
-        </div>
       </section>
 
       {/* VISION & MISSION */}
@@ -235,5 +215,6 @@ export default function HomePage() {
     </div>
   );
 }
+
 
 

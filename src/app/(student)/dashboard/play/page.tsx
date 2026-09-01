@@ -28,7 +28,7 @@ import {
   Cpu,
   Circle,
   Edit3,
-} from "lucide-react";
+} , Lightbulb, Undo2, Handshake } from "lucide-react";
 
 const Chessboard = dynamic(
   () => import("react-chessboard").then((m) => m.Chessboard),
@@ -379,10 +379,60 @@ export default function PlayComputerPage() {
     }
 
     Object.assign(styles, legalSquares);
+    Object.assign(styles, hintStyle);
     return styles;
   }, [lastMove, legalSquares, fen]);
 
   if (loadingUser) { return <ContentLoader label="Loading board..." />; }
+
+  
+  const [hintStyle, setHintStyle] = useState<Record<string, React.CSSProperties>>({});
+
+  const showHint = useCallback(() => {
+    const g = gameRef.current;
+    if (g.turn() !== playerColor || thinking || gameOver) return;
+    // Find best move using engine for player color
+    const best = getBestMove(g.fen(), "hard");
+    if (best) {
+      setHintStyle({
+        [best.from]: { background: "radial-gradient(circle, rgba(251,191,36,0.7) 0%, transparent 70%)" },
+        [best.to]: { background: "radial-gradient(circle, rgba(251,191,36,0.5) 0%, transparent 70%)" },
+      });
+      setTimeout(() => setHintStyle({}), 2500);
+    }
+  }, [playerColor, thinking, gameOver]);
+
+  const undoMove = useCallback(() => {
+    if (thinking || gameOver) return;
+    const g = gameRef.current;
+    // Undo opponent + player move
+    g.undo();
+    g.undo();
+    setFen(g.fen());
+    setHistory(g.history());
+    setLastMove(null);
+    clearLights();
+    setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
+  }, [thinking, gameOver, playerColor, clearLights]);
+
+  const offerDrawVsAI = useCallback(() => {
+    if (gameOver) return;
+    // AI accepts draw if position is roughly equal (material only)
+    const g = gameRef.current;
+    const board = g.board();
+    let score = 0;
+    const val: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    for (const row of board) for (const p of row) {
+      if (p) score += (p.color === "w" ? 1 : -1) * (val[p.type] || 0);
+    }
+    if (Math.abs(score) <= 2) {
+      finishGame("draw");
+      setStatus("Draw accepted!");
+    } else {
+      setStatus("Computer declines the draw. Play on!");
+      setTimeout(() => setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`), 2000);
+    }
+  }, [gameOver, finishGame, playerColor]);
 
   const playerName = profile?.full_name || "You";
   const isPlayerTurn = !thinking && !gameOver && gameRef.current.turn() === playerColor;
@@ -569,6 +619,17 @@ export default function PlayComputerPage() {
                   <Flag className="h-4 w-4" /> Resign
                 </Button>
               </div>
+              <div className="grid grid-cols-3 gap-2">
+                <Button variant="glass" size="sm" className="rounded-xl" onClick={showHint} disabled={thinking || gameOver}>
+                  <Lightbulb className="h-3.5 w-3.5" /> Hint
+                </Button>
+                <Button variant="glass" size="sm" className="rounded-xl" onClick={undoMove} disabled={thinking || gameOver || history.length < 2}>
+                  <Undo2 className="h-3.5 w-3.5" /> Undo
+                </Button>
+                <Button variant="glass" size="sm" className="rounded-xl" onClick={offerDrawVsAI} disabled={gameOver}>
+                  <Handshake className="h-3.5 w-3.5" /> Draw
+                </Button>
+              </div>
 
               {/* Reserve result box space so layout doesn't jump */}
               <div className="min-h-[76px]">
@@ -628,5 +689,6 @@ export default function PlayComputerPage() {
     </>
   );
 }
+
 
 
