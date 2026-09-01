@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Chess, Square } from "chess.js";
@@ -72,17 +72,77 @@ export default function PlayComputerPage() {
   const [lastDelta, setLastDelta] = useState<number | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
+  // Move lights
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
+  const [legalSquares, setLegalSquares] = useState<Record<string, React.CSSProperties>>({});
+  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return router.push("/login");
 
-      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
       setProfile(prof || { full_name: user.email?.split("@")[0], chess_rating: 1200 });
       setRating(prof?.chess_rating || 1200);
       setLoadingUser(false);
     })();
   }, [router, supabase]);
+
+  const clearLights = useCallback(() => {
+    setSelectedSquare(null);
+    setLegalSquares({});
+  }, []);
+
+  const getMoveOptions = useCallback((square: Square) => {
+    const g = gameRef.current;
+    const piece = g.get(square);
+    if (!piece || piece.color !== playerColor || g.turn() !== playerColor) {
+      clearLights();
+      return false;
+    }
+
+    const moves = g.moves({ square, verbose: true });
+    if (!moves.length) {
+      clearLights();
+      return false;
+    }
+
+    const styles: Record<string, React.CSSProperties> = {};
+
+    // Selected piece glow
+    styles[square] = {
+      background:
+        "radial-gradient(circle, rgba(54,138,228,0.55) 0%, rgba(54,138,228,0.22) 55%, transparent 70%)",
+    };
+
+    for (const m of moves) {
+      const targetHasEnemy = !!g.get(m.to) && g.get(m.to)?.color !== playerColor;
+      if (targetHasEnemy) {
+        // capture ring
+        styles[m.to] = {
+          background:
+            "radial-gradient(circle, rgba(239,68,68,0.0) 0%, rgba(239,68,68,0.0) 55%, rgba(239,68,68,0.55) 56%, rgba(239,68,68,0.25) 100%)",
+          borderRadius: "50%",
+        };
+      } else {
+        // empty legal square dot
+        styles[m.to] = {
+          background:
+            "radial-gradient(circle, rgba(15,23,42,0.22) 0%, rgba(15,23,42,0.22) 28%, transparent 30%)",
+          borderRadius: "50%",
+        };
+      }
+    }
+
+    setSelectedSquare(square);
+    setLegalSquares(styles);
+    return true;
+  }, [playerColor, clearLights]);
 
   const syncBoard = useCallback(() => {
     setFen(gameRef.current.fen());
@@ -93,6 +153,7 @@ export default function PlayComputerPage() {
     setGameOver(true);
     setResult(r);
     setThinking(false);
+    clearLights();
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -117,7 +178,7 @@ export default function PlayComputerPage() {
       setRating(newRating);
       setLastDelta(delta);
     } catch {}
-  }, [difficulty, playerColor, rating, supabase]);
+  }, [difficulty, playerColor, rating, supabase, clearLights]);
 
   const checkGameEnd = useCallback(() => {
     const g = gameRef.current;
@@ -139,11 +200,13 @@ export default function PlayComputerPage() {
 
     setThinking(true);
     setStatus("Computer is thinking...");
+    clearLights();
 
     setTimeout(() => {
       const best = getBestMove(g.fen(), difficulty);
       if (best) {
         g.move({ from: best.from, to: best.to, promotion: best.promotion || "q" });
+        setLastMove({ from: best.from, to: best.to });
       }
       syncBoard();
       setThinking(false);
@@ -151,24 +214,52 @@ export default function PlayComputerPage() {
         setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
       }
     }, 150);
-  }, [difficulty, playerColor, syncBoard, checkGameEnd]);
+  }, [difficulty, playerColor, syncBoard, checkGameEnd, clearLights]);
 
-  const onDrop = useCallback((source: string, target: string) => {
+  const tryMove = useCallback((from: Square, to: Square) => {
     if (thinking || gameOver) return false;
     const g = gameRef.current;
     if (g.turn() !== playerColor) return false;
 
-    const move = g.move({
-      from: source as Square,
-      to: target as Square,
-      promotion: "q",
-    });
-
+    const move = g.move({ from, to, promotion: "q" });
     if (!move) return false;
+
+    setLastMove({ from, to });
+    clearLights();
     syncBoard();
-    if (!checkGameEnd()) triggerComputerMove();
+
+    if (!checkGameEnd()) {
+      triggerComputerMove();
+    }
     return true;
-  }, [thinking, gameOver, playerColor, syncBoard, checkGameEnd, triggerComputerMove]);
+  }, [thinking, gameOver, playerColor, clearLights, syncBoard, checkGameEnd, triggerComputerMove]);
+
+  const onDrop = useCallback((source: string, target: string) => {
+    return tryMove(source as Square, target as Square);
+  }, [tryMove]);
+
+  const onSquareClick = useCallback((square: Square) => {
+    if (thinking || gameOver) return;
+    const g = gameRef.current;
+    if (g.turn() !== playerColor) return;
+
+    // If a piece is selected and user clicks a legal destination -> move
+    if (selectedSquare) {
+      const legal = g.moves({ square: selectedSquare, verbose: true }).some((m) => m.to === square);
+      if (legal) {
+        tryMove(selectedSquare, square);
+        return;
+      }
+    }
+
+    // Otherwise select this square (if own piece)
+    getMoveOptions(square);
+  }, [thinking, gameOver, playerColor, selectedSquare, getMoveOptions, tryMove]);
+
+  const onPieceDragBegin = useCallback((_piece: string, sourceSquare: string) => {
+    if (thinking || gameOver) return;
+    getMoveOptions(sourceSquare as Square);
+  }, [thinking, gameOver, getMoveOptions]);
 
   const startNewGame = (asColor: PlayerColor) => {
     gameRef.current = new Chess();
@@ -178,6 +269,8 @@ export default function PlayComputerPage() {
     setResult(null);
     setLastDelta(null);
     setThinking(false);
+    setLastMove(null);
+    clearLights();
     syncBoard();
 
     if (asColor === "b") {
@@ -194,27 +287,44 @@ export default function PlayComputerPage() {
     setStatus("You resigned");
   };
 
-  // Compute red highlight for check
-  const checkStyles = (() => {
+  // Highlight layers: last move + check + legal lights
+  const customSquareStyles = useMemo(() => {
+    const styles: Record<string, React.CSSProperties> = {};
+
+    // last move
+    if (lastMove) {
+      styles[lastMove.from] = {
+        backgroundColor: "rgba(54, 138, 228, 0.28)",
+      };
+      styles[lastMove.to] = {
+        backgroundColor: "rgba(54, 138, 228, 0.38)",
+      };
+    }
+
+    // check glow on king
     const g = gameRef.current;
-    if (!g.inCheck()) return {};
-    const turn = g.turn();
-    const board = g.board();
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        const p = board[r][c];
-        if (p && p.type === "k" && p.color === turn) {
-          return {
-            [p.square]: {
+    if (g.inCheck()) {
+      const turn = g.turn();
+      const board = g.board();
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const p = board[r][c];
+          if (p && p.type === "k" && p.color === turn) {
+            styles[p.square] = {
+              ...(styles[p.square] || {}),
               background:
-                "radial-gradient(circle, rgba(239,68,68,0.85) 0%, rgba(239,68,68,0.35) 45%, transparent 70%)",
-            },
-          };
+                "radial-gradient(circle, rgba(239,68,68,0.9) 0%, rgba(239,68,68,0.4) 45%, transparent 72%)",
+            };
+          }
         }
       }
     }
-    return {};
-  })();
+
+    // legal move lights override on top
+    Object.assign(styles, legalSquares);
+
+    return styles;
+  }, [lastMove, legalSquares, fen]); // fen keeps check styles fresh after moves
 
   if (loadingUser) {
     return (
@@ -238,10 +348,14 @@ export default function PlayComputerPage() {
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <h1 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">Play vs Computer</h1>
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-[#0B1528] tracking-tight">
+                    Play vs Computer
+                  </h1>
                   <Badge variant="blue">Live</Badge>
                 </div>
-                <p className="text-[13px] font-medium text-[#64748B]">Real match · dynamic ELO · {difficulty} engine</p>
+                <p className="text-[13px] font-medium text-[#64748B]">
+                  Click a piece to see legal moves · drag or click destination
+                </p>
               </div>
             </div>
 
@@ -264,7 +378,7 @@ export default function PlayComputerPage() {
           </div>
 
           {thinking && (
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#368AE4] px-4 py-3 text-white shadow-[0_8px_20px_-4px_rgba(54,138,228,0.45)]">
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#368AE4] px-4 py-3 text-white">
               <div className="flex items-center gap-3">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm font-bold">Computer is calculating…</span>
@@ -294,23 +408,26 @@ export default function PlayComputerPage() {
               </div>
             </GlassCard>
 
-            <GlassCard className="p-3 sm:p-4">
-              <div className="rounded-2xl overflow-hidden">
+            {/* overflow-hidden prevents floating drag ghosts outside board */}
+            <GlassCard className="p-3 sm:p-4 overflow-hidden">
+              <div className="relative w-full max-w-[640px] mx-auto overflow-hidden rounded-2xl">
                 <Chessboard
                   id="aca-play-board"
                   position={fen}
                   onPieceDrop={onDrop}
+                  onSquareClick={onSquareClick}
+                  onPieceDragBegin={onPieceDragBegin}
                   boardOrientation={orientation}
                   arePiecesDraggable={isPlayerTurn}
                   customLightSquareStyle={{ backgroundColor: "#EAF2FB" }}
                   customDarkSquareStyle={{ backgroundColor: "#368AE4" }}
-                  customSquareStyles={checkStyles}
+                  customSquareStyles={customSquareStyles}
+                  animationDuration={180}
                   customBoardStyle={{
                     borderRadius: "16px",
                     overflow: "hidden",
                     boxShadow: "0 12px 40px rgba(54,138,228,0.15)",
                   }}
-                  animationDuration={200}
                 />
               </div>
             </GlassCard>
@@ -322,7 +439,9 @@ export default function PlayComputerPage() {
                 </div>
                 <div>
                   <p className="text-sm font-extrabold text-[#0B1528]">{playerName}</p>
-                  <p className="text-[11px] font-bold text-[#64748B]">{rating} ELO · {playerColor === "w" ? "White" : "Black"}</p>
+                  <p className="text-[11px] font-bold text-[#64748B]">
+                    {rating} ELO · {playerColor === "w" ? "White" : "Black"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -365,20 +484,29 @@ export default function PlayComputerPage() {
                 <Button variant="primary" className="rounded-2xl" onClick={() => startNewGame("w")}>
                   <RotateCcw className="h-4 w-4" /> White
                 </Button>
-                <Button variant="outline" className="rounded-2xl" onClick={() => startNewGame("b")}>Black</Button>
-                <Button variant="ghost" className="col-span-2 rounded-2xl text-red-600 hover:bg-red-50 hover:text-red-700" onClick={resign} disabled={gameOver}>
+                <Button variant="outline" className="rounded-2xl" onClick={() => startNewGame("b")}>
+                  Black
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="col-span-2 rounded-2xl text-red-600 hover:bg-red-50 hover:text-red-700"
+                  onClick={resign}
+                  disabled={gameOver}
+                >
                   <Flag className="h-4 w-4" /> Resign
                 </Button>
               </div>
 
               {gameOver && result && (
-                <div className={`rounded-2xl p-4 border text-sm font-extrabold ${
-                  result === "win"
-                    ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                    : result === "draw"
-                    ? "bg-white/60 border-white/80 text-[#0B1528]"
-                    : "bg-red-50 border-red-200 text-red-700"
-                }`}>
+                <div
+                  className={`rounded-2xl p-4 border text-sm font-extrabold ${
+                    result === "win"
+                      ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                      : result === "draw"
+                      ? "bg-white/60 border-white/80 text-[#0B1528]"
+                      : "bg-red-50 border-red-200 text-red-700"
+                  }`}
+                >
                   Game over · {result.toUpperCase()}
                   <div className="mt-1 text-xs font-bold opacity-80">ELO now {rating}</div>
                 </div>
@@ -391,16 +519,23 @@ export default function PlayComputerPage() {
                   <span className="h-4 w-1.5 rounded-full bg-[#368AE4]" />
                   <p className="text-sm font-extrabold text-[#0B1528]">Move list</p>
                 </div>
-                <Badge variant="outline" className="normal-case tracking-normal">{history.length} plies</Badge>
+                <Badge variant="outline" className="normal-case tracking-normal">
+                  {history.length} plies
+                </Badge>
               </div>
 
               <div className="max-h-64 overflow-y-auto rounded-2xl bg-white/35 border border-white/60 p-3">
                 {history.length === 0 ? (
-                  <p className="text-xs font-medium text-[#64748B] py-6 text-center">No moves yet — make the first move.</p>
+                  <p className="text-xs font-medium text-[#64748B] py-6 text-center">
+                    No moves yet — click a piece to see lights.
+                  </p>
                 ) : (
                   <div className="space-y-1">
                     {Array.from({ length: Math.ceil(history.length / 2) }).map((_, i) => (
-                      <div key={i} className="grid grid-cols-[36px_1fr_1fr] gap-2 rounded-lg px-2 py-1.5 text-xs font-mono text-[#0B1528] hover:bg-white/50">
+                      <div
+                        key={i}
+                        className="grid grid-cols-[36px_1fr_1fr] gap-2 rounded-lg px-2 py-1.5 text-xs font-mono text-[#0B1528] hover:bg-white/50"
+                      >
                         <span className="text-[#64748B] font-sans font-bold">{i + 1}.</span>
                         <span className="font-semibold">{history[i * 2] || ""}</span>
                         <span className="font-semibold">{history[i * 2 + 1] || ""}</span>
