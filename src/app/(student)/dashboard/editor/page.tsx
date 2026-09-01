@@ -77,8 +77,8 @@ export default function BoardEditorPage() {
   const [copied, setCopied] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<string>("wP");
   const [arrowColor, setArrowColor] = useState<ArrowColor>("green");
-  const [arrows, setArrows] = useState<Array<[string, string, string]>>([]);
-  const [arrowFrom, setArrowFrom] = useState<string | null>(null);
+  const [arrows, setArrows] = useState<[Square, Square, string][]>([]);
+  const [arrowFrom, setArrowFrom] = useState<Square | null>(null);
 
   const fen = useMemo(() => positionToFen(position, turn), [position, turn]);
 
@@ -111,7 +111,7 @@ export default function BoardEditorPage() {
     if (!arrowFrom) {
       setArrowFrom(square);
     } else if (arrowFrom !== square) {
-      setArrows((a) => [...a, [arrowFrom, square, ARROW_COLORS[arrowColor]]]);
+      setArrows((a) => [...a, [arrowFrom as Square, square as Square, ARROW_COLORS[arrowColor]]]);
       setArrowFrom(null);
     } else {
       setArrowFrom(null);
@@ -235,3 +235,4 @@ export default function BoardEditorPage() {
     </div>
   );
 }
+
