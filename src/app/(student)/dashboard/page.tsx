@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
+import { StreakCard } from "@/components/dashboard/streak-card";
 import {
   LayoutDashboard,
   BookOpen,
@@ -443,6 +444,9 @@ export default function StudentDashboard() {
               </div>
             </GlassCard>
 
+            {/* Streak Card */}
+            <StreakCard />
+
             {/* Featured / Today's course */}
             {featuredCourse && (
               <GlassCard className="p-5 space-y-4">
@@ -540,5 +544,6 @@ export default function StudentDashboard() {
     </>
   );
 }
+
 
 

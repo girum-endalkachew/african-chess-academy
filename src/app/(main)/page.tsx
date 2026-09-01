@@ -110,20 +110,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PARTNERS STRIP */}
-      <GlassCard className="px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
-        <p className="text-[13px] font-extrabold text-[#0B1528] shrink-0 leading-snug">
-          Building the future of<br />chess across <span className="text-[#368AE4]">Africa.</span>
-        </p>
-        <div className="hidden md:block h-10 w-px bg-white/80" />
-        <div className="flex flex-wrap items-center justify-around gap-8 flex-1">
-          {["FIDE", "AUSC", "ECF", "CHESS AFRICA", "lichess.org"].map((name) => (
-            <span key={name} className="text-[13px] font-extrabold text-[#64748B]/60 tracking-widest uppercase">
-              {name}
-            </span>
-          ))}
-        </div>
-      </GlassCard>
+      {/* VISION & MISSION */}
+      <div className="grid md:grid-cols-2 gap-6 mb-10">
+        <GlassCard className="p-7 relative overflow-hidden" hoverEffect>
+          <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-br from-[#368AE4]/20 to-transparent rounded-full blur-2xl" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#368AE4] to-[#60A5FA] flex items-center justify-center shadow-md">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-extrabold text-[#368AE4] uppercase tracking-wider">Our Vision</p>
+                <h3 className="text-xl font-extrabold text-[#0B1528]">Chess Excellence Across Africa</h3>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-[#64748B] leading-relaxed">
+              To make Africa the next global powerhouse of chess by nurturing world-class talent, building sustainable chess ecosystems, and inspiring the next generation of grandmasters from every corner of the continent.
+            </p>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-7 relative overflow-hidden" hoverEffect>
+          <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-br from-amber-400/20 to-transparent rounded-full blur-2xl" />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-wider">Our Mission</p>
+                <h3 className="text-xl font-extrabold text-[#0B1528]">Empower Every Player</h3>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-[#64748B] leading-relaxed">
+              Provide world-class chess education, foster competitive opportunities, and create a supportive community where every African player — from beginner to master — can develop their strategic mindset and reach their full potential.
+            </p>
+          </div>
+        </GlassCard>
+      </div>
 
       {/* STATS ROW (matching dashboard style) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
@@ -334,5 +358,6 @@ export default function HomePage() {
     </div>
   );
 }
+
 
 
