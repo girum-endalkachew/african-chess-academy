@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -7,174 +7,139 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  User, Mail, Lock, AlertCircle, ArrowRight, ArrowLeft, Eye, EyeOff, Sparkles
-} from "lucide-react";
+import { User, Mail, Lock, UserPlus, Eye, EyeOff, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setInfo(null);
+    setBusy(true); setErr(null);
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      setLoading(false);
-      return;
-    }
-    if (password !== confirm) {
-      setError("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
-
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
+    const { data, error } = await supabase.auth.signUp({
+      email,
       password,
       options: {
-        data: {
-          full_name: fullName.trim(),
-          role: "student",
-        },
+        emailRedirectTo: `${window.location.origin}/post-login`,
+        data: { full_name: fullName },
       },
     });
+    if (error) { setErr(error.message); setBusy(false); return; }
 
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-      return;
+    // create profile row (best-effort)
+    if (data.user) {
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        full_name: fullName || email.split("@")[0],
+        onboarding_complete: false,
+        primary_workspace: "explore",
+        chess_rating: 1200,
+      });
+      await supabase.from("user_roles").upsert({
+        user_id: data.user.id,
+        role: "registered",
+        status: "active",
+      });
     }
 
-    // If email confirmation is disabled, session exists → go dashboard
+    setBusy(false);
+
     if (data.session) {
-      router.push("/dashboard");
-      router.refresh();
-      return;
+      router.push("/post-login");
+    } else {
+      // email confirmation flow
+      setDone(true);
     }
-
-    // If confirmation is required
-    setInfo("Account created. Check your email to confirm, then sign in.");
-    setLoading(false);
   };
 
-  return (
-    <div className="min-h-screen flex w-full bg-white overflow-hidden">
-      <div className="hidden lg:flex w-1/2 relative overflow-hidden flex-col justify-between p-12" style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)" }}>
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-[#00A3E0] rounded-full blur-[120px] opacity-30" />
-        <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-3 text-white w-fit">
-            <div className="bg-white p-1.5 rounded-xl">
-              <Image src="/aca-logo.jpg" alt="ACA Logo" width={36} height={36} className="rounded-lg object-cover" />
-            </div>
-            <div>
-              <span className="font-bold text-xl tracking-tight block leading-none">ACA ACADEMY</span>
-              <span className="text-[10px] text-slate-400 tracking-widest">AFRICAN CHESS ACADEMY</span>
-            </div>
-          </Link>
-        </div>
-        <div className="relative z-10 max-w-lg space-y-4">
-          <h1 className="text-5xl font-bold text-white leading-tight">
-            Create your real student account.
-          </h1>
-          <p className="text-slate-300 text-lg">
-            Register with your email and password to access lessons, tournaments, and play vs computer.
-          </p>
-        </div>
-        <div className="relative z-10 text-sm text-slate-400">© {new Date().getFullYear()} African Chess Academy</div>
-      </div>
-
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 md:px-20 relative bg-white">
-        <Link href="/" className="absolute top-8 left-6 sm:left-12 flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#00A3E0]">
-          <ArrowLeft className="w-4 h-4" /> Back to home
+  if (done) {
+    return (
+      <div className="mx-auto w-full max-w-sm text-center space-y-4">
+        <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
+        <h1 className="text-2xl font-extrabold text-[#0B1528]">Check your email</h1>
+        <p className="text-sm text-[#64748B]">
+          We sent a confirmation link to <span className="font-bold text-[#0B1528]">{email}</span>.
+          Click it to activate your account.
+        </p>
+        <Link href="/login">
+          <Button variant="primary" className="w-full">Back to Sign In</Button>
         </Link>
-
-        <div className="w-full max-w-md mx-auto space-y-8 relative z-10">
-          <div className="lg:hidden flex justify-center">
-            <Image src="/aca-logo.jpg" alt="ACA Logo" width={56} height={56} className="rounded-xl" />
-          </div>
-
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E6F5FF] border border-[#DBE9F7]">
-              <Sparkles className="w-3 h-3 text-[#00A3E0]" />
-              <span className="text-xs font-semibold text-[#00A3E0]">Real registration</span>
-            </div>
-            <h2 className="text-4xl font-bold text-[#1E293B] tracking-tight">Create account</h2>
-            <p className="text-slate-500">Use a real email and password. No demo account needed.</p>
-          </div>
-
-          <form onSubmit={handleRegister} className="space-y-4">
-            {error && (
-              <div className="p-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
-            {info && (
-              <div className="p-4 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
-                {info}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#1E293B]">Full name</label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <Input className="pl-12 h-12 rounded-xl" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" required />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#1E293B]">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <Input type="email" className="pl-12 h-12 rounded-xl" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#1E293B]">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <Input type={showPassword ? "text" : "password"} className="pl-12 pr-12 h-12 rounded-xl" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min 6 characters" required minLength={6} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-[#1E293B]">Confirm password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                <Input type={showPassword ? "text" : "password"} className="pl-12 h-12 rounded-xl" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat password" required minLength={6} />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full h-12 rounded-xl font-bold gap-2 bg-[#00A3E0] hover:bg-[#0284C7] text-white" disabled={loading}>
-              {loading ? "Creating account..." : "Create account"}
-              {!loading && <ArrowRight className="h-5 w-5" />}
-            </Button>
-          </form>
-
-          <p className="text-center text-sm text-slate-600">
-            Already have an account?{" "}
-            <Link href="/login" className="font-bold text-[#00A3E0] hover:underline">Sign in</Link>
-          </p>
-        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-sm space-y-6">
+      <div className="lg:hidden flex items-center gap-2 justify-center">
+        <div className="relative h-10 w-10 rounded-xl overflow-hidden ring-1 ring-slate-100 bg-white">
+          <Image src="/aca-logo.jpg" alt="ACA" fill className="object-cover" />
+        </div>
+        <span className="font-extrabold text-[#0B1528]">ACA</span>
+      </div>
+
+      <div>
+        <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#368AE4]">Join ACA</p>
+        <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold text-[#0B1528]">Create your account</h1>
+        <p className="mt-1 text-sm text-[#64748B]">Start with the free “How to Play Chess” course.</p>
+      </div>
+
+      {err && (
+        <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 text-xs font-bold p-3">
+          {err}
+        </div>
+      )}
+
+      <form onSubmit={submit} className="space-y-3">
+        <label className="block">
+          <span className="text-[10px] font-extrabold text-[#64748B] uppercase">Full name</span>
+          <div className="mt-1 relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="Your name" className="pl-9" />
+          </div>
+        </label>
+
+        <label className="block">
+          <span className="text-[10px] font-extrabold text-[#64748B] uppercase">Email</span>
+          <div className="mt-1 relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
+            <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@example.com" className="pl-9" />
+          </div>
+        </label>
+
+        <label className="block">
+          <span className="text-[10px] font-extrabold text-[#64748B] uppercase">Password</span>
+          <div className="mt-1 relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
+            <Input value={password} onChange={(e) => setPassword(e.target.value)} type={show ? "text" : "password"} required placeholder="At least 8 characters" className="pl-9 pr-10" />
+            <button type="button" onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B]">
+              {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </label>
+
+        <Button type="submit" variant="primary" className="w-full h-11 rounded-xl" disabled={busy}>
+          <UserPlus className="h-4 w-4" /> {busy ? "Creating..." : "Create Account"}
+        </Button>
+      </form>
+
+      <div className="text-center text-xs text-[#64748B]">
+        Already have an account?{" "}
+        <Link href="/login" className="font-extrabold text-[#368AE4] hover:underline inline-flex items-center gap-1">
+          Sign in <ArrowRight className="h-3 w-3" />
+        </Link>
+      </div>
+
+      <p className="text-[10px] text-[#64748B] text-center">
+        By registering you agree to ACA’s Terms and Privacy.
+      </p>
     </div>
   );
 }
