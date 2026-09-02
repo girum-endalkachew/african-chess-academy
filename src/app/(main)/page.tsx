@@ -6,6 +6,7 @@ import {
   Building, HeartHandshake, PlayCircle, HelpCircle, ChevronRight
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
+import { Badge } from "@/components/ui/badge";
 
 export default function HomePage() {
   return (
@@ -200,3 +201,4 @@ export default function HomePage() {
     </div>
   );
 }
+
