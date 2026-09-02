@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   BookOpen, Sparkles, ArrowRight, GraduationCap, Shield,
-  Clock, PlayCircle, Lock, CheckCircle2, Bell, Trophy
+  Clock, PlayCircle, Lock, CheckCircle2, Bell, AlertCircle
 } from "lucide-react";
 
 export default function ExplorePage() {
@@ -25,7 +25,7 @@ export default function ExplorePage() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [pending, setPending] = useState<string[]>([]);
   const [enrolled, setEnrolled] = useState(false);
 
@@ -40,7 +40,6 @@ export default function ExplorePage() {
       setRoles(access.roles);
       setWorkspaces(access.workspaces);
 
-      // Load intro (free) course
       const { data: intro } = await supabase
         .from("courses")
         .select("*")
@@ -48,7 +47,6 @@ export default function ExplorePage() {
         .maybeSingle();
       setIntroCourse(intro);
 
-      // Load premium courses (locked previews)
       const { data: premium } = await supabase
         .from("courses")
         .select("*")
@@ -57,7 +55,6 @@ export default function ExplorePage() {
         .limit(3);
       setPremiumCourses(premium || []);
 
-      // Check if enrolled in intro
       if (intro) {
         const { data: enr } = await supabase
           .from("course_enrollments")
@@ -68,7 +65,6 @@ export default function ExplorePage() {
         setEnrolled(!!enr);
       }
 
-      // Load announcements
       const { data: ann } = await supabase
         .from("announcements")
         .select("*")
@@ -76,7 +72,6 @@ export default function ExplorePage() {
         .limit(3);
       setAnnouncements(ann || []);
 
-      // Pending role requests
       const { data: reqs } = await supabase
         .from("role_requests")
         .select("requested_role, status")
@@ -89,11 +84,11 @@ export default function ExplorePage() {
 
   const enrollIntro = async () => {
     if (!introCourse) return;
-    const access = await loadAccess();
-    if (!access) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
     setBusy("enroll");
     await supabase.from("course_enrollments").insert({
-      user_id: access.userId,
+      user_id: user.id,
       course_id: introCourse.id,
       progress: 0,
       status: "active",
@@ -105,18 +100,25 @@ export default function ExplorePage() {
 
   const requestRole = async (requested_role: "student" | "coach" | "premium") => {
     setBusy(requested_role);
-    setMsg("");
-    const access = await loadAccess();
-    if (!access) return;
+    setMsg(null);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setMsg({ type: "error", text: "Session expired. Please log in again." });
+      setBusy(null);
+      return;
+    }
+
     const { error } = await supabase.from("role_requests").insert({
-      user_id: access.userId,
+      user_id: user.id,
       requested_role,
       message: `Requesting ${requested_role} access from Explore`,
       status: "pending",
     });
-    if (error) setMsg(error.message);
-    else {
-      setMsg(`✓ Request for ${requested_role} sent! An admin will review.`);
+
+    if (error) {
+      setMsg({ type: "error", text: error.message });
+    } else {
+      setMsg({ type: "success", text: `✓ Request for ${requested_role} sent! An admin will review.` });
       setPending((p) => Array.from(new Set([...p, requested_role])));
     }
     setBusy(null);
@@ -138,7 +140,6 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen canvas-bg">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <Badge variant="blue" className="mb-2">Registered · Explore</Badge>
@@ -156,28 +157,26 @@ export default function ExplorePage() {
         </div>
 
         {msg && (
-          <GlassCard className="p-4 border-emerald-200 bg-emerald-50 text-emerald-800 text-sm font-bold">
-            {msg}
+          <GlassCard className={`p-4 text-sm font-bold flex items-center gap-2 ${
+            msg.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"
+          }`}>
+            {msg.type === "success" ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+            <span>{msg.text}</span>
           </GlassCard>
         )}
 
-        {/* FREE INTRO COURSE - Hero */}
+        {/* Free Intro Course */}
         {introCourse && (
           <GlassCard className="p-6 sm:p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/40 to-transparent" />
             <div className="relative z-10 grid md:grid-cols-3 gap-6 items-center">
               <div className="md:col-span-2 space-y-3">
-                <Badge variant="success">100% FREE</Badge>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B1528]">
-                  {introCourse.title}
-                </h2>
-                <p className="text-sm text-[#64748B] leading-relaxed">
-                  {introCourse.description}
-                </p>
+                <Badge variant="success">100% FREE INTRO COURSE</Badge>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B1528]">{introCourse.title}</h2>
+                <p className="text-sm text-[#64748B] leading-relaxed">{introCourse.description}</p>
                 <div className="flex flex-wrap gap-3 text-xs font-bold text-[#64748B]">
                   <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> {introCourse.total_lessons} Lessons</span>
                   <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> ~50 min</span>
-                  <span className="flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Certificate</span>
                 </div>
                 <div className="pt-2">
                   {enrolled ? (
@@ -202,9 +201,9 @@ export default function ExplorePage() {
           </GlassCard>
         )}
 
-        {/* UPGRADE PATHS */}
+        {/* Upgrade Paths */}
         <div>
-          <h3 className="text-lg font-extrabold text-[#0B1528] mb-3">Ready for more? Request access:</h3>
+          <h3 className="text-lg font-extrabold text-[#0B1528] mb-3">Request Platform Roles:</h3>
           <div className="grid md:grid-cols-3 gap-4">
             <GlassCard className="p-6 space-y-3" hoverEffect>
               <div className="h-10 w-10 rounded-xl bg-[#EEF3FA] text-[#368AE4] flex items-center justify-center">
@@ -258,50 +257,6 @@ export default function ExplorePage() {
             </GlassCard>
           </div>
         </div>
-
-        {/* LOCKED PREMIUM COURSES PREVIEW */}
-        {premiumCourses.length > 0 && (
-          <div>
-            <h3 className="text-lg font-extrabold text-[#0B1528] mb-3">Unlock More Courses (Student Access)</h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              {premiumCourses.map((c) => (
-                <GlassCard key={c.id} className="p-5 space-y-3 relative overflow-hidden">
-                  <div className="absolute top-3 right-3">
-                    <Lock className="h-4 w-4 text-[#64748B]" />
-                  </div>
-                  <Badge variant="outline">{c.level}</Badge>
-                  <h4 className="text-sm font-extrabold text-[#0B1528]">{c.title}</h4>
-                  <p className="text-[10px] text-[#64748B] line-clamp-2">{c.description}</p>
-                  <p className="text-[10px] font-bold text-[#64748B]">{c.total_lessons} lessons</p>
-                  <Button variant="outline" size="sm" className="w-full" disabled>
-                    <Lock className="h-3.5 w-3.5" /> Student Only
-                  </Button>
-                </GlassCard>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ANNOUNCEMENTS */}
-        {announcements.length > 0 && (
-          <GlassCard className="p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Bell className="h-5 w-5 text-[#368AE4]" />
-              <h3 className="text-base font-extrabold text-[#0B1528]">Latest Announcements</h3>
-            </div>
-            <div className="space-y-2">
-              {announcements.map((a) => (
-                <div key={a.id} className="rounded-xl bg-white/50 border border-white/70 p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="blue" className="text-[9px]">{a.category}</Badge>
-                    <p className="text-xs font-extrabold text-[#0B1528]">{a.title}</p>
-                  </div>
-                  <p className="text-[11px] text-[#64748B]">{a.body}</p>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-        )}
       </div>
     </div>
   );

@@ -1,12 +1,11 @@
 ﻿"use client";
 
-
-import Image from "next/image";
 import { useState, useEffect, ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Menu, X, LogOut, LucideIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, X, LogOut, LucideIcon, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { CommandPalette } from "@/components/ui/command-palette";
 
 export type NavItem = {
   href: string;
@@ -28,11 +27,24 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [cmdOpen, setCmdOpen] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("aca_sidebar_collapsed");
     if (saved === "true") setCollapsed(true);
     setMounted(true);
+  }, []);
+
+  // Global Ctrl+K / Cmd+K listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCmdOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const toggleCollapsed = () => {
@@ -51,7 +63,10 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
 
   return (
     <div className="min-h-screen canvas-bg flex font-sans max-w-full overflow-x-hidden">
-      {/* SIDEBAR */}
+      {/* Command Palette Modal */}
+      <CommandPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
+
+      {/* STICKY SIDEBAR */}
       <aside
         className={`
           fixed lg:sticky top-0 left-0 h-screen z-40 
@@ -66,7 +81,9 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
       >
         <div className={`h-16 sm:h-20 border-b border-white/50 flex items-center justify-between shrink-0 ${collapsed ? "px-4" : "px-5"}`}>
           <Link href="/" className="flex items-center gap-3 overflow-hidden">
-            <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100 shrink-0"><Image src="/aca-logo.jpg" alt="ACA Logo" width={40} height={40} className="object-cover h-full w-full" /></div>
+            <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-[#0B1528] text-white shadow-sm shrink-0">
+              <span className="font-serif text-lg sm:text-xl leading-none">♙</span>
+            </div>
             {!collapsed && (
               <div className="flex flex-col leading-none min-w-0">
                 <span className="font-extrabold text-[#0B1528] text-[13px] truncate">ACA {role}</span>
@@ -141,12 +158,27 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
             <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl text-[#0B1528] bg-white/60 border border-white/80 shadow-sm">
               <Menu className="h-5 w-5" />
             </button>
-            <span className="hidden sm:block text-[13px] font-bold text-[#64748B]">
-              Welcome back to the <span className="text-[#368AE4]">Academy</span>
-            </span>
+            <button
+              onClick={() => setCmdOpen(true)}
+              className="hidden sm:flex items-center gap-3 rounded-2xl bg-white/50 border border-white/70 px-4 py-2 text-xs font-bold text-[#64748B] hover:text-[#0B1528] hover:bg-white/70 backdrop-blur transition"
+            >
+              <Search className="h-3.5 w-3.5 text-[#368AE4]" />
+              <span>Search platform...</span>
+              <kbd className="rounded bg-white/80 border border-white/90 px-1.5 py-0.5 text-[9px] font-extrabold text-[#64748B] shadow-2xs">
+                ⌘K
+              </kbd>
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCmdOpen(true)}
+              className="sm:hidden p-2 rounded-xl text-[#0B1528] bg-white/60 border border-white/80 shadow-sm"
+              title="Search"
+            >
+              <Search className="h-4 w-4 text-[#368AE4]" />
+            </button>
+
             <div className="text-right hidden sm:block">
               <p className="text-[13px] font-extrabold text-[#0B1528] leading-tight">{userName}</p>
               <p className="text-[10px] font-bold text-[#64748B] leading-tight uppercase tracking-wider">{role}</p>
@@ -162,4 +194,3 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
     </div>
   );
 }
-
