@@ -1,90 +1,91 @@
 ﻿"use client";
 
-
-import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Menu, X } from "lucide-react";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { Menu, X, ArrowRight, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const mainLinks = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/programs", label: "Programs" },
+  { href: "/news", label: "Learn" },
+  { href: "/events", label: "Events" },
+  { href: "/coaches", label: "Community" },
+  { href: "/contact", label: "For Schools" },
+  { href: "/contact", label: "Contact" },
+];
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
-    <header className="relative w-full px-6 sm:px-10 lg:px-12 pt-8 pb-4">
-      <div className="flex items-center justify-between">
-        
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 relative z-50">
-          <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#0B1528] text-white shadow-sm shrink-0">
-            <span className="font-serif text-xl sm:text-2xl leading-none">â™™</span>
+    <header className="relative z-50 w-full px-4 sm:px-8 lg:px-10 pt-4 sm:pt-6 pb-2">
+      <div className="flex items-center justify-between gap-3">
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="relative h-10 w-10 sm:h-11 sm:w-11 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
+            <Image src="/aca-logo.jpg" alt="ACA" fill className="object-cover" />
           </div>
-          <div className="flex flex-col leading-none">
-            <span className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528]">
-              AFRICAN
-            </span>
-            <span className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528] mt-0.5">
-              CHESS ACADEMY
-            </span>
-            <span className="hidden sm:block text-[8px] font-bold tracking-[0.2em] text-[#64748B] mt-1">
-              CENTER OF EXCELLENCE
-            </span>
+          <div className="leading-tight">
+            <p className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528]">AFRICAN</p>
+            <p className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528]">CHESS ACADEMY</p>
           </div>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-8">
-          <div className="relative flex flex-col items-center">
-            <Link href="/" className="text-sm font-bold text-[#368AE4]">Home</Link>
-            <span className="absolute -bottom-2 h-1.5 w-1.5 rounded-full bg-[#368AE4]" />
-          </div>
-          <Link href="/about" className="text-sm font-medium text-[#64748B] hover:text-[#0B1528]">About</Link>
-          <Link href="/programs" className="text-sm font-medium text-[#64748B] hover:text-[#0B1528]">Programs</Link>
-          <Link href="/tournaments" className="text-sm font-medium text-[#64748B] hover:text-[#0B1528]">Tournaments</Link>
-          <Link href="/resources" className="text-sm font-medium text-[#64748B] hover:text-[#0B1528]">Resources</Link>
-          <Link href="/events" className="text-sm font-medium text-[#64748B] hover:text-[#0B1528]">Events</Link>
-          <Link href="/contact" className="text-sm font-medium text-[#64748B] hover:text-[#0B1528]">Contact</Link>
+        <nav className="hidden xl:flex items-center gap-5">
+          {mainLinks.map((l) => (
+            <Link
+              key={l.label + l.href}
+              href={l.href}
+              className={cn(
+                "text-sm font-semibold transition",
+                pathname === l.href ? "text-[#368AE4]" : "text-[#64748B] hover:text-[#0B1528]"
+              )}
+            >
+              {l.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Desktop Right CTA */}
-        <div className="hidden lg:flex">
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/login" className="text-sm font-bold text-[#64748B] hover:text-[#0B1528] px-3 py-2">
+            🔐 Sign In
+          </Link>
           <Link
             href="/register"
-            className="btn-blue inline-flex items-center gap-3 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-95"
+            className="btn-blue inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white"
           >
-            Join Academy
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
-              <ArrowRight className="h-3 w-3" />
-            </span>
+            Join ACA <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="lg:hidden relative z-50 p-2 text-[#0B1528] bg-white/40 border border-white/60 rounded-xl backdrop-blur-md"
+        <button
+          className="md:hidden p-2 rounded-xl bg-white/60 border border-white/80"
+          onClick={() => setOpen(!open)}
+          aria-label="Menu"
         >
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      {isOpen && (
-        <div className="absolute top-24 left-6 right-6 p-6 bg-white/70 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-[0_20px_40px_rgba(30,60,100,0.1)] z-40 lg:hidden flex flex-col gap-4">
-          <Link href="/" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#368AE4]">Home</Link>
-          <Link href="/about" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#0B1528]">About</Link>
-          <Link href="/programs" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#0B1528]">Programs</Link>
-          <Link href="/tournaments" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#0B1528]">Tournaments</Link>
-          <Link href="/resources" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#0B1528]">Resources</Link>
-          <Link href="/events" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#0B1528]">Events</Link>
-          <Link href="/contact" onClick={() => setIsOpen(false)} className="text-[15px] font-bold text-[#0B1528]">Contact</Link>
-          <div className="pt-4 mt-2 border-t border-[#64748B]/20">
+      {open && (
+        <div className="md:hidden mt-3 rounded-2xl bg-white/80 backdrop-blur border border-white/80 p-4 space-y-1 shadow-lg">
+          {mainLinks.map((l) => (
             <Link
-              href="/register"
-              onClick={() => setIsOpen(false)}
-              className="btn-blue flex items-center justify-center gap-2 rounded-full w-full py-3.5 text-[15px] font-bold text-white"
+              key={l.label}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] hover:bg-white"
             >
-              Join Academy <ArrowRight className="h-4 w-4" />
+              {l.label}
             </Link>
+          ))}
+          <div className="pt-3 border-t border-slate-100 grid gap-2">
+            <Link href="/login" onClick={() => setOpen(false)} className="text-center text-sm font-bold py-2">Sign In</Link>
+            <Link href="/register" onClick={() => setOpen(false)} className="btn-blue text-center rounded-full py-3 text-sm font-bold text-white">Join ACA</Link>
           </div>
         </div>
       )}
