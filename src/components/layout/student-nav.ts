@@ -1,6 +1,6 @@
 ﻿import {
   LayoutDashboard, BookOpen, Trophy, Calendar, Award, User, Settings,
-  Swords, Edit3, Users, Puzzle, Gamepad2
+  Swords, Edit3, Users, Puzzle, Gamepad2, StickyNote
 } from "lucide-react";
 import type { NavItem } from "@/components/layout/portal-shell";
 
@@ -12,6 +12,7 @@ export const studentNavItems: NavItem[] = [
   { href: "/dashboard/friends", label: "Friends", icon: Users },
   { href: "/dashboard/puzzles", label: "Puzzles", icon: Puzzle },
   { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
+  { href: "/dashboard/notes", label: "My Notes", icon: StickyNote },
   { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
   { href: "/dashboard/events", label: "Events", icon: Calendar },
   { href: "/dashboard/certificates", label: "Certificates", icon: Award },

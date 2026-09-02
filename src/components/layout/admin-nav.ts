@@ -1,12 +1,13 @@
 ﻿import {
   LayoutDashboard, Users, GraduationCap, BookOpen, Trophy, Calendar,
-  Newspaper, Settings, ShieldCheck
+  Newspaper, Settings, ShieldCheck, Bell
 } from "lucide-react";
 import type { NavItem } from "@/components/layout/portal-shell";
 
 export const adminNavItems: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/approvals", label: "Approvals", icon: ShieldCheck },
+  { href: "/admin/announcements", label: "Announcements", icon: Bell },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/coaches", label: "Coaches", icon: GraduationCap },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
