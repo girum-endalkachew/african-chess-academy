@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Chess, Square } from "chess.js";
 import { createClient } from "@/lib/supabase/client";
+import { PortalShell, NavItem } from "@/components/layout/portal-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -22,6 +23,7 @@ import {
   Lightbulb,
   Undo2,
   Handshake,
+  Sparkles,
 } from "lucide-react";
 
 const Chessboard = dynamic(
@@ -35,17 +37,20 @@ const Chessboard = dynamic(
 );
 
 type PlayerColor = "w" | "b";
+type ExtendedLevel = "beginner" | "easy" | "intermediate" | "advanced" | "expert" | "master";
 
 export default function PlayComputerPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const customFen = searchParams.get("fen");
   const supabase = createClient();
 
-  const gameRef = useRef(new Chess());
+  const gameRef = useRef(new Chess(customFen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
   const [fen, setFen] = useState(gameRef.current.fen());
   const [history, setHistory] = useState<string[]>([]);
   const [status, setStatus] = useState("Your move (White)");
   const [thinking, setThinking] = useState(false);
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
+  const [level, setLevel] = useState<ExtendedLevel>("easy");
   const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
   const [orientation, setOrientation] = useState<"white" | "black">("white");
   const [gameOver, setGameOver] = useState(false);
@@ -60,6 +65,12 @@ export default function PlayComputerPage() {
   const [hintStyle, setHintStyle] = useState<Record<string, React.CSSProperties>>({});
   const [boardWidth, setBoardWidth] = useState(360);
   const boardWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const engineDifficulty: Difficulty = useMemo(() => {
+    if (level === "beginner" || level === "easy") return "easy";
+    if (level === "intermediate" || level === "advanced") return "medium";
+    return "hard";
+  }, [level]);
 
   useEffect(() => {
     const el = boardWrapRef.current;
@@ -138,13 +149,13 @@ export default function PlayComputerPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const opp = opponentRating(difficulty);
+      const opp = opponentRating(engineDifficulty);
       const { newRating, delta } = computeElo(rating, opp, r);
       await supabase.from("profiles").update({ chess_rating: newRating }).eq("id", user.id);
       await supabase.from("chess_games").insert({
         user_id: user.id,
         player_color: playerColor,
-        difficulty,
+        difficulty: engineDifficulty,
         result: r,
         moves_pgn: gameRef.current.pgn(),
         moves_count: gameRef.current.history().length,
@@ -155,7 +166,7 @@ export default function PlayComputerPage() {
       setRating(newRating);
       setLastDelta(delta);
     } catch {}
-  }, [difficulty, playerColor, rating, supabase, clearLights]);
+  }, [engineDifficulty, playerColor, rating, supabase, clearLights]);
 
   const checkGameEnd = useCallback(() => {
     const g = gameRef.current;
@@ -177,7 +188,7 @@ export default function PlayComputerPage() {
     setStatus("Computer is thinking...");
     clearLights();
     setTimeout(() => {
-      const best = getBestMove(g.fen(), difficulty);
+      const best = getBestMove(g.fen(), engineDifficulty);
       if (best) {
         g.move({ from: best.from, to: best.to, promotion: best.promotion || "q" });
         setLastMove({ from: best.from, to: best.to });
@@ -188,7 +199,7 @@ export default function PlayComputerPage() {
         setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
       }
     }, 120);
-  }, [difficulty, playerColor, syncBoard, checkGameEnd, clearLights]);
+  }, [engineDifficulty, playerColor, syncBoard, checkGameEnd, clearLights]);
 
   const tryMove = useCallback((from: Square, to: Square) => {
     if (thinking || gameOver) return false;
@@ -226,7 +237,7 @@ export default function PlayComputerPage() {
   }, [thinking, gameOver, getMoveOptions]);
 
   const startNewGame = (asColor: PlayerColor) => {
-    gameRef.current = new Chess();
+    gameRef.current = new Chess(customFen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     setPlayerColor(asColor);
     setOrientation(asColor === "w" ? "white" : "black");
     setGameOver(false);
@@ -288,8 +299,7 @@ export default function PlayComputerPage() {
         if (p) score += (p.color === "w" ? 1 : -1) * (val[p.type] || 0);
       }
     }
-    // Easy mode: AI is generous and accepts more draws
-    const threshold = difficulty === "easy" ? 4 : difficulty === "medium" ? 2 : 1;
+    const threshold = level === "beginner" || level === "easy" ? 4 : level === "intermediate" ? 2 : 1;
     if (Math.abs(score) <= threshold) {
       finishGame("draw");
       setStatus("Draw accepted!");
@@ -299,7 +309,7 @@ export default function PlayComputerPage() {
         if (!gameOver) setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
       }, 2000);
     }
-  }, [gameOver, finishGame, playerColor, difficulty]);
+  }, [gameOver, finishGame, playerColor, level]);
 
   const customSquareStyles = useMemo(() => {
     const styles: Record<string, React.CSSProperties> = {};
@@ -342,10 +352,11 @@ export default function PlayComputerPage() {
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-[#0B1528]">Play vs Computer</h1>
-                <Badge variant="blue">Live</Badge>
+                <Badge variant="blue">Live AI</Badge>
+                {customFen && <Badge variant="warning">Custom Position</Badge>}
               </div>
               <p className="text-[12px] sm:text-[13px] font-medium text-[#64748B]">
-                Hint · Undo · Draw · Easy mode is forgiving
+                6 Difficulty Levels · ACA AI Engine
               </p>
             </div>
           </div>
@@ -368,7 +379,7 @@ export default function PlayComputerPage() {
             <div className="h-12 flex items-center justify-between gap-3 rounded-2xl bg-[#368AE4] px-4 text-white">
               <div className="flex items-center gap-3">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm font-bold">Computer is calculating…</span>
+                <span className="text-sm font-bold">ACA AI is calculating move…</span>
               </div>
               <Badge className="bg-white/20 text-white border-0">AI</Badge>
             </div>
@@ -388,9 +399,9 @@ export default function PlayComputerPage() {
                 <Cpu className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-extrabold text-[#0B1528]">ACA Engine</p>
-                <p className="text-[11px] font-bold text-[#64748B] truncate">
-                  {difficulty[0].toUpperCase() + difficulty.slice(1)} · {playerColor === "w" ? "Black" : "White"}
+                <p className="text-sm font-extrabold text-[#0B1528]">ACA AI Coach</p>
+                <p className="text-[11px] font-bold text-[#64748B] capitalize">
+                  {level} Level · {playerColor === "w" ? "Black" : "White"}
                 </p>
               </div>
             </div>
@@ -440,26 +451,23 @@ export default function PlayComputerPage() {
         <div className="lg:col-span-5 space-y-4">
           <GlassCard className="p-4 sm:p-6 space-y-4">
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-1">Difficulty</p>
-              <div className="grid grid-cols-3 gap-2">
-                {(["easy", "medium", "hard"] as Difficulty[]).map((k) => (
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-2">Level Selection</p>
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                {(["beginner", "easy", "intermediate", "advanced", "expert", "master"] as ExtendedLevel[]).map((lvl) => (
                   <button
-                    key={k}
+                    key={lvl}
                     type="button"
-                    onClick={() => setDifficulty(k)}
-                    className={`rounded-xl border px-2 py-2.5 text-xs font-extrabold ${
-                      difficulty === k
-                        ? "border-[#368AE4] bg-white/80 text-[#368AE4]"
+                    onClick={() => setLevel(lvl)}
+                    className={`rounded-xl border px-1.5 py-2 text-[11px] font-extrabold capitalize transition-all ${
+                      level === lvl
+                        ? "border-[#368AE4] bg-white/80 text-[#368AE4] shadow-sm"
                         : "border-white/70 bg-white/30 text-[#64748B]"
                     }`}
                   >
-                    {k[0].toUpperCase() + k.slice(1)}
+                    {lvl}
                   </button>
                 ))}
               </div>
-              {difficulty === "easy" && (
-                <p className="text-[10px] font-bold text-emerald-600 mt-2">Easy is forgiving — random play, fewer captures.</p>
-              )}
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -503,7 +511,7 @@ export default function PlayComputerPage() {
 
           <GlassCard className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-extrabold text-[#0B1528]">Move list</p>
+              <p className="text-sm font-extrabold text-[#0B1528]">Move List</p>
               <Badge variant="outline" className="normal-case tracking-normal">{history.length}</Badge>
             </div>
             <div className="h-48 sm:h-64 overflow-y-auto rounded-2xl bg-white/35 border border-white/60 p-3">

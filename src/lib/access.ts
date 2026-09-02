@@ -41,14 +41,13 @@ export async function loadAccess(): Promise<AccessState | null> {
     .from("profiles")
     .select("id, full_name, chess_rating, onboarding_complete, primary_workspace, account_status")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   const { data: roleRows } = await supabase
     .from("user_roles")
     .select("role, status")
     .eq("user_id", user.id);
 
-  // fallback if migration not run yet
   let roles = activeRoles((roleRows || []) as RoleRow[]);
   if (roles.length === 0) {
     roles = ["registered"];
@@ -66,9 +65,11 @@ export async function loadAccess(): Promise<AccessState | null> {
 
   const plan = sub?.status === "active" ? (sub.plan || "free") : "free";
   const ws = workspacesFor(roles);
+  
+  const primaryWs = (profile?.primary_workspace as Workspace | undefined) || null;
   const home = workspacePath(
-    (profile?.primary_workspace as Workspace) && ws.includes(profile.primary_workspace as Workspace)
-      ? (profile.primary_workspace as Workspace)
+    primaryWs && ws.includes(primaryWs)
+      ? primaryWs
       : defaultWorkspace(roles)
   );
 
@@ -76,12 +77,12 @@ export async function loadAccess(): Promise<AccessState | null> {
     userId: user.id,
     profile: {
       id: user.id,
-      full_name: profile?.full_name || user.email?.split("@")[0] || "User",
+      full_name: profile?.full_name ?? user.email?.split("@")[0] ?? "User",
       email: user.email,
       chess_rating: profile?.chess_rating ?? 1200,
       onboarding_complete: profile?.onboarding_complete ?? false,
-      primary_workspace: profile?.primary_workspace,
-      account_status: profile?.account_status,
+      primary_workspace: profile?.primary_workspace ?? null,
+      account_status: profile?.account_status ?? "active",
     },
     roles,
     plan,
