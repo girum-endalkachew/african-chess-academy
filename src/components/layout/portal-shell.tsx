@@ -61,19 +61,17 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
   const sidebarWidth = collapsed ? "w-20" : "w-64";
 
   return (
-    <div className="h-screen w-screen overflow-hidden canvas-bg flex font-sans">
+    <div className="h-screen w-full overflow-hidden canvas-bg flex font-sans">
       <CommandPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
 
-      {/* PERMANENT FIXED SIDEBAR */}
       <aside
         className={`
-          h-screen shrink-0 z-40
-          ${sidebarWidth}
-          bg-white/70 lg:bg-white/40 backdrop-blur-xl border-r border-white/60 
+          h-screen shrink-0 z-40 ${sidebarWidth}
+          bg-white/70 lg:bg-white/40 backdrop-blur-xl border-r border-white/60
           flex flex-col relative
           ${mounted ? "transition-all duration-300 ease-in-out" : ""}
-          fixed lg:relative
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"} 
+          fixed lg:static
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
           shadow-[4px_0_24px_rgba(30,60,100,0.08)]
         `}
@@ -90,7 +88,6 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
               </div>
             )}
           </Link>
-
           <button onClick={() => setMobileOpen(false)} className="lg:hidden p-1 text-[#64748B]">
             <X className="h-5 w-5" />
           </button>
@@ -99,14 +96,13 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
         <button
           onClick={toggleCollapsed}
           className="hidden lg:flex absolute -right-3 top-24 z-50 h-6 w-6 rounded-full bg-white border border-white/80 shadow-md items-center justify-center text-[#64748B] hover:text-[#368AE4] hover:scale-110 transition"
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
         </button>
 
         <nav className="flex-1 overflow-y-auto overscroll-contain py-4 space-y-1">
           {navItems.map((item) => {
-            const active = pathname === item.href;
+            const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             const Icon = item.icon;
             return (
               <div key={item.href} className={collapsed ? "px-2" : "px-3"}>
@@ -118,7 +114,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
                     flex items-center rounded-xl transition-all
                     ${collapsed ? "justify-center h-10 w-12 mx-auto" : "gap-3 px-3.5 py-2.5"}
                     ${active
-                      ? "bg-white/80 text-[#368AE4] shadow-sm border border-white/90 font-extrabold"
+                      ? "bg-white/80 text-[#368AE4] shadow-sm border border-white/90"
                       : "text-[#64748B] hover:bg-white/50 hover:text-[#0B1528]"}
                   `}
                 >
@@ -133,11 +129,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
         <div className={`border-t border-white/50 shrink-0 ${collapsed ? "p-2" : "p-3"}`}>
           <button
             onClick={handleSignOut}
-            title={collapsed ? "Sign out" : undefined}
-            className={`
-              flex items-center rounded-xl text-[#64748B] hover:bg-red-50 hover:text-red-600 transition-colors
-              ${collapsed ? "justify-center h-10 w-12 mx-auto" : "gap-3 px-3.5 py-2.5 w-full"}
-            `}
+            className={`flex items-center rounded-xl text-[#64748B] hover:bg-red-50 hover:text-red-600 transition-colors ${collapsed ? "justify-center h-10 w-12 mx-auto" : "gap-3 px-3.5 py-2.5 w-full"}`}
           >
             <LogOut className="h-[18px] w-[18px] shrink-0" />
             {!collapsed && <span className="text-[13px] font-bold">Sign out</span>}
@@ -149,25 +141,21 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
         <div onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 bg-[#0B1528]/30 backdrop-blur-sm z-30" />
       )}
 
-      {/* INDEPENDENT SCROLLING MAIN CONTENT */}
       <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-        <header className="h-16 sm:h-20 bg-white/30 backdrop-blur-md border-b border-white/50 flex items-center justify-between px-4 sm:px-8 shrink-0 shadow-[0_4px_24px_rgba(30,60,100,0.02)]">
+        <header className="h-16 sm:h-20 bg-white/30 backdrop-blur-md border-b border-white/50 flex items-center justify-between px-4 sm:px-8 shrink-0">
           <div className="flex items-center gap-3">
             <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl text-[#0B1528] bg-white/60 border border-white/80 shadow-sm">
               <Menu className="h-5 w-5" />
             </button>
             <button
               onClick={() => setCmdOpen(true)}
-              className="hidden sm:flex items-center gap-3 rounded-2xl bg-white/50 border border-white/70 px-4 py-2 text-xs font-bold text-[#64748B] hover:text-[#0B1528] hover:bg-white/70 backdrop-blur transition"
+              className="hidden sm:flex items-center gap-3 rounded-2xl bg-white/50 border border-white/70 px-4 py-2 text-xs font-bold text-[#64748B] hover:text-[#0B1528] hover:bg-white/70"
             >
               <Search className="h-3.5 w-3.5 text-[#368AE4]" />
               <span>Search platform...</span>
-              <kbd className="rounded bg-white/80 border border-white/90 px-1.5 py-0.5 text-[9px] font-extrabold text-[#64748B]">
-                ⌘K
-              </kbd>
+              <kbd className="rounded bg-white/80 border border-white/90 px-1.5 py-0.5 text-[9px] font-extrabold text-[#64748B]">⌘K</kbd>
             </button>
           </div>
-
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
               <p className="text-[13px] font-extrabold text-[#0B1528] leading-tight">{userName}</p>
@@ -178,9 +166,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
             </div>
           </div>
         </header>
-
-        {/* Page Content Scrolls Separately */}
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden">{children}</main>
       </div>
     </div>
   );
