@@ -7,11 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Mail, Lock, LogIn, Eye, EyeOff, ArrowRight,
-  BookOpen, Swords, Trophy, Sparkles, Shield
-} from "lucide-react";
+import { Mail, Lock, LogIn, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,152 +16,156 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setErr(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
     if (error) {
       setErr(error.message);
       setBusy(false);
       return;
     }
+
     router.push("/post-login");
   };
 
+  const handleGoogleLogin = async () => {
+    setGoogleBusy(true);
+    setErr(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/post-login`,
+      },
+    });
+
+    if (error) {
+      setErr(error.message);
+      setGoogleBusy(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Welcome header like student dashboard */}
-      <div>
-        <p className="text-sm font-bold text-[#368AE4] mb-1">👋 Welcome back</p>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0B1528] tracking-tight">
-          Sign in to your <span className="text-[#368AE4]">Academy</span>
+    <div className="max-w-md mx-auto space-y-6">
+      <div className="text-center space-y-2">
+        <p className="text-sm font-bold text-[#368AE4]">Welcome Back</p>
+        <h1 className="text-3xl font-extrabold text-[#0B1528] tracking-tight">
+          Sign in to <span className="text-[#368AE4]">ACA</span>
         </h1>
-        <p className="text-sm text-[#64748B] mt-2 font-medium">
-          Continue learning, playing, and climbing your ELO.
+        <p className="text-xs text-[#64748B] font-medium">
+          Access your courses, puzzles, live games, and dashboard.
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-5 items-start">
-        {/* Form card */}
-        <GlassCard className="lg:col-span-7 p-6 sm:p-8 space-y-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
-              <h2 className="text-base font-extrabold text-[#0B1528]">Account login</h2>
-            </div>
-            <Badge variant="blue">Secure</Badge>
+      <GlassCard className="p-6 sm:p-8 space-y-5">
+        {err && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 text-red-700 text-xs font-bold p-3.5">
+            {err}
           </div>
+        )}
 
-          {err && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 text-red-700 text-xs font-bold p-3.5">
-              {err}
+        {/* Google OAuth Button */}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full h-12 rounded-2xl bg-white/80 border-slate-200 text-[#0B1528] font-bold text-xs flex items-center justify-center gap-3 hover:bg-white"
+          onClick={handleGoogleLogin}
+          disabled={googleBusy || busy}
+        >
+          <svg className="h-4 w-4" viewBox="0 0 24 24">
+            <path
+              fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+            />
+          </svg>
+          {googleBusy ? "Connecting to Google..." : "Continue with Google"}
+        </Button>
+
+        <div className="relative flex items-center justify-center">
+          <div className="border-t border-slate-200/80 w-full" />
+          <span className="bg-white/60 px-3 text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider absolute">
+            or email
+          </span>
+        </div>
+
+        <form onSubmit={submit} className="space-y-4">
+          <label className="block space-y-1.5">
+            <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Email</span>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                type="email"
+                required
+                placeholder="you@example.com"
+                className="pl-10 h-12 rounded-2xl"
+              />
             </div>
-          )}
+          </label>
 
-          <form onSubmit={submit} className="space-y-4">
-            <label className="block space-y-1.5">
-              <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Email</span>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  className="pl-10 h-12 rounded-2xl"
-                />
-              </div>
-            </label>
+          <label className="block space-y-1.5">
+            <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Password</span>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
+              <Input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type={show ? "text" : "password"}
+                required
+                placeholder="••••••••"
+                className="pl-10 pr-11 h-12 rounded-2xl"
+              />
+              <button
+                type="button"
+                onClick={() => setShow((s) => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B]"
+              >
+                {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </label>
 
-            <label className="block space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Password</span>
-                <Link href="/forgot" className="text-[11px] font-bold text-[#368AE4] hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
-                <Input
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  type={show ? "text" : "password"}
-                  required
-                  placeholder="••••••••"
-                  className="pl-10 pr-11 h-12 rounded-2xl"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShow((s) => !s)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#0B1528]"
-                >
-                  {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </label>
-
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full h-12 rounded-2xl text-sm"
-              disabled={busy}
-            >
-              <LogIn className="h-4 w-4" />
-              {busy ? "Signing in..." : "Sign In to Dashboard"}
-            </Button>
-          </form>
-
-          <div className="pt-2 border-t border-white/60 text-center text-xs text-[#64748B]">
-            New to ACA?{" "}
-            <Link href="/register" className="font-extrabold text-[#368AE4] hover:underline inline-flex items-center gap-1">
-              Create free account <ArrowRight className="h-3 w-3" />
+          <div className="flex justify-end">
+            <Link href="/forgot" className="text-xs font-bold text-[#368AE4] hover:underline">
+              Forgot password?
             </Link>
           </div>
-        </GlassCard>
 
-        {/* Side widgets like student dashboard */}
-        <div className="lg:col-span-5 space-y-4">
-          <GlassCard className="p-5 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#368AE4]/10 to-transparent pointer-events-none" />
-            <div className="relative z-10">
-              <p className="text-[10px] font-extrabold text-[#368AE4] uppercase tracking-wider mb-2">After you sign in</p>
-              <h3 className="text-lg font-extrabold text-[#0B1528] mb-3">Your workspace awaits</h3>
-              <div className="space-y-2.5">
-                {[
-                  { i: BookOpen, t: "Learning hub", d: "Courses & lessons" },
-                  { i: Swords, t: "Play center", d: "AI · Friends · Puzzles" },
-                  { i: Trophy, t: "Compete", d: "Tournaments & events" },
-                  { i: Sparkles, t: "Track growth", d: "ELO · streaks · certs" },
-                ].map((x) => (
-                  <div key={x.t} className="flex items-center gap-3 rounded-xl bg-white/50 border border-white/70 px-3 py-2.5">
-                    <div className="h-9 w-9 rounded-xl bg-[#EEF3FA] text-[#368AE4] flex items-center justify-center shrink-0">
-                      <x.i className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-extrabold text-[#0B1528]">{x.t}</p>
-                      <p className="text-[10px] font-medium text-[#64748B]">{x.d}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </GlassCard>
+          <Button type="submit" variant="primary" className="w-full h-12 rounded-2xl" disabled={busy || googleBusy}>
+            <LogIn className="h-4 w-4" />
+            {busy ? "Signing in..." : "Sign In"}
+          </Button>
+        </form>
 
-          <GlassCard className="p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="h-4 w-4 text-[#368AE4]" />
-              <p className="text-xs font-extrabold text-[#0B1528]">Secure access</p>
-            </div>
-            <p className="text-[11px] text-[#64748B] leading-relaxed">
-              Multi-role accounts. New users start on Explore. Student & Coach access is admin-approved.
-            </p>
-          </GlassCard>
+        <div className="pt-2 border-t border-white/60 text-center text-xs text-[#64748B]">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="font-extrabold text-[#368AE4] hover:underline inline-flex items-center gap-1">
+            Create account <ArrowRight className="h-3 w-3" />
+          </Link>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   BookOpen, Sparkles, ArrowRight, GraduationCap, Shield,
   Clock, PlayCircle, CheckCircle2, AlertCircle, Target,
-  TrendingUp, Zap, Lock
+  TrendingUp, Zap, Lock, LayoutDashboard
 } from "lucide-react";
 
 export default function ExplorePage() {
@@ -77,22 +77,6 @@ export default function ExplorePage() {
     })();
   }, [router, supabase]);
 
-  const enrollIntro = async () => {
-    if (!introCourse) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    setBusy("enroll");
-    await supabase.from("course_enrollments").insert({
-      user_id: user.id,
-      course_id: introCourse.id,
-      progress: 0,
-      status: "active",
-    });
-    setEnrolled(true);
-    setBusy(null);
-    router.push(`/explore/course/${introCourse.id}`);
-  };
-
   const requestRole = async (requested_role: "student" | "coach" | "premium") => {
     setBusy(requested_role);
     setMsg(null);
@@ -131,6 +115,31 @@ export default function ExplorePage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {/* VERIFIED STUDENT BANNER */}
+      {isStudent && (
+        <GlassCard className="p-6 bg-gradient-to-r from-[#368AE4]/15 via-white/40 to-[#368AE4]/10 border-[#368AE4]/40 shadow-lg relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-[#368AE4]" />
+                <Badge variant="blue">VERIFIED STUDENT ACCOUNT</Badge>
+              </div>
+              <h2 className="text-xl font-extrabold text-[#0B1528]">
+                Congratulations, {name.split(" ")[0]}! You are officially verified.
+              </h2>
+              <p className="text-xs font-semibold text-[#64748B]">
+                Your student account is active. You have full access to learning modules, puzzles, and live games.
+              </p>
+            </div>
+            <Link href="/dashboard" className="shrink-0">
+              <Button variant="primary" className="h-12 px-6 rounded-2xl gap-2 text-sm font-extrabold shadow-md">
+                <LayoutDashboard className="h-4 w-4" /> Go to Student Dashboard <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </GlassCard>
+      )}
+
       {/* Welcome Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B1528] tracking-tight">
@@ -138,12 +147,11 @@ export default function ExplorePage() {
         </h1>
         <p className="text-sm text-[#64748B] mt-1 font-medium">
           {isStudent
-            ? "You have full student access. Explore courses or head to your dashboard."
-            : "Complete the free intro course and request student access to unlock the full platform."}
+            ? "Your student account is verified. Head to your dashboard or review courses below."
+            : "Complete the free intro course and request student access to unlock full features."}
         </p>
       </div>
 
-      {/* Status Message */}
       {msg && (
         <GlassCard className={`p-4 text-sm font-bold flex items-center gap-2 ${
           msg.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"
@@ -159,7 +167,7 @@ export default function ExplorePage() {
           { label: "ELO Rating", value: "1200", icon: Target, color: "text-[#368AE4]" },
           { label: "Courses", value: enrolled ? "1" : "0", icon: BookOpen, color: "text-emerald-600" },
           { label: "Streak", value: "0 days", icon: Zap, color: "text-amber-600" },
-          { label: "Status", value: isStudent ? "Student" : "Registered", icon: TrendingUp, color: isStudent ? "text-emerald-600" : "text-[#64748B]" },
+          { label: "Status", value: isStudent ? "Verified Student ✓" : "Registered", icon: TrendingUp, color: isStudent ? "text-[#368AE4]" : "text-[#64748B]" },
         ].map((stat) => (
           <GlassCard key={stat.label} className="p-4">
             <stat.icon className={`h-4 w-4 ${stat.color} mb-2`} />
@@ -169,57 +177,21 @@ export default function ExplorePage() {
         ))}
       </div>
 
-      {/* Free Intro Course */}
-      {introCourse && (
-        <GlassCard className="p-6 sm:p-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-100/40 to-transparent" />
-          <div className="relative z-10 grid md:grid-cols-3 gap-6 items-center">
-            <div className="md:col-span-2 space-y-3">
-              <Badge variant="success">100% FREE INTRO COURSE</Badge>
-              <h2 className="text-2xl font-extrabold text-[#0B1528]">{introCourse.title}</h2>
-              <p className="text-sm text-[#64748B] leading-relaxed">{introCourse.description}</p>
-              <div className="flex flex-wrap gap-3 text-xs font-bold text-[#64748B]">
-                <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> {introCourse.total_lessons} Lessons</span>
-                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> ~50 min</span>
-              </div>
-              <div className="pt-2">
-                {enrolled ? (
-                  <Link href={`/explore/course/${introCourse.id}`}>
-                    <Button variant="primary" className="h-12 rounded-2xl">
-                      <PlayCircle className="h-4 w-4" /> Continue Learning
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button variant="primary" className="h-12 rounded-2xl" onClick={enrollIntro} disabled={busy === "enroll"}>
-                    {busy === "enroll" ? "Enrolling..." : "Start Free Course"} <ArrowRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="hidden md:flex items-center justify-center">
-              <div className="h-32 w-32 rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-2xl">
-                <BookOpen className="h-16 w-16 text-white" />
-              </div>
-            </div>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Upgrade / Role Request Cards */}
+      {/* Upgrade / Role Request Cards for unverified users */}
       {!isStudent && (
         <div>
           <h3 className="text-lg font-extrabold text-[#0B1528] mb-3 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-[#64748B]" /> Unlock Full Access
+            <Lock className="h-4 w-4 text-[#64748B]" /> Account Status & Upgrades
           </h3>
           <div className="grid md:grid-cols-3 gap-4">
             <GlassCard className="p-6 space-y-3" hoverEffect>
               <div className="h-10 w-10 rounded-xl bg-[#EEF3FA] text-[#368AE4] flex items-center justify-center">
                 <GraduationCap className="h-5 w-5" />
               </div>
-              <h3 className="font-extrabold text-[#0B1528]">Become a Student</h3>
+              <h3 className="font-extrabold text-[#0B1528]">Student Access</h3>
               <p className="text-xs text-[#64748B]">Full course library, tournaments, puzzles, streak tracking, friends multiplayer.</p>
               {pending.includes("student") ? (
-                <Button variant="outline" className="w-full" disabled><Clock className="h-4 w-4" /> Pending Admin</Button>
+                <Button variant="outline" className="w-full" disabled><Clock className="h-4 w-4" /> Pending Admin Review</Button>
               ) : (
                 <Button variant="primary" className="w-full" disabled={!!busy} onClick={() => requestRole("student")}>
                   {busy === "student" ? "Sending..." : "Request Student Access"}
@@ -260,51 +232,6 @@ export default function ExplorePage() {
                 </Button>
               )}
             </GlassCard>
-          </div>
-        </div>
-      )}
-
-      {/* Announcements */}
-      {announcements.length > 0 && (
-        <div>
-          <h3 className="text-lg font-extrabold text-[#0B1528] mb-3">📢 Announcements</h3>
-          <div className="space-y-3">
-            {announcements.map((ann: any) => (
-              <GlassCard key={ann.id} className="p-4">
-                <p className="text-sm font-extrabold text-[#0B1528]">{ann.title}</p>
-                <p className="text-xs text-[#64748B] mt-1">{ann.content}</p>
-              </GlassCard>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Premium Courses Preview */}
-      {premiumCourses.length > 0 && (
-        <div>
-          <h3 className="text-lg font-extrabold text-[#0B1528] mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-amber-500" /> Premium Courses
-          </h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {premiumCourses.map((course: any) => (
-              <GlassCard key={course.id} className="p-5 space-y-2" hoverEffect>
-                <Badge variant="accent">Premium</Badge>
-                <h4 className="text-sm font-extrabold text-[#0B1528]">{course.title}</h4>
-                <p className="text-xs text-[#64748B] line-clamp-2">{course.description}</p>
-                <div className="flex items-center gap-2 text-[10px] font-bold text-[#64748B]">
-                  <BookOpen className="h-3 w-3" /> {course.total_lessons} lessons
-                </div>
-                {isStudent || isPremium ? (
-                  <Link href={`/explore/course/${course.id}`}>
-                    <Button variant="secondary" className="w-full text-xs">View Course</Button>
-                  </Link>
-                ) : (
-                  <Button variant="outline" className="w-full text-xs" disabled>
-                    <Lock className="h-3 w-3" /> Requires Access
-                  </Button>
-                )}
-              </GlassCard>
-            ))}
           </div>
         </div>
       )}

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import {
   Home, BookOpen, Compass, BarChart3, GraduationCap,
   Sparkles, Shield, LogOut, Menu, X, ChevronRight,
-  ArrowUpRight, Clock, Bell
+  ArrowUpRight, Clock, CheckCircle2, LayoutDashboard
 } from "lucide-react";
 
 const sidebarLinks = [
@@ -22,12 +22,6 @@ const sidebarLinks = [
   { href: "/explore?tab=course", label: "Free Course", icon: BookOpen },
   { href: "/explore?tab=browse", label: "Browse Courses", icon: Compass },
   { href: "/explore?tab=progress", label: "My Progress", icon: BarChart3 },
-];
-
-const upgradeCards = [
-  { role: "student" as const, label: "Student Access", icon: GraduationCap, color: "text-[#368AE4]", bg: "bg-[#EEF3FA]" },
-  { role: "premium" as const, label: "Go Premium", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50" },
-  { role: "coach" as const, label: "Apply as Coach", icon: Shield, color: "text-purple-600", bg: "bg-purple-50" },
 ];
 
 export default function ExploreLayout({ children }: { children: React.ReactNode }) {
@@ -107,13 +101,37 @@ export default function ExploreLayout({ children }: { children: React.ReactNode 
 
         {/* Status Badge */}
         <div className="px-5 pt-4 pb-2">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#EEF3FA]/80 border border-[#DBE9F7]">
-            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-              {isStudent ? "Student · Explore" : "Registered · Explore"}
-            </span>
-          </div>
+          {isStudent ? (
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#368AE4]/10 border border-[#368AE4]/30">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-[#368AE4]" />
+                <span className="text-[11px] font-extrabold text-[#368AE4]">
+                  Verified Student
+                </span>
+              </div>
+              <span className="h-2 w-2 rounded-full bg-[#368AE4] animate-pulse" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#EEF3FA]/80 border border-[#DBE9F7]">
+              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                Registered User
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* Quick Launch Dashboard if verified */}
+        {isStudent && (
+          <div className="px-3 pt-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-[#368AE4] text-white text-xs font-extrabold shadow-[0_4px_12px_rgba(54,138,228,0.3)] hover:bg-[#2B7AD4] transition"
+            >
+              <LayoutDashboard className="h-4 w-4" /> Launch Dashboard
+            </Link>
+          </div>
+        )}
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
@@ -141,47 +159,28 @@ export default function ExploreLayout({ children }: { children: React.ReactNode 
               </Link>
             );
           })}
-
-          {/* Upgrade Section */}
-          {!isStudent && (
-            <>
-              <p className="px-3 pt-5 pb-1 text-[9px] font-extrabold text-[#64748B]/60 uppercase tracking-widest">
-                Upgrade
-              </p>
-              {upgradeCards.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <Link
-                    key={card.role}
-                    href="/explore?tab=upgrade"
-                    onClick={() => setSidebarOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-[#64748B] hover:bg-white/60 hover:text-[#0B1528] transition-all group"
-                  >
-                    <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center shrink-0", card.bg, card.color)}>
-                      <Icon className="h-3.5 w-3.5" />
-                    </div>
-                    {card.label}
-                    <ArrowUpRight className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-100 transition" />
-                  </Link>
-                );
-              })}
-            </>
-          )}
         </nav>
 
         {/* User Footer */}
         <div className="p-4 border-t border-white/60">
           <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/50 transition cursor-pointer group">
-            <div className="h-9 w-9 rounded-xl bg-[#368AE4] text-white flex items-center justify-center text-sm font-extrabold shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-[#368AE4] text-white flex items-center justify-center text-sm font-extrabold shrink-0 relative">
               {access.profile.full_name?.charAt(0)?.toUpperCase() || "U"}
+              {isStudent && (
+                <span className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow">
+                  <CheckCircle2 className="h-3 w-3 text-[#368AE4] fill-[#368AE4]/20" />
+                </span>
+              )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-extrabold text-[#0B1528] truncate">{access.profile.full_name}</p>
+              <p className="text-xs font-extrabold text-[#0B1528] truncate flex items-center gap-1">
+                {access.profile.full_name}
+              </p>
               <p className="text-[10px] text-[#64748B] truncate">{access.profile.email}</p>
             </div>
             <button
               onClick={handleSignOut}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-red-500 hover:bg-red-50 transition opacity-0 group-hover:opacity-100"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-red-500 hover:bg-red-50 transition"
               title="Sign out"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -204,15 +203,19 @@ export default function ExploreLayout({ children }: { children: React.ReactNode 
             <div>
               <p className="text-xs font-bold text-[#64748B]">Explore Workspace</p>
               <p className="text-sm font-extrabold text-[#0B1528]">
-                {isStudent ? "Welcome back!" : "Complete onboarding to unlock full access"}
+                {isStudent ? "Verified Student Account" : "Registered User Access"}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {!isStudent && (
+            {isStudent ? (
+              <Badge variant="blue" className="hidden sm:inline-flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Verified Student
+              </Badge>
+            ) : (
               <Badge variant="warning" className="hidden sm:inline-flex">
-                <Clock className="h-3 w-3 mr-1" /> Limited Access
+                <Clock className="h-3 w-3 mr-1" /> Pending Student Verification
               </Badge>
             )}
             <WorkspaceSwitcher workspaces={access.workspaces} />
