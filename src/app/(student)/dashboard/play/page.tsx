@@ -47,7 +47,6 @@ export default function PlayvsComputerPage() {
   const customFen = searchParams.get("fen");
   const supabase = createClient();
 
-  // Setup state
   const [selectedCoach, setSelectedCoach] = useState(COACHES[0]);
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w");
   const [inSetup, setInSetup] = useState(!customFen);
@@ -55,7 +54,6 @@ export default function PlayvsComputerPage() {
   const [themeId, setThemeId] = useState("aca-blue");
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Game state
   const [game, setGame] = useState(() => new Chess(customFen || START_FEN));
   const [fen, setFen] = useState(customFen || START_FEN);
   const [history, setHistory] = useState<Move[]>([]);
@@ -68,14 +66,12 @@ export default function PlayvsComputerPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [winStreak, setWinStreak] = useState(0);
 
-  // Interactive controls
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [legalMoves, setLegalMoves] = useState<Square[]>([]);
   const [lastMove, setLastMove] = useState<{ from: Square; to: Square } | null>(null);
 
   const theme = getTheme(themeId);
 
-  // Load theme + settings + user
   useEffect(() => {
     const savedTheme = localStorage.getItem("aca_chess_theme");
     if (savedTheme) setThemeId(savedTheme);
@@ -105,7 +101,6 @@ export default function PlayvsComputerPage() {
     localStorage.setItem("aca_sound_enabled", String(next));
   };
 
-  // Bot move
   const makeBotMove = useCallback((currentFen: string, currentGame: Chess) => {
     if (currentGame.isGameOver() || gameEnded) return;
     setIsBotThinking(true);
@@ -129,7 +124,6 @@ export default function PlayvsComputerPage() {
     }, 400);
   }, [gameEnded, selectedCoach.id, soundEnabled]);
 
-  // Game end handler
   const handleGameEnd = useCallback(async (result: GameResult, reason: string) => {
     if (gameEnded) return;
     setGameEnded(true);
@@ -138,7 +132,6 @@ export default function PlayvsComputerPage() {
     setEloDelta(delta);
     setEndMessage(reason);
 
-    // Update win streak
     if (result === "win") {
       const newStreak = winStreak + 1;
       setWinStreak(newStreak);
@@ -162,7 +155,6 @@ export default function PlayvsComputerPage() {
     }
   }, [gameEnded, userRating, selectedCoach.elo, selectedCoach.id, userId, playerColor, game, supabase, winStreak]);
 
-  // Detect end / trigger bot
   useEffect(() => {
     if (gameEnded || inSetup) return;
 
@@ -197,7 +189,6 @@ export default function PlayvsComputerPage() {
     if (playerColor === "b") makeBotMove(START_FEN, fresh);
   };
 
-  // Click to select / move
   const onSquareClick = (square: Square) => {
     if (inSetup || gameEnded || isBotThinking) return;
 
@@ -205,13 +196,11 @@ export default function PlayvsComputerPage() {
     const isUserTurn = (currentTurn === "w" && playerColor === "w") || (currentTurn === "b" && playerColor === "b");
     if (!isUserTurn) return;
 
-    // If a square is already selected and this is a legal move → execute
     if (selectedSquare && legalMoves.includes(square)) {
       tryMove(selectedSquare, square);
       return;
     }
 
-    // Select new piece
     const piece = game.get(square);
     if (piece && piece.color === currentTurn) {
       setSelectedSquare(square);
@@ -278,7 +267,6 @@ export default function PlayvsComputerPage() {
     }
   };
 
-  // Captured pieces
   const capturedByUser: string[] = [];
   const capturedByBot: string[] = [];
   history.forEach((m) => {
@@ -291,9 +279,7 @@ export default function PlayvsComputerPage() {
 
   const pieceSymbol = (p: string) => ({ p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" } as any)[p] || "";
 
-  // Custom square styles: hints + last move + legal moves + selected
   const customSquares: Record<string, React.CSSProperties> = {};
-
   if (lastMove) {
     customSquares[lastMove.from] = { backgroundColor: theme.highlight };
     customSquares[lastMove.to] = { backgroundColor: theme.highlight };
@@ -349,59 +335,34 @@ export default function PlayvsComputerPage() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1528]/50 backdrop-blur-sm p-4"
-          onClick={() => setShowSettings(false)}
-        >
-          <GlassCard
-            className="p-6 max-w-lg w-full space-y-5 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1528]/50 backdrop-blur-sm p-4" onClick={() => setShowSettings(false)}>
+          <GlassCard className="p-6 max-w-lg w-full space-y-5 relative" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Palette className="h-4 w-4 text-[#368AE4]" />
                 <h2 className="text-base font-extrabold text-[#0B1528]">Board Settings</h2>
               </div>
-              <button
-                onClick={() => setShowSettings(false)}
-                className="h-8 w-8 rounded-lg text-[#64748B] hover:bg-white/60 flex items-center justify-center"
-              >
+              <button onClick={() => setShowSettings(false)} className="h-8 w-8 rounded-lg text-[#64748B] hover:bg-white/60 flex items-center justify-center">
                 <X className="h-4 w-4" />
               </button>
             </div>
-
             <div className="space-y-3">
               <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Board Theme</p>
               <div className="grid grid-cols-3 gap-3">
                 {CHESS_THEMES.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => saveTheme(t.id)}
-                    className={cn(
-                      "rounded-xl overflow-hidden border-2 transition text-left",
-                      themeId === t.id ? "border-[#368AE4] shadow-md" : "border-white/70 hover:border-[#368AE4]/50"
-                    )}
-                  >
+                  <button key={t.id} onClick={() => saveTheme(t.id)} className={cn("rounded-xl overflow-hidden border-2 transition text-left", themeId === t.id ? "border-[#368AE4] shadow-md" : "border-white/70 hover:border-[#368AE4]/50")}>
                     <div className="aspect-video" style={{ background: t.preview }} />
-                    <div className="p-2 bg-white/70">
-                      <p className="text-[10px] font-extrabold text-[#0B1528]">{t.name}</p>
-                    </div>
+                    <div className="p-2 bg-white/70"><p className="text-[10px] font-extrabold text-[#0B1528]">{t.name}</p></div>
                   </button>
                 ))}
               </div>
             </div>
-
             <div className="pt-3 border-t border-white/60 flex items-center justify-between">
               <div>
                 <p className="text-sm font-extrabold text-[#0B1528]">Move Sound Effects</p>
                 <p className="text-[10px] text-[#64748B] font-medium">Play a click when pieces move</p>
               </div>
-              <Button
-                variant={soundEnabled ? "primary" : "outline"}
-                size="sm"
-                className="rounded-xl"
-                onClick={toggleSound}
-              >
+              <Button variant={soundEnabled ? "primary" : "outline"} size="sm" className="rounded-xl" onClick={toggleSound}>
                 {soundEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
                 {soundEnabled ? "ON" : "OFF"}
               </Button>
@@ -417,32 +378,41 @@ export default function PlayvsComputerPage() {
             <h2 className="text-lg font-extrabold text-[#0B1528] mb-3">1. Choose Your Opponent</h2>
             <div className="grid md:grid-cols-3 gap-4">
               {COACHES.map((coach) => (
-                <GlassCard
+                <div
                   key={coach.id}
                   className={cn(
-                    "p-5 space-y-3 cursor-pointer transition-all border-2",
+                    "relative overflow-hidden rounded-[20px] cursor-pointer transition-all duration-300",
                     selectedCoach.id === coach.id
-                      ? "border-[#368AE4] bg-white/90 shadow-md scale-[1.02]"
-                      : "border-white/70 hover:bg-white/60"
+                      ? "ring-2 ring-[#368AE4] shadow-[0_8px_30px_rgba(54,138,228,0.15)] scale-[1.02] bg-white/95"
+                      : "border border-white/70 hover:bg-white/60 shadow-sm bg-white/45"
                   )}
                   onClick={() => setSelectedCoach(coach)}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="h-16 w-16 rounded-2xl overflow-hidden bg-white/60 shadow-sm ring-2 ring-white/80">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover" />
+                  {/* Color Banner */}
+                  <div className={cn("h-20 w-full relative border-b border-white/50", coach.headerBg)}>
+                    <div className="absolute top-3 right-3">
+                      <Badge variant={coach.badge} className="shadow-sm">{coach.elo} ELO</Badge>
                     </div>
-                    <Badge variant={coach.badge}>{coach.elo} ELO</Badge>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-[#0B1528] text-base">{coach.name}</h3>
-                    <p className="text-[10px] font-bold text-[#64748B] uppercase">{coach.title}</p>
+                  {/* Floating Avatar */}
+                  <div className="absolute top-7 left-5 h-20 w-20 rounded-2xl bg-white p-1 shadow-md border border-slate-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={coach.avatarUrl} alt={coach.name} className="w-full h-full object-cover rounded-xl bg-slate-50" />
                   </div>
-                  <p className="text-xs text-[#64748B] leading-relaxed">{coach.description}</p>
-                  <p className="text-[11px] italic text-[#368AE4] font-medium border-l-2 border-[#368AE4]/40 pl-2">
-                    &ldquo;{coach.quote}&rdquo;
-                  </p>
-                </GlassCard>
+                  {/* Content */}
+                  <div className="pt-9 pb-5 px-5 space-y-3">
+                    <div>
+                      <h3 className="font-extrabold text-[#0B1528] text-lg leading-tight">{coach.name}</h3>
+                      <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">{coach.title}</p>
+                    </div>
+                    <p className="text-xs text-[#64748B] leading-relaxed min-h-[40px]">{coach.description}</p>
+                    <div className="pt-3 border-t border-slate-100/80">
+                      <p className="text-[11px] italic text-[#64748B] font-medium leading-snug">
+                        "{coach.quote}"
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -450,28 +420,15 @@ export default function PlayvsComputerPage() {
           <div>
             <h2 className="text-lg font-extrabold text-[#0B1528] mb-3">2. Pick Your Color</h2>
             <div className="grid grid-cols-2 gap-4 max-w-md">
-              <Button
-                variant={playerColor === "w" ? "primary" : "outline"}
-                className="h-14 rounded-2xl text-sm font-extrabold"
-                onClick={() => setPlayerColor("w")}
-              >
+              <Button variant={playerColor === "w" ? "primary" : "outline"} className="h-14 rounded-2xl text-sm font-extrabold" onClick={() => setPlayerColor("w")}>
                 ⚪ Play as White
               </Button>
-              <Button
-                variant={playerColor === "b" ? "primary" : "outline"}
-                className="h-14 rounded-2xl text-sm font-extrabold"
-                onClick={() => setPlayerColor("b")}
-              >
+              <Button variant={playerColor === "b" ? "primary" : "outline"} className="h-14 rounded-2xl text-sm font-extrabold" onClick={() => setPlayerColor("b")}>
                 ⚫ Play as Black
               </Button>
             </div>
           </div>
-
-          <Button
-            variant="primary"
-            className="h-14 px-8 rounded-2xl text-base font-extrabold shadow-lg"
-            onClick={startGame}
-          >
+          <Button variant="primary" className="h-14 px-8 rounded-2xl text-base font-extrabold shadow-lg" onClick={startGame}>
             <Play className="h-5 w-5" /> Start Match vs {selectedCoach.name}
           </Button>
         </div>
@@ -480,11 +437,11 @@ export default function PlayvsComputerPage() {
         <div className="grid lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-7 space-y-3">
             {/* Opponent Card */}
-            <GlassCard className="p-4 flex items-center justify-between">
+            <GlassCard className="p-4 flex items-center justify-between border-white/80">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-xl overflow-hidden bg-white shadow-sm ring-2 ring-white/80">
+                <div className="h-12 w-12 rounded-xl overflow-hidden bg-white shadow-sm ring-2 ring-slate-100 p-0.5">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={selectedCoach.avatarUrl} alt={selectedCoach.name} className="w-full h-full object-cover" />
+                  <img src={selectedCoach.avatarUrl} alt={selectedCoach.name} className="w-full h-full object-cover rounded-lg bg-slate-50" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -496,9 +453,7 @@ export default function PlayvsComputerPage() {
                   </p>
                   {capturedByBot.length > 0 && (
                     <div className="flex gap-0.5 mt-1 text-sm">
-                      {capturedByBot.map((p, i) => (
-                        <span key={i} className="text-[#0B1528]">{pieceSymbol(p)}</span>
-                      ))}
+                      {capturedByBot.map((p, i) => <span key={i} className="text-[#0B1528] drop-shadow-sm">{pieceSymbol(p)}</span>)}
                     </div>
                   )}
                 </div>
@@ -506,8 +461,8 @@ export default function PlayvsComputerPage() {
             </GlassCard>
 
             {/* Board */}
-            <GlassCard className="p-3 sm:p-4">
-              <div className="rounded-2xl overflow-hidden shadow-md">
+            <GlassCard className="p-3 sm:p-4 border-white/80">
+              <div className="rounded-2xl overflow-hidden shadow-lg border border-[#0B1528]/10">
                 <Chessboard
                   id="aca-vs-computer-board"
                   position={fen}
@@ -522,15 +477,15 @@ export default function PlayvsComputerPage() {
                   animationDuration={150}
                 />
               </div>
-              <p className="text-[10px] font-bold text-[#64748B] text-center mt-2">
+              <p className="text-[10px] font-bold text-[#64748B] text-center mt-3">
                 💡 Click a piece to see legal moves, then click a highlighted square to move
               </p>
             </GlassCard>
 
             {/* Your Card */}
-            <GlassCard className="p-4 flex items-center justify-between">
+            <GlassCard className="p-4 flex items-center justify-between border-white/80">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#368AE4] to-[#60A5FA] text-white flex items-center justify-center font-extrabold text-sm shadow-sm">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#368AE4] to-[#60A5FA] text-white flex items-center justify-center font-extrabold text-sm shadow-sm ring-2 ring-slate-100">
                   YOU
                 </div>
                 <div>
@@ -538,9 +493,7 @@ export default function PlayvsComputerPage() {
                   <p className="text-[10px] font-bold text-[#64748B]">{userRating} ELO · {history.length} moves</p>
                   {capturedByUser.length > 0 && (
                     <div className="flex gap-0.5 mt-1 text-sm">
-                      {capturedByUser.map((p, i) => (
-                        <span key={i} className="text-[#0B1528]">{pieceSymbol(p)}</span>
-                      ))}
+                      {capturedByUser.map((p, i) => <span key={i} className="text-[#0B1528] drop-shadow-sm">{pieceSymbol(p)}</span>)}
                     </div>
                   )}
                 </div>
@@ -548,16 +501,15 @@ export default function PlayvsComputerPage() {
             </GlassCard>
           </div>
 
-          {/* Side Panel */}
           <div className="lg:col-span-5 space-y-4">
             {gameEnded && (
               <GlassCard className="p-6 text-center space-y-3 bg-gradient-to-br from-[#368AE4]/10 to-transparent border-[#368AE4]/40">
-                <div className="h-12 w-12 mx-auto rounded-2xl bg-[#368AE4] text-white flex items-center justify-center">
+                <div className="h-12 w-12 mx-auto rounded-2xl bg-[#368AE4] text-white flex items-center justify-center shadow-md">
                   <Crown className="h-6 w-6" />
                 </div>
                 <h3 className="text-xl font-extrabold text-[#0B1528]">{endMessage}</h3>
                 {eloDelta !== null && (
-                  <Badge variant={eloDelta >= 0 ? "success" : "danger"} className="text-xs px-3 py-1">
+                  <Badge variant={eloDelta >= 0 ? "success" : "danger"} className="text-xs px-3 py-1 shadow-sm">
                     Rating: {eloDelta >= 0 ? `+${eloDelta}` : eloDelta} ELO
                   </Badge>
                 )}
@@ -574,51 +526,33 @@ export default function PlayvsComputerPage() {
               </GlassCard>
             )}
 
-            <GlassCard className="p-5 space-y-3">
+            <GlassCard className="p-5 space-y-3 border-white/80">
               <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Game Controls</p>
               <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="glass"
-                  className="rounded-xl"
-                  onClick={requestHint}
-                  disabled={gameEnded || isBotThinking}
-                >
+                <Button variant="glass" className="rounded-xl bg-white/50" onClick={requestHint} disabled={gameEnded || isBotThinking}>
                   <Lightbulb className="h-4 w-4 text-amber-500" /> Get Hint
                 </Button>
-                <Button
-                  variant="glass"
-                  className="rounded-xl"
-                  onClick={undoMove}
-                  disabled={gameEnded || history.length < 2 || isBotThinking}
-                >
+                <Button variant="glass" className="rounded-xl bg-white/50" onClick={undoMove} disabled={gameEnded || history.length < 2 || isBotThinking}>
                   <RotateCcw className="h-4 w-4" /> Takeback
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                className="w-full rounded-xl text-red-600 hover:bg-red-50"
-                onClick={resign}
-                disabled={gameEnded}
-              >
+              <Button variant="outline" className="w-full rounded-xl text-red-600 hover:bg-red-50 bg-white/50" onClick={resign} disabled={gameEnded}>
                 <Flag className="h-4 w-4" /> Resign Game
               </Button>
             </GlassCard>
 
-            <GlassCard className="p-5 space-y-3">
+            <GlassCard className="p-5 space-y-3 border-white/80">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Move History</p>
-                <Badge variant="outline" className="text-[10px]">{history.length} moves</Badge>
+                <Badge variant="outline" className="text-[10px] bg-white/50">{history.length} moves</Badge>
               </div>
-              <div className="max-h-48 overflow-y-auto font-mono text-xs space-y-1 divide-y divide-white/60">
+              <div className="max-h-48 overflow-y-auto font-mono text-xs space-y-1 divide-y divide-white/60 pr-2">
                 {history.length === 0 ? (
                   <p className="text-[#64748B] text-center py-4 italic">No moves made yet.</p>
                 ) : (
                   history.reduce((acc: any[], move, idx) => {
-                    if (idx % 2 === 0) {
-                      acc.push({ num: Math.floor(idx / 2) + 1, white: move.san, black: "" });
-                    } else {
-                      acc[acc.length - 1].black = move.san;
-                    }
+                    if (idx % 2 === 0) acc.push({ num: Math.floor(idx / 2) + 1, white: move.san, black: "" });
+                    else acc[acc.length - 1].black = move.san;
                     return acc;
                   }, []).map((pair: any) => (
                     <div key={pair.num} className="grid grid-cols-3 pt-1.5 text-center font-bold">
