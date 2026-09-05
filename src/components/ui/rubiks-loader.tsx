@@ -7,8 +7,8 @@ export function RubiksLoader({ label = "Loading ACA..." }: { label?: string }) {
   const [phase, setPhase] = useState<"scramble" | "solve" | "done">("scramble");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("solve"), 2800);
-    const t2 = setTimeout(() => setPhase("done"), 4200);
+    const t1 = setTimeout(() => setPhase("solve"), 1000);
+    const t2 = setTimeout(() => setPhase("done"), 1000);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
