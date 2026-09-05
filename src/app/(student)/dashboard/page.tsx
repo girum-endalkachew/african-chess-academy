@@ -138,17 +138,7 @@ export default function StudentDashboard() {
   const rating = profile?.chess_rating || 1200;
   const firstName = (profile?.full_name || "Player").split(" ")[0];
   const isToday = (day: number) => day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
-
-  const quickActions = [
-    { href: "/dashboard/play", label: "Play AI", icon: Swords, tone: "bg-[#368AE4] text-white" },
-    { href: "/dashboard/puzzles", label: "Puzzles", icon: Puzzle, tone: "bg-white/70 text-[#0B1528]" },
-    { href: "/dashboard/drills", label: "Drills", icon: Brain, tone: "bg-white/70 text-[#0B1528]" },
-    { href: "/dashboard/friends", label: "Friends", icon: Users, tone: "bg-white/70 text-[#0B1528]" },
-    { href: "/dashboard/learning", label: "Learn", icon: BookOpen, tone: "bg-white/70 text-[#0B1528]" },
-    { href: "/dashboard/editor", label: "Editor", icon: Edit3, tone: "bg-white/70 text-[#0B1528]" },
-  ];
-
-  return (
+return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       {/* Hero */}
       <GlassCard className="relative overflow-hidden p-6 sm:p-8 border-white/70">
@@ -451,3 +441,4 @@ export default function StudentDashboard() {
     </div>
   );
 }
+
