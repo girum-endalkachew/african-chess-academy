@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -32,13 +32,20 @@ export default function ExploreLayout({ children }: { children: React.ReactNode 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
     (async () => {
       const a = await loadAccess();
       if (!a) {
         router.replace("/login");
         return;
       }
+      
+      // HARD REDIRECT: If user is verified, they should NEVER see explore again.
+      if (a.roles.includes("student") || a.roles.includes("coach") || a.roles.includes("admin")) {
+        router.replace(a.homePath);
+        return;
+      }
+
       setAccess(a);
       setLoading(false);
     })();
@@ -87,7 +94,7 @@ export default function ExploreLayout({ children }: { children: React.ReactNode 
               <Image src="/aca-logo.jpg" alt="ACA" fill className="object-cover" />
             </div>
             <div className="leading-tight">
-              <p className="text-[11px] font-extrabold tracking-wide text-[#0B1528]">♟️ AFRICAN</p>
+              <p className="text-[11px] font-extrabold tracking-wide text-[#0B1528]">â™Ÿï¸ AFRICAN</p>
               <p className="text-[11px] font-extrabold tracking-wide text-[#0B1528]">CHESS ACADEMY</p>
             </div>
           </Link>

@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+﻿import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -27,8 +27,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const pathname = request.nextUrl.pathname;
+
+  // 1. Protect internal routes from unauthenticated users
   const protectedPrefixes = ["/dashboard", "/coach", "/admin", "/explore"];
-  const needsAuth = protectedPrefixes.some((p) => request.nextUrl.pathname.startsWith(p));
+  const needsAuth = protectedPrefixes.some((p) => pathname.startsWith(p));
 
   if (!user && needsAuth) {
     const url = request.nextUrl.clone();
@@ -36,9 +39,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 2. Prevent logged-in users from seeing Auth pages (Login/Register)
+  const authRoutes = ["/login", "/register", "/forgot", "/reset"];
+  const isAuthRoute = authRoutes.some((p) => pathname.startsWith(p));
+
+  if (user && isAuthRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/post-login"; // Smart router will send them to their correct dashboard
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/coach/:path*", "/admin/:path*", "/explore/:path*"],
+  matcher: [
+    "/dashboard/:path*", 
+    "/coach/:path*", 
+    "/admin/:path*", 
+    "/explore/:path*",
+    "/login",
+    "/register",
+    "/forgot",
+    "/reset"
+  ],
 };
