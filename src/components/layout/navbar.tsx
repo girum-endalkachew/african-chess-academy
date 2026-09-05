@@ -4,7 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowRight, ChevronDown, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  X,
+  ArrowRight,
+  ChevronDown,
+  LayoutDashboard,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { loadAccess, type AccessState } from "@/lib/access";
 
@@ -19,12 +25,36 @@ const programsItems = [
 ];
 
 const learnItems = [
-  { label: "Chess Fundamentals", href: "/explore", description: "Learn the rules and basics" },
-  { label: "Chess Strategy", href: "/explore?tab=strategy", description: "Positioning & tactical play" },
-  { label: "Puzzles", href: "/dashboard/puzzles", description: "Interactive tactical exercises" },
-  { label: "Articles", href: "/news", description: "Blogs, news, and updates" },
-  { label: "Resources", href: "/news?category=resources", description: "Study books & templates" },
-  { label: "FAQ", href: "/about#faq", description: "Common questions answered" },
+  {
+    label: "Chess Fundamentals",
+    href: "/explore",
+    description: "Learn the rules and basics",
+  },
+  {
+    label: "Chess Strategy",
+    href: "/explore?tab=strategy",
+    description: "Positioning & tactical play",
+  },
+  {
+    label: "Puzzles",
+    href: "/dashboard/puzzles",
+    description: "Interactive tactical exercises",
+  },
+  {
+    label: "Articles",
+    href: "/news",
+    description: "Blogs, news, and updates",
+  },
+  {
+    label: "Resources",
+    href: "/news?category=resources",
+    description: "Study books & templates",
+  },
+  {
+    label: "FAQ",
+    href: "/about#faq",
+    description: "Common questions answered",
+  },
 ];
 
 const eventsItems = [
@@ -37,12 +67,36 @@ const eventsItems = [
 ];
 
 const forItems = [
-  { label: "For Parents", description: "child development + enrollment", href: "/contact?role=parent" },
-  { label: "For Students", description: "learning + playing + community", href: "/register" },
-  { label: "For Schools", description: "school partnership", href: "/contact?role=school" },
-  { label: "For Corporates", description: "corporate programs", href: "/contact?role=corporate" },
-  { label: "For Coaches", description: "professional development", href: "/contact?role=coach" },
-  { label: "For Partners", description: "collaboration opportunities", href: "/contact?role=partner" },
+  {
+    label: "For Parents",
+    description: "child development + enrollment",
+    href: "/contact?role=parent",
+  },
+  {
+    label: "For Students",
+    description: "learning + playing + community",
+    href: "/register",
+  },
+  {
+    label: "For Schools",
+    description: "school partnership",
+    href: "/contact?role=school",
+  },
+  {
+    label: "For Corporates",
+    description: "corporate programs",
+    href: "/contact?role=corporate",
+  },
+  {
+    label: "For Coaches",
+    description: "professional development",
+    href: "/contact?role=coach",
+  },
+  {
+    label: "For Partners",
+    description: "collaboration opportunities",
+    href: "/contact?role=partner",
+  },
 ];
 
 export function Navbar() {
@@ -63,37 +117,91 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="relative z-50 w-full px-4 sm:px-8 lg:px-10 pt-4 sm:pt-6 pb-2">
+    <header className="relative z-50 w-full bg-[#F8FAFD] px-4 pt-4 sm:px-8 sm:pt-6 lg:px-10">
       <div className="flex items-center justify-between gap-3">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          <div className="relative h-10 w-10 sm:h-11 sm:w-11 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
-            <Image src="/aca-logo.jpg" alt="ACA" fill className="object-cover animate-fade-in" />
+
+        {/* LOGO */}
+
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2.5 sm:gap-3"
+        >
+          <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-white shadow-sm sm:h-11 sm:w-11">
+            <Image
+              src="/aca-logo.jpg"
+              alt="African Chess Academy"
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
+
           <div className="leading-tight">
-            <p className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528]">♟️ AFRICAN</p>
-            <p className="text-[12px] sm:text-[14px] font-extrabold tracking-wide text-[#0B1528]">CHESS ACADEMY</p>
+            <p className="text-[12px] font-extrabold tracking-wide text-[#0B1528] sm:text-[14px]">
+              ♟️ AFRICAN
+            </p>
+
+            <p className="text-[12px] font-extrabold tracking-wide text-[#0B1528] sm:text-[14px]">
+              CHESS ACADEMY
+            </p>
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden xl:flex items-center gap-6">
-          <Link href="/" className={cn("text-sm font-semibold transition", pathname === "/" ? "text-[#368AE4]" : "text-[#64748B] hover:text-[#0B1528]")}>
+
+        {/* DESKTOP NAVIGATION */}
+
+        <nav className="hidden items-center gap-6 xl:flex">
+
+          <Link
+            href="/"
+            className={cn(
+              "text-sm font-semibold transition",
+              pathname === "/"
+                ? "text-[#368AE4]"
+                : "text-[#64748B] hover:text-[#0B1528]"
+            )}
+          >
             Home
           </Link>
-          <Link href="/about" className={cn("text-sm font-semibold transition", pathname === "/about" ? "text-[#368AE4]" : "text-[#64748B] hover:text-[#0B1528]")}>
+
+          <Link
+            href="/about"
+            className={cn(
+              "text-sm font-semibold transition",
+              pathname === "/about"
+                ? "text-[#368AE4]"
+                : "text-[#64748B] hover:text-[#0B1528]"
+            )}
+          >
             About
           </Link>
 
-          {/* Programs Dropdown */}
-          <div className="relative" onMouseEnter={() => setDropdown("programs")} onMouseLeave={() => setDropdown(null)}>
-            <button className="text-sm font-semibold text-[#64748B] hover:text-[#0B1528] flex items-center gap-1 py-1 cursor-pointer">
-              Programs <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", dropdown === "programs" && "rotate-180")} />
+
+          {/* PROGRAMS */}
+
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdown("programs")}
+            onMouseLeave={() => setDropdown(null)}
+          >
+            <button className="flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-[#64748B] transition hover:text-[#0B1528]">
+              Programs
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  dropdown === "programs" && "rotate-180"
+                )}
+              />
             </button>
+
             {dropdown === "programs" && (
-              <div className="absolute top-full left-0 w-64 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/80 p-2 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 top-full w-64 rounded-2xl bg-white/95 p-2 shadow-xl backdrop-blur-xl">
                 {programsItems.map((item) => (
-                  <Link key={item.label} href={item.href} className="block rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#0B1528] hover:bg-[#EEF3FA] transition">
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#0B1528] transition hover:bg-[#EEF3FA]"
+                  >
                     {item.label}
                   </Link>
                 ))}
@@ -101,32 +209,71 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Learn Dropdown */}
-          <div className="relative" onMouseEnter={() => setDropdown("learn")} onMouseLeave={() => setDropdown(null)}>
-            <button className="text-sm font-semibold text-[#64748B] hover:text-[#0B1528] flex items-center gap-1 py-1 cursor-pointer">
-              Learn <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", dropdown === "learn" && "rotate-180")} />
+
+          {/* LEARN */}
+
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdown("learn")}
+            onMouseLeave={() => setDropdown(null)}
+          >
+            <button className="flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-[#64748B] transition hover:text-[#0B1528]">
+              Learn
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  dropdown === "learn" && "rotate-180"
+                )}
+              />
             </button>
+
             {dropdown === "learn" && (
-              <div className="absolute top-full left-0 w-72 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/80 p-2 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 top-full w-72 rounded-2xl bg-white/95 p-2 shadow-xl backdrop-blur-xl">
                 {learnItems.map((item) => (
-                  <Link key={item.label} href={item.href} className="block rounded-xl px-3.5 py-2 hover:bg-[#EEF3FA] transition">
-                    <p className="text-xs font-bold text-[#0B1528]">{item.label}</p>
-                    <p className="text-[10px] text-[#64748B] mt-0.5">{item.description}</p>
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block rounded-xl px-3.5 py-2 transition hover:bg-[#EEF3FA]"
+                  >
+                    <p className="text-xs font-bold text-[#0B1528]">
+                      {item.label}
+                    </p>
+
+                    <p className="mt-0.5 text-[10px] text-[#64748B]">
+                      {item.description}
+                    </p>
                   </Link>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Events Dropdown */}
-          <div className="relative" onMouseEnter={() => setDropdown("events")} onMouseLeave={() => setDropdown(null)}>
-            <button className="text-sm font-semibold text-[#64748B] hover:text-[#0B1528] flex items-center gap-1 py-1 cursor-pointer">
-              Events <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", dropdown === "events" && "rotate-180")} />
+
+          {/* EVENTS */}
+
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdown("events")}
+            onMouseLeave={() => setDropdown(null)}
+          >
+            <button className="flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-[#64748B] transition hover:text-[#0B1528]">
+              Events
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  dropdown === "events" && "rotate-180"
+                )}
+              />
             </button>
+
             {dropdown === "events" && (
-              <div className="absolute top-full left-0 w-56 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/80 p-2 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 top-full w-56 rounded-2xl bg-white/95 p-2 shadow-xl backdrop-blur-xl">
                 {eventsItems.map((item) => (
-                  <Link key={item.label} href={item.href} className="block rounded-xl px-3.5 py-2 text-xs font-bold text-[#0B1528] hover:bg-[#EEF3FA] transition">
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="block rounded-xl px-3.5 py-2 text-xs font-bold text-[#0B1528] transition hover:bg-[#EEF3FA]"
+                  >
                     {item.label}
                   </Link>
                 ))}
@@ -134,93 +281,230 @@ export function Navbar() {
             )}
           </div>
 
-          {/* For... Dropdown */}
-          <div className="relative" onMouseEnter={() => setDropdown("for")} onMouseLeave={() => setDropdown(null)}>
-            <button className="text-sm font-semibold text-[#64748B] hover:text-[#0B1528] flex items-center gap-1 py-1 cursor-pointer">
-              For... <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", dropdown === "for" && "rotate-180")} />
+
+          {/* FOR */}
+
+          <div
+            className="relative"
+            onMouseEnter={() => setDropdown("for")}
+            onMouseLeave={() => setDropdown(null)}
+          >
+            <button className="flex cursor-pointer items-center gap-1 py-1 text-sm font-semibold text-[#64748B] transition hover:text-[#0B1528]">
+              For...
+              <ChevronDown
+                className={cn(
+                  "h-3.5 w-3.5 transition-transform duration-200",
+                  dropdown === "for" && "rotate-180"
+                )}
+              />
             </button>
+
             {dropdown === "for" && (
-              <div className="absolute top-full left-0 w-80 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/80 p-2 shadow-xl space-y-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 top-full w-80 rounded-2xl bg-white/95 p-2 shadow-xl backdrop-blur-xl">
                 {forItems.map((item) => (
-                  <Link key={item.label} href={item.href} className="block rounded-xl px-3.5 py-2.5 hover:bg-[#EEF3FA] transition group">
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="group block rounded-xl px-3.5 py-2.5 transition hover:bg-[#EEF3FA]"
+                  >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#0B1528] group-hover:text-[#368AE4] transition">{item.label}</span>
-                      <span className="text-xs text-[#368AE4] opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-[-4px] group-hover:translate-x-0">→</span>
+                      <span className="text-xs font-bold text-[#0B1528] transition group-hover:text-[#368AE4]">
+                        {item.label}
+                      </span>
+
+                      <span className="translate-x-[-4px] text-xs text-[#368AE4] opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
+                        →
+                      </span>
                     </div>
-                    <p className="text-[10px] text-[#64748B] mt-0.5 leading-relaxed">{item.description}</p>
+
+                    <p className="mt-0.5 text-[10px] leading-relaxed text-[#64748B]">
+                      {item.description}
+                    </p>
                   </Link>
                 ))}
               </div>
             )}
           </div>
 
-          <Link href="/contact" className={cn("text-sm font-semibold transition", pathname === "/contact" ? "text-[#368AE4]" : "text-[#64748B] hover:text-[#0B1528]")}>
+
+          <Link
+            href="/contact"
+            className={cn(
+              "text-sm font-semibold transition",
+              pathname === "/contact"
+                ? "text-[#368AE4]"
+                : "text-[#64748B] hover:text-[#0B1528]"
+            )}
+          >
             Contact
           </Link>
+
         </nav>
 
-        {/* Right CTA */}
-        <div className="hidden md:flex items-center gap-3">
+
+        {/* RIGHT SIDE */}
+
+        <div className="hidden items-center gap-3 md:flex">
+
           {authLoading ? (
-            <div className="h-10 w-32 bg-white/40 animate-pulse rounded-full" />
+            <div className="h-10 w-32 animate-pulse rounded-full bg-white/40" />
           ) : access ? (
-            <Link href={access.homePath} className="btn-blue inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 shadow-md">
-              <LayoutDashboard className="h-4 w-4" /> Go to {access.roles.includes("student") ? "Dashboard" : "Portal"}
+            <Link
+              href={access.homePath}
+              className="btn-blue inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Go to {access.roles.includes("student") ? "Dashboard" : "Portal"}
             </Link>
           ) : (
             <>
-              <Link href="/login" className="text-sm font-bold text-[#64748B] hover:text-[#0B1528] flex items-center gap-1.5 px-3 py-2 transition">
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-[#64748B] transition hover:text-[#0B1528]"
+              >
                 🔐 Sign In
               </Link>
-              <Link href="/register" className="btn-blue inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 shadow-md">
-                Join ACA <ArrowRight className="h-4 w-4" />
+
+              <Link
+                href="/register"
+                className="btn-blue inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5"
+              >
+                Join ACA
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </>
           )}
+
         </div>
 
-        {/* Mobile Toggle */}
-        <button className="md:hidden p-2 rounded-xl bg-white/60 border border-white/80 transition active:scale-[0.98] cursor-pointer" onClick={() => setOpen(!open)} aria-label="Menu">
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+
+        {/* MOBILE BUTTON */}
+
+        <button
+          className="cursor-pointer rounded-xl bg-white/60 p-2 transition active:scale-[0.98] md:hidden"
+          onClick={() => setOpen(!open)}
+          aria-label="Menu"
+        >
+          {open ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
         </button>
+
       </div>
 
-      {/* Mobile Drawer Accordions */}
+
+      {/* MOBILE MENU */}
+
       {open && (
-        <div className="md:hidden mt-3 rounded-2xl bg-white/95 backdrop-blur-xl border border-white/80 p-4 space-y-1 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
-          <Link href="/" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] hover:bg-[#EEF3FA] transition">Home</Link>
-          <Link href="/about" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] hover:bg-[#EEF3FA] transition">About</Link>
+        <div className="mt-3 rounded-2xl bg-white/95 p-4 shadow-xl backdrop-blur-xl md:hidden">
+
+          <Link
+            href="/"
+            onClick={() => setOpen(false)}
+            className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] transition hover:bg-[#EEF3FA]"
+          >
+            Home
+          </Link>
+
+          <Link
+            href="/about"
+            onClick={() => setOpen(false)}
+            className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] transition hover:bg-[#EEF3FA]"
+          >
+            About
+          </Link>
+
+
+          {/* MOBILE PROGRAMS */}
 
           <div>
-            <button onClick={() => setMobileDropdown(mobileDropdown === "programs" ? null : "programs")} className="flex items-center justify-between w-full rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] hover:bg-[#EEF3FA] transition cursor-pointer">
+            <button
+              onClick={() =>
+                setMobileDropdown(
+                  mobileDropdown === "programs" ? null : "programs"
+                )
+              }
+              className="flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] transition hover:bg-[#EEF3FA]"
+            >
               <span>Programs</span>
-              <ChevronDown className={cn("h-4 w-4 text-[#64748B] transition-transform duration-200", mobileDropdown === "programs" && "rotate-180")} />
+
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-[#64748B] transition-transform duration-200",
+                  mobileDropdown === "programs" && "rotate-180"
+                )}
+              />
             </button>
+
             {mobileDropdown === "programs" && (
-              <div className="pl-4 mt-1 space-y-1 border-l-2 border-[#368AE4]/30 ml-3 animate-in slide-in-from-top-1 duration-150">
+              <div className="ml-3 mt-1 space-y-1 pl-4">
                 {programsItems.map((item) => (
-                  <Link key={item.label} href={item.href} onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2 text-xs font-bold text-[#64748B] hover:text-[#0B1528] hover:bg-[#EEF3FA]">{item.label}</Link>
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-xs font-bold text-[#64748B] hover:bg-[#EEF3FA] hover:text-[#0B1528]"
+                  >
+                    {item.label}
+                  </Link>
                 ))}
               </div>
             )}
           </div>
 
-          <Link href="/contact" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] hover:bg-[#EEF3FA] transition">Contact</Link>
 
-          <div className="pt-3 border-t border-slate-100 mt-2">
+          <Link
+            href="/contact"
+            onClick={() => setOpen(false)}
+            className="block rounded-xl px-3 py-2.5 text-sm font-bold text-[#0B1528] transition hover:bg-[#EEF3FA]"
+          >
+            Contact
+          </Link>
+
+
+          <div className="mt-2 pt-3">
+
             {!authLoading && access ? (
-              <Link href={access.homePath} onClick={() => setOpen(false)} className="btn-blue flex items-center justify-center gap-2 rounded-full py-3 text-sm font-bold text-white transition shadow-md w-full">
-                <LayoutDashboard className="h-4 w-4" /> Go to {access.roles.includes("student") ? "Dashboard" : "Portal"}
+              <Link
+                href={access.homePath}
+                onClick={() => setOpen(false)}
+                className="btn-blue flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold text-white shadow-md"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Go to{" "}
+                {access.roles.includes("student")
+                  ? "Dashboard"
+                  : "Portal"}
               </Link>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                <Link href="/login" onClick={() => setOpen(false)} className="text-center text-sm font-bold py-2.5 hover:bg-[#EEF3FA] rounded-full transition">🔐 Sign In</Link>
-                <Link href="/register" onClick={() => setOpen(false)} className="btn-blue text-center rounded-full py-2.5 text-sm font-bold text-white transition">Join ACA</Link>
+
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full py-2.5 text-center text-sm font-bold transition hover:bg-[#EEF3FA]"
+                >
+                  🔐 Sign In
+                </Link>
+
+                <Link
+                  href="/register"
+                  onClick={() => setOpen(false)}
+                  className="btn-blue rounded-full py-2.5 text-center text-sm font-bold text-white transition"
+                >
+                  Join ACA
+                </Link>
+
               </div>
             )}
+
           </div>
+
         </div>
       )}
+
     </header>
   );
 }

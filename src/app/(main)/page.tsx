@@ -17,88 +17,86 @@ import {
 import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
 
+const journey = [
+  {
+    title: "Structured Paths",
+    desc: "Clear level-by-level training from first moves to mastery.",
+    iconBg: "bg-blue-100 text-blue-600",
+    Icon: Target,
+  },
+  {
+    title: "Verified Mentors",
+    desc: "Learn with verified FIDE coaches and experienced guides.",
+    iconBg: "bg-emerald-100 text-emerald-600",
+    Icon: GraduationCap,
+  },
+  {
+    title: "Live Tournaments",
+    desc: "Compete, track ratings, and grow under real pressure.",
+    iconBg: "bg-amber-100 text-amber-600",
+    Icon: Trophy,
+  },
+  {
+    title: "Global Community",
+    desc: "Train and connect with players across Africa and beyond.",
+    iconBg: "bg-violet-100 text-violet-600",
+    Icon: Network,
+  },
+];
+
+const skills = [
+  {
+    t: "Critical Calculation",
+    d: "Evaluating choices under pressure.",
+  },
+  {
+    t: "Strategic Planning",
+    d: "Formulating long-term advantages.",
+  },
+  {
+    t: "Emotional Control",
+    d: "Resilience in competitive play.",
+  },
+  {
+    t: "Pattern Recognition",
+    d: "Instant tactical vision.",
+  },
+];
+
+const path = [
+  {
+    n: "01",
+    level: "Level 1",
+    title: "Fundamentals",
+    d: "Piece dynamics, rules, and essential mates.",
+    icon: "♟",
+  },
+  {
+    n: "02",
+    level: "Level 2",
+    title: "Tactical Pattern",
+    d: "Forks, pins, skewers, and combination play.",
+    icon: "♞",
+  },
+  {
+    n: "03",
+    level: "Level 3",
+    title: "Advanced Mastery",
+    d: "Positional nuances, calculation, and endgames.",
+    icon: "♛",
+  },
+];
+
 export default function HomePage() {
-  const journey = [
-    {
-      title: "Structured Paths",
-      desc: "Clear level-by-level training from first moves to mastery.",
-      iconBg: "bg-blue-100 text-blue-600",
-      Icon: Target,
-    },
-    {
-      title: "Verified Mentors",
-      desc: "Learn with verified FIDE coaches and experienced guides.",
-      iconBg: "bg-emerald-100 text-emerald-600",
-      Icon: GraduationCap,
-    },
-    {
-      title: "Live Tournaments",
-      desc: "Compete, track ratings, and grow under real pressure.",
-      iconBg: "bg-amber-100 text-amber-600",
-      Icon: Trophy,
-    },
-    {
-      title: "Global Community",
-      desc: "Train and connect with players across Africa and beyond.",
-      iconBg: "bg-violet-100 text-violet-600",
-      Icon: Network,
-    },
-  ];
-
-  const skills = [
-    {
-      t: "Critical Calculation",
-      d: "Evaluating choices under pressure.",
-    },
-    {
-      t: "Strategic Planning",
-      d: "Formulating long-term advantages.",
-    },
-    {
-      t: "Emotional Control",
-      d: "Resilience in competitive play.",
-    },
-    {
-      t: "Pattern Recognition",
-      d: "Instant tactical vision.",
-    },
-  ];
-
-  const path = [
-    {
-      n: "01",
-      level: "Level 1",
-      title: "Fundamentals",
-      d: "Piece dynamics, rules, and essential mates.",
-      icon: "♟",
-    },
-    {
-      n: "02",
-      level: "Level 2",
-      title: "Tactical Pattern",
-      d: "Forks, pins, skewers, and combination play.",
-      icon: "♞",
-    },
-    {
-      n: "03",
-      level: "Level 3",
-      title: "Advanced Mastery",
-      d: "Positional nuances, calculation, and endgames.",
-      icon: "♛",
-    },
-  ];
-
   return (
     <main className="w-full overflow-hidden bg-[#F8FAFD] text-[#0B1528]">
 
-      {/* =========================================================
-          HERO
-      ========================================================== */}
+      {/* HERO */}
 
       <section
         className="
           relative isolate min-h-[720px] overflow-hidden
-          bg-[#F7F9FC]
+          bg-[#F8FAFD]
           bg-cover bg-no-repeat
           bg-[position:62%_center]
           sm:min-h-[760px]
@@ -110,8 +108,8 @@ export default function HomePage() {
         }}
       >
 
-        {/* Soft overlay only on the left.
-            This keeps the woman's side natural. */}
+        {/* LEFT TEXT PROTECTION */}
+
         <div
           className="
             absolute inset-y-0 left-0 -z-10
@@ -123,41 +121,25 @@ export default function HomePage() {
           "
         />
 
-        {/* Very subtle overall lightening */}
-        <div className="absolute inset-0 -z-20 bg-white/5" />
+        <div className="absolute -left-32 top-20 -z-10 h-72 w-72 rounded-full bg-[#368AE4]/10 blur-3xl" />
 
-        {/* Decorative blue glow */}
-        <div
-          className="
-            absolute -left-32 top-20 -z-10
-            h-72 w-72 rounded-full
-            bg-[#368AE4]/10 blur-3xl
-          "
-        />
+        <div className="absolute -right-32 bottom-10 -z-10 h-96 w-96 rounded-full bg-[#368AE4]/10 blur-3xl" />
+
 
         <div
           className="
-            absolute -right-32 bottom-10 -z-10
-            h-96 w-96 rounded-full
-            bg-[#368AE4]/10 blur-3xl
-          "
-        />
-
-        <div
-          className="
-            mx-auto flex min-h-[720px] max-w-[1400px]
-            items-center px-5 py-20
+            mx-auto flex min-h-[720px]
+            max-w-[1400px] items-center
+            px-5 py-20
             sm:min-h-[760px] sm:px-8
             lg:min-h-[calc(100vh-80px)]
             lg:px-12 xl:px-16
           "
         >
 
-          {/* HERO CONTENT */}
-
           <div className="relative z-10 w-full max-w-[610px] pt-12 lg:pt-0">
 
-            {/* Eyebrow */}
+            {/* EYEBROW */}
 
             <div
               className="
@@ -177,7 +159,8 @@ export default function HomePage() {
               Welcome to African Chess Academy
             </div>
 
-            {/* Heading */}
+
+            {/* TITLE */}
 
             <h1
               className="
@@ -194,16 +177,15 @@ export default function HomePage() {
             >
               Think.
               <br />
-
               Strategize.
               <br />
-
               <span className="text-[#368AE4]">
                 Become.
               </span>
             </h1>
 
-            {/* Description */}
+
+            {/* DESCRIPTION */}
 
             <p
               className="
@@ -218,7 +200,8 @@ export default function HomePage() {
               a stronger mind and a brighter future.
             </p>
 
-            {/* Buttons */}
+
+            {/* BUTTONS */}
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
 
@@ -235,7 +218,6 @@ export default function HomePage() {
                   transition-all duration-300
                   hover:-translate-y-1
                   hover:bg-[#2679D2]
-                  hover:shadow-[0_16px_35px_rgba(54,138,228,0.3)]
                 "
               >
                 Explore Programs
@@ -249,13 +231,13 @@ export default function HomePage() {
                 />
               </Link>
 
+
               <Link
                 href="/tournaments"
                 className="
                   group inline-flex items-center
                   justify-center gap-3
                   rounded-xl
-                  border border-slate-200
                   bg-white/75
                   px-6 py-4
                   text-sm font-bold
@@ -281,143 +263,62 @@ export default function HomePage() {
 
             </div>
 
-            {/* TRUST / STATS */}
 
-            <div
-              className="
-                mt-10 flex flex-wrap
-                items-center gap-x-7 gap-y-5
-              "
-            >
+            {/* HERO STATS */}
 
-              <div className="flex items-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-5">
 
-                <div
-                  className="
-                    flex h-11 w-11 items-center
-                    justify-center rounded-full
-                    border border-white
-                    bg-white/70
-                    shadow-sm
-                    backdrop-blur
-                  "
-                >
-                  <Users className="h-5 w-5 text-[#368AE4]" />
-                </div>
-
-                <div>
-                  <p className="text-lg font-black text-[#0B1528]">
-                    2,500+
-                  </p>
-
-                  <p className="text-[11px] font-medium text-[#64748B]">
-                    Students
-                  </p>
-                </div>
-
-              </div>
+              <HeroStat
+                icon={<Users className="h-5 w-5 text-[#368AE4]" />}
+                value="2,500+"
+                label="Students"
+              />
 
               <div className="hidden h-10 w-px bg-slate-300 sm:block" />
 
-              <div className="flex items-center gap-3">
-
-                <div
-                  className="
-                    flex h-11 w-11 items-center
-                    justify-center rounded-full
-                    border border-white
-                    bg-white/70
-                    shadow-sm
-                    backdrop-blur
-                  "
-                >
-                  <Trophy className="h-5 w-5 text-[#368AE4]" />
-                </div>
-
-                <div>
-                  <p className="text-lg font-black text-[#0B1528]">
-                    150+
-                  </p>
-
-                  <p className="text-[11px] font-medium text-[#64748B]">
-                    Tournaments
-                  </p>
-                </div>
-
-              </div>
+              <HeroStat
+                icon={<Trophy className="h-5 w-5 text-[#368AE4]" />}
+                value="150+"
+                label="Tournaments"
+              />
 
               <div className="hidden h-10 w-px bg-slate-300 sm:block" />
 
-              <div className="flex items-center gap-3">
-
-                <div
-                  className="
-                    flex h-11 w-11 items-center
-                    justify-center rounded-full
-                    border border-white
-                    bg-white/70
-                    shadow-sm
-                    backdrop-blur
-                  "
-                >
-                  <Globe2 className="h-5 w-5 text-[#368AE4]" />
-                </div>
-
-                <div>
-                  <p className="text-lg font-black text-[#0B1528]">
-                    Africa
-                  </p>
-
-                  <p className="text-[11px] font-medium text-[#64748B]">
-                    Growing together
-                  </p>
-                </div>
-
-              </div>
+              <HeroStat
+                icon={<Globe2 className="h-5 w-5 text-[#368AE4]" />}
+                value="Africa"
+                label="Growing together"
+              />
 
             </div>
 
           </div>
         </div>
 
-        {/* Bottom fade */}
+
+        {/* BOTTOM FADE */}
 
         <div
           className="
-            absolute bottom-0 left-0 right-0
+            pointer-events-none absolute
+            bottom-0 left-0 right-0
             h-24
             bg-gradient-to-t
             from-[#F8FAFD]
             to-transparent
-            pointer-events-none
           "
         />
 
       </section>
 
 
-      {/* =========================================================
-          TRUST STRIP
-      ========================================================== */}
+      {/* TRUST STRIP */}
 
-      <section className="border-y border-slate-200/70 bg-white">
+      <section className="bg-white">
 
-        <div
-          className="
-            mx-auto max-w-7xl
-            px-5 py-7
-            sm:px-8
-            lg:px-12
-          "
-        >
+        <div className="mx-auto max-w-7xl px-5 py-7 sm:px-8 lg:px-12">
 
-          <div
-            className="
-              flex flex-col gap-5
-              sm:flex-row sm:items-center
-              sm:justify-between
-            "
-          >
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
               <p className="text-xs font-extrabold uppercase tracking-wider text-[#64748B]">
@@ -440,11 +341,7 @@ export default function HomePage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="
-                    flex items-center gap-2
-                    text-xs font-bold
-                    text-slate-400
-                  "
+                  className="flex items-center gap-2 text-xs font-bold text-slate-400"
                 >
                   <span className="h-2 w-2 rounded-full bg-[#368AE4]/40" />
                   {item}
@@ -460,50 +357,25 @@ export default function HomePage() {
       </section>
 
 
-      {/* =========================================================
-          WHY ACA
-      ========================================================== */}
+      {/* WHY ACA */}
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
 
         <div className="mx-auto max-w-3xl text-center">
 
-          <div
-            className="
-              mx-auto mb-4 flex h-11 w-11
-              items-center justify-center
-              rounded-2xl bg-[#368AE4]/10
-            "
-          >
+          <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#368AE4]/10">
             <Sparkles className="h-5 w-5 text-[#368AE4]" />
           </div>
 
-          <p
-            className="
-              text-xs font-extrabold
-              uppercase tracking-[0.15em]
-              text-[#368AE4]
-            "
-          >
+          <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#368AE4]">
             Why ACA exists
           </p>
 
-          <h2
-            className="
-              mt-3 text-3xl font-black
-              tracking-tight text-[#0B1528]
-              sm:text-4xl
-            "
-          >
+          <h2 className="mt-3 text-3xl font-black tracking-tight text-[#0B1528] sm:text-4xl">
             From potential to global performance.
           </h2>
 
-          <p
-            className="
-              mt-5 text-sm leading-7
-              text-[#64748B] sm:text-base
-            "
-          >
+          <p className="mt-5 text-sm leading-7 text-[#64748B] sm:text-base">
             African Chess Academy bridges the gap between potential
             and global performance. We provide structured training,
             verified FIDE coaches, and competitive opportunities
@@ -512,8 +384,6 @@ export default function HomePage() {
 
         </div>
 
-
-        {/* Journey cards */}
 
         <div className="mt-14">
 
@@ -543,7 +413,6 @@ export default function HomePage() {
                   shadow-[0_8px_30px_rgba(15,23,42,0.04)]
                   transition-all duration-300
                   hover:-translate-y-1
-                  hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]
                 "
               >
 
@@ -566,16 +435,7 @@ export default function HomePage() {
                   {desc}
                 </p>
 
-                <div
-                  className="
-                    mt-6 h-1 w-8
-                    rounded-full
-                    bg-[#368AE4]/20
-                    transition-all
-                    group-hover:w-14
-                    group-hover:bg-[#368AE4]
-                  "
-                />
+                <div className="mt-6 h-1 w-8 rounded-full bg-[#368AE4]/20 transition-all group-hover:w-14 group-hover:bg-[#368AE4]" />
 
               </div>
 
@@ -588,9 +448,7 @@ export default function HomePage() {
       </section>
 
 
-      {/* =========================================================
-          WHAT WE DEVELOP
-      ========================================================== */}
+      {/* BEYOND CHESS */}
 
       <section className="bg-[#F1F6FC]">
 
@@ -621,23 +479,10 @@ export default function HomePage() {
 
               <GlassCard
                 key={item.t}
-                className="
-                  border-white/80
-                  bg-white/80
-                  p-6
-                  transition-all
-                  hover:-translate-y-1
-                "
+                className="border-white/80 bg-white/80 p-6 transition-all hover:-translate-y-1"
               >
 
-                <div
-                  className="
-                    flex h-10 w-10
-                    items-center justify-center
-                    rounded-xl
-                    bg-[#368AE4]/10
-                  "
-                >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#368AE4]/10">
                   <Award className="h-5 w-5 text-[#368AE4]" />
                 </div>
 
@@ -664,9 +509,7 @@ export default function HomePage() {
       </section>
 
 
-      {/* =========================================================
-          DEVELOPMENT PATH
-      ========================================================== */}
+      {/* DEVELOPMENT PATH */}
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
 
@@ -690,17 +533,7 @@ export default function HomePage() {
 
         <div className="relative mt-14 grid gap-5 md:grid-cols-3">
 
-          {/* Connecting line */}
-
-          <div
-            className="
-              absolute left-[16.5%]
-              right-[16.5%]
-              top-16 hidden
-              h-px bg-slate-200
-              md:block
-            "
-          />
+          <div className="absolute left-[16.5%] right-[16.5%] top-16 hidden h-px bg-slate-200 md:block" />
 
           {path.map((step) => (
 
@@ -718,17 +551,7 @@ export default function HomePage() {
 
               <div className="flex items-start justify-between">
 
-                <div
-                  className="
-                    flex h-12 w-12
-                    items-center justify-center
-                    rounded-2xl
-                    bg-[#368AE4]
-                    text-lg font-black text-white
-                    shadow-lg
-                    shadow-[#368AE4]/20
-                  "
-                >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#368AE4] text-lg font-black text-white shadow-lg shadow-[#368AE4]/20">
                   {step.n}
                 </div>
 
@@ -789,9 +612,7 @@ export default function HomePage() {
       </section>
 
 
-      {/* =========================================================
-          FOR SCHOOLS / PARENTS / ONLINE
-      ========================================================== */}
+      {/* AUDIENCE */}
 
       <section className="bg-[#0B1528]">
 
@@ -848,28 +669,17 @@ export default function HomePage() {
       </section>
 
 
-      {/* =========================================================
-          FAQ + CTA
-      ========================================================== */}
+      {/* FAQ + CTA */}
 
       <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
 
         <div className="grid gap-6 lg:grid-cols-12">
 
-          {/* FAQ */}
-
-          <GlassCard className="lg:col-span-7 p-7 sm:p-8">
+          <GlassCard className="p-7 sm:p-8 lg:col-span-7">
 
             <div className="flex items-center gap-3">
 
-              <div
-                className="
-                  flex h-10 w-10
-                  items-center justify-center
-                  rounded-xl
-                  bg-[#368AE4]/10
-                "
-              >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#368AE4]/10">
                 <HelpCircle className="h-5 w-5 text-[#368AE4]" />
               </div>
 
@@ -908,34 +718,19 @@ export default function HomePage() {
           </GlassCard>
 
 
-          {/* CTA */}
-
           <div
             className="
               relative overflow-hidden
               rounded-[1.7rem]
               bg-[#368AE4]
-              p-8
-              text-white
+              p-8 text-white
               lg:col-span-5
             "
           >
 
-            <div
-              className="
-                absolute -right-20 -top-20
-                h-56 w-56 rounded-full
-                bg-white/10 blur-2xl
-              "
-            />
+            <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
 
-            <div
-              className="
-                absolute -bottom-24 -left-20
-                h-64 w-64 rounded-full
-                bg-white/10 blur-2xl
-              "
-            />
+            <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
 
             <div className="relative z-10 flex h-full flex-col justify-between">
 
@@ -989,9 +784,40 @@ export default function HomePage() {
 }
 
 
-/* =============================================================
-   DARK FEATURE CARD
-============================================================= */
+/* HERO STAT */
+
+function HeroStat({
+  icon,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/70 shadow-sm backdrop-blur">
+        {icon}
+      </div>
+
+      <div>
+        <p className="text-lg font-black text-[#0B1528]">
+          {value}
+        </p>
+
+        <p className="text-[11px] font-medium text-[#64748B]">
+          {label}
+        </p>
+      </div>
+
+    </div>
+  );
+}
+
+
+/* DARK FEATURE */
 
 function DarkFeatureCard({
   icon,
@@ -1019,15 +845,7 @@ function DarkFeatureCard({
       "
     >
 
-      <div
-        className="
-          flex h-11 w-11
-          items-center justify-center
-          rounded-xl
-          bg-[#368AE4]
-          text-white
-        "
-      >
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#368AE4] text-white">
         {icon}
       </div>
 
@@ -1041,14 +859,7 @@ function DarkFeatureCard({
 
       <Link
         href={href}
-        className="
-          mt-6 inline-flex
-          items-center gap-2
-          text-xs font-bold
-          text-[#72B3FF]
-          transition
-          hover:text-white
-        "
+        className="mt-6 inline-flex items-center gap-2 text-xs font-bold text-[#72B3FF] transition hover:text-white"
       >
         {linkText}
         <ArrowRight className="h-3.5 w-3.5" />
@@ -1059,9 +870,7 @@ function DarkFeatureCard({
 }
 
 
-/* =============================================================
-   FAQ ITEM
-============================================================= */
+/* FAQ */
 
 function FAQItem({
   question,
@@ -1071,14 +880,7 @@ function FAQItem({
   answer: string;
 }) {
   return (
-    <div
-      className="
-        rounded-2xl
-        border border-slate-200
-        bg-slate-50/70
-        p-5
-      "
-    >
+    <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
 
       <p className="text-sm font-black text-[#0B1528]">
         {question}
