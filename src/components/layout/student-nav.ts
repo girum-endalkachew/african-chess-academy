@@ -1,6 +1,7 @@
 ﻿import {
   LayoutDashboard, BookOpen, Swords, Gamepad2, Users, Puzzle,
-  Trophy, Calendar, Award, Edit3, StickyNote, User, Settings, Brain
+  Trophy, Calendar, Award, Edit3, StickyNote, User, Settings, Brain,
+  MessageCircle, Medal
 } from "lucide-react";
 import type { NavItem } from "@/components/layout/portal-shell";
 
@@ -10,6 +11,8 @@ export const studentNavItems: NavItem[] = [
   { href: "/dashboard/play-hub", label: "Play Center", icon: Gamepad2 },
   { href: "/dashboard/play", label: "vs Computer", icon: Swords },
   { href: "/dashboard/friends", label: "Social & Friends", icon: Users },
+  { href: "/dashboard/community", label: "Community Feed", icon: MessageCircle },
+  { href: "/dashboard/leaderboards", label: "Leaderboards", icon: Medal },
   { href: "/dashboard/puzzles", label: "Puzzles", icon: Puzzle },
   { href: "/dashboard/drills", label: "Drills", icon: Brain },
   { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
