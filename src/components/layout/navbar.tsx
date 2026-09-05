@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils";
 import { loadAccess, type AccessState } from "@/lib/access";
 
 const programsItems = [
-  { label: "♟ Chess Academy", href: "/programs?category=chess-academy" },
-  { label: "🧠 Strategic Thinking", href: "/programs?category=strategic-thinking" },
-  { label: "🧩 Cognitive Skills", href: "/programs?category=cognitive-skills" },
-  { label: "🧊 Rubik’s Cube", href: "/programs?category=rubiks-cube" },
-  { label: "🏫 School Programs", href: "/programs?category=schools" },
-  { label: "☀️ Camps & Bootcamps", href: "/programs?category=camps" },
-  { label: "👨‍🏫 Coaching & Seminars", href: "/programs?category=coaching" },
+  { label: "Chess Academy", href: "/programs?category=chess-academy" },
+  { label: "Strategic Thinking", href: "/programs?category=strategic-thinking" },
+  { label: "Cognitive Skills", href: "/programs?category=cognitive-skills" },
+  { label: "Rubik's Cube", href: "/programs?category=rubiks-cube" },
+  { label: "School Programs", href: "/programs?category=schools" },
+  { label: "Camps & Bootcamps", href: "/programs?category=camps" },
+  { label: "Coaching & Seminars", href: "/programs?category=coaching" },
 ];
 
 const learnItems = [
@@ -51,7 +51,6 @@ export function Navbar() {
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
   const pathname = usePathname();
 
-  // Auth State for smart routing
   const [access, setAccess] = useState<AccessState | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -160,7 +159,7 @@ export function Navbar() {
           </Link>
         </nav>
 
-        {/* Right CTA / Smart Auth Button */}
+        {/* Right CTA */}
         <div className="hidden md:flex items-center gap-3">
           {authLoading ? (
             <div className="h-10 w-32 bg-white/40 animate-pulse rounded-full" />

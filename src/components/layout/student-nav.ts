@@ -7,9 +7,9 @@ import type { NavItem } from "@/components/layout/portal-shell";
 export const studentNavItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/learning", label: "My Learning", icon: BookOpen },
-  { href: "/dashboard/play-hub", label: "Play", icon: Gamepad2 },
+  { href: "/dashboard/play-hub", label: "Play Center", icon: Gamepad2 },
   { href: "/dashboard/play", label: "vs Computer", icon: Swords },
-  { href: "/dashboard/friends", label: "Friends", icon: Users },
+  { href: "/dashboard/friends", label: "Social & Friends", icon: Users },
   { href: "/dashboard/puzzles", label: "Puzzles", icon: Puzzle },
   { href: "/dashboard/drills", label: "Drills", icon: Brain },
   { href: "/dashboard/editor", label: "Board Editor", icon: Edit3 },
