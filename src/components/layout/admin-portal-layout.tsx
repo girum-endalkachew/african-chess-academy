@@ -2,33 +2,36 @@
 
 import { useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { loadAccess } from "@/lib/access";
 import { PortalShell } from "@/components/layout/portal-shell";
 import { adminNavItems } from "@/components/layout/admin-nav";
 
 export function AdminPortalLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const supabase = createClient();
   const [userName, setUserName] = useState("Admin");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.replace("/login"); return; }
-
-      const { data: prof } = await supabase.from("profiles").select("full_name, role").eq("id", user.id).single();
+      const access = await loadAccess();
       if (!mounted) return;
 
-      if (prof?.role === "student") { router.replace("/dashboard"); return; }
-      if (prof?.role === "coach") { router.replace("/coach"); return; }
+      if (!access) {
+        router.replace("/login");
+        return;
+      }
 
-      setUserName(prof?.full_name || user.email?.split("@")[0] || "Admin");
+      if (!access.roles.includes("admin")) {
+        router.replace(access.homePath || "/explore");
+        return;
+      }
+
+      setUserName(access.profile.full_name || access.profile.email?.split("@")[0] || "Admin");
       setReady(true);
     })();
     return () => { mounted = false; };
-  }, [router, supabase]);
+  }, [router]);
 
   return (
     <PortalShell role="Admin" userName={userName} navItems={adminNavItems}>
