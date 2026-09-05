@@ -1,537 +1,463 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Chess, Square } from "chess.js";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Chess, Move, Square } from "chess.js";
 import { createClient } from "@/lib/supabase/client";
-import { PortalShell, NavItem } from "@/components/layout/portal-shell";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GlassCard } from "@/components/ui/glass-card";
 import { ContentLoader } from "@/components/ui/content-loader";
-import { Difficulty, getBestMove } from "@/lib/chess/engine";
-import { computeElo, opponentRating, GameResult } from "@/lib/chess/elo";
+import { getBestMove, type Difficulty } from "@/lib/chess/engine";
+import { computeElo, opponentRating, type GameResult } from "@/lib/chess/elo";
+import { cn } from "@/lib/utils";
 import {
-  Swords,
-  RotateCcw,
-  Flag,
-  TrendingUp,
-  Loader2,
-  Cpu,
-  Circle,
-  Lightbulb,
-  Undo2,
-  Handshake,
-  Sparkles,
+  Swords, RotateCcw, Lightbulb, Flag, Handshake, Crown, Sparkles,
+  ArrowRight, ShieldAlert, CheckCircle2, Play, Users, Bot, RefreshCw, Edit3
 } from "lucide-react";
 
-const Chessboard = dynamic(
-  () => import("react-chessboard").then((m) => m.Chessboard),
+const Chessboard = dynamic(() => import("react-chessboard").then((m) => m.Chessboard), {
+  ssr: false,
+  loading: () => <div className="w-full aspect-square rounded-2xl bg-white/40 animate-pulse" />,
+});
+
+const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+type BotProfile = {
+  id: Difficulty;
+  name: string;
+  title: string;
+  elo: number;
+  avatar: string;
+  description: string;
+  colorBg: string;
+  badge: "success" | "blue" | "warning";
+};
+
+const BOTS: BotProfile[] = [
   {
-    ssr: false,
-    loading: () => (
-      <div className="w-full aspect-square rounded-2xl bg-white/40 border border-white/60 animate-pulse" />
-    ),
-  }
-);
+    id: "easy",
+    name: "Kofi the Cub",
+    title: "Beginner Bot",
+    elo: 800,
+    avatar: "🦁",
+    description: "Forgiving AI that makes occasional tactical blunders. Great for practice!",
+    colorBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
+    badge: "success",
+  },
+  {
+    id: "medium",
+    name: "Zara the Owl",
+    title: "Club Player",
+    elo: 1500,
+    avatar: "🦉",
+    description: "Solid, balanced play. Develops pieces well but misses deep combinations.",
+    colorBg: "bg-[#EEF3FA] border-[#DBE9F7] text-[#368AE4]",
+    badge: "blue",
+  },
+  {
+    id: "hard",
+    name: "Master Engine",
+    title: "Grandmaster AI",
+    elo: 2200,
+    avatar: "👑",
+    description: "Deep Stockfish calculation. Punishes every inaccuracy relentlessly.",
+    colorBg: "bg-amber-50 border-amber-200 text-amber-800",
+    badge: "warning",
+  },
+];
 
-type PlayerColor = "w" | "b";
-type ExtendedLevel = "beginner" | "easy" | "intermediate" | "advanced" | "expert" | "master";
-
-export default function PlayComputerPage() {
+export default function PlayvsComputerPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const customFen = searchParams.get("fen");
   const supabase = createClient();
 
-  const gameRef = useRef(new Chess(customFen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
-  const [fen, setFen] = useState(gameRef.current.fen());
-  const [history, setHistory] = useState<string[]>([]);
-  const [status, setStatus] = useState("Your move (White)");
-  const [thinking, setThinking] = useState(false);
-  const [level, setLevel] = useState<ExtendedLevel>("easy");
-  const [playerColor, setPlayerColor] = useState<PlayerColor>("w");
-  const [orientation, setOrientation] = useState<"white" | "black">("white");
-  const [gameOver, setGameOver] = useState(false);
-  const [result, setResult] = useState<GameResult | null>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [rating, setRating] = useState(1200);
-  const [lastDelta, setLastDelta] = useState<number | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
-  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-  const [legalSquares, setLegalSquares] = useState<Record<string, React.CSSProperties>>({});
-  const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
-  const [hintStyle, setHintStyle] = useState<Record<string, React.CSSProperties>>({});
-  const [boardWidth, setBoardWidth] = useState(360);
-  const boardWrapRef = useRef<HTMLDivElement | null>(null);
+  // Setup state
+  const [selectedBot, setSelectedBot] = useState<BotProfile>(BOTS[0]);
+  const [playerColor, setPlayerColor] = useState<"w" | "b">("w");
+  const [inSetup, setInSetup] = useState(!customFen);
 
-  const engineDifficulty: Difficulty = useMemo(() => {
-    if (level === "beginner" || level === "easy") return "easy";
-    if (level === "intermediate" || level === "advanced") return "medium";
-    return "hard";
-  }, [level]);
+  // Game state
+  const [game, setGame] = useState(() => new Chess(customFen || START_FEN));
+  const [fen, setFen] = useState(customFen || START_FEN);
+  const [history, setHistory] = useState<Move[]>([]);
+  const [isBotThinking, setIsBotThinking] = useState(false);
+  const [hintSquare, setHintSquare] = useState<{ from: Square; to: Square } | null>(null);
+  const [gameEnded, setGameEnded] = useState(false);
+  const [endMessage, setEndMessage] = useState<string | null>(null);
+  const [userRating, setUserRating] = useState(1200);
+  const [eloDelta, setEloDelta] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const el = boardWrapRef.current;
-    if (!el) return;
-    const update = () => {
-      const w = Math.floor(el.getBoundingClientRect().width);
-      setBoardWidth((prev) => (Math.abs(prev - w) > 2 ? Math.max(280, Math.min(w, 560)) : prev));
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
+  // Load User ELO
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return router.push("/login");
-      const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      setProfile(prof || { full_name: user.email?.split("@")[0], chess_rating: 1200 });
-      setRating(prof?.chess_rating || 1200);
-      setLoadingUser(false);
+      if (user) {
+        setUserId(user.id);
+        const { data: prof } = await supabase.from("profiles").select("chess_rating").eq("id", user.id).maybeSingle();
+        if (prof?.chess_rating) setUserRating(prof.chess_rating);
+      }
     })();
-  }, [router, supabase]);
+  }, [supabase]);
 
-  const clearLights = useCallback(() => {
-    setSelectedSquare(null);
-    setLegalSquares({});
-  }, []);
+  // Bot move trigger
+  const makeBotMove = useCallback((currentFen: string, currentGame: Chess) => {
+    if (currentGame.isGameOver() || gameEnded) return;
 
-  const getMoveOptions = useCallback((square: Square) => {
-    const g = gameRef.current;
-    const piece = g.get(square);
-    if (!piece || piece.color !== playerColor || g.turn() !== playerColor) {
-      clearLights();
-      return false;
-    }
-    const moves = g.moves({ square, verbose: true });
-    if (!moves.length) {
-      clearLights();
-      return false;
-    }
-    const styles: Record<string, React.CSSProperties> = {};
-    styles[square] = {
-      background: "radial-gradient(circle, rgba(54,138,228,0.55) 0%, rgba(54,138,228,0.22) 55%, transparent 70%)",
-    };
-    for (const m of moves) {
-      const targetHasEnemy = !!g.get(m.to) && g.get(m.to)?.color !== playerColor;
-      if (targetHasEnemy) {
-        styles[m.to] = {
-          background: "radial-gradient(circle, rgba(239,68,68,0) 55%, rgba(239,68,68,0.55) 56%, rgba(239,68,68,0.25) 100%)",
-          borderRadius: "50%",
-        };
-      } else {
-        styles[m.to] = {
-          background: "radial-gradient(circle, rgba(15,23,42,0.22) 0%, rgba(15,23,42,0.22) 28%, transparent 30%)",
-          borderRadius: "50%",
-        };
-      }
-    }
-    setSelectedSquare(square);
-    setLegalSquares(styles);
-    return true;
-  }, [playerColor, clearLights]);
-
-  const syncBoard = useCallback(() => {
-    setFen(gameRef.current.fen());
-    setHistory(gameRef.current.history());
-  }, []);
-
-  const finishGame = useCallback(async (r: GameResult) => {
-    setGameOver(true);
-    setResult(r);
-    setThinking(false);
-    clearLights();
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const opp = opponentRating(engineDifficulty);
-      const { newRating, delta } = computeElo(rating, opp, r);
-      await supabase.from("profiles").update({ chess_rating: newRating }).eq("id", user.id);
-      await supabase.from("chess_games").insert({
-        user_id: user.id,
-        player_color: playerColor,
-        difficulty: engineDifficulty,
-        result: r,
-        moves_pgn: gameRef.current.pgn(),
-        moves_count: gameRef.current.history().length,
-        rating_before: rating,
-        rating_after: newRating,
-        rating_delta: delta,
-      });
-      setRating(newRating);
-      setLastDelta(delta);
-    } catch {}
-  }, [engineDifficulty, playerColor, rating, supabase, clearLights]);
-
-  const checkGameEnd = useCallback(() => {
-    const g = gameRef.current;
-    if (g.isCheckmate()) {
-      finishGame(g.turn() === playerColor ? "loss" : "win");
-      return true;
-    }
-    if (g.isDraw() || g.isStalemate() || g.isThreefoldRepetition() || g.isInsufficientMaterial()) {
-      finishGame("draw");
-      return true;
-    }
-    return false;
-  }, [finishGame, playerColor]);
-
-  const triggerComputerMove = useCallback(() => {
-    const g = gameRef.current;
-    if (g.isGameOver() || g.turn() === playerColor) return;
-    setThinking(true);
-    setStatus("Computer is thinking...");
-    clearLights();
+    setIsBotThinking(true);
     setTimeout(() => {
-      const best = getBestMove(g.fen(), engineDifficulty);
+      const best = getBestMove(currentFen, selectedBot.id);
       if (best) {
-        g.move({ from: best.from, to: best.to, promotion: best.promotion || "q" });
-        setLastMove({ from: best.from, to: best.to });
-      }
-      syncBoard();
-      setThinking(false);
-      if (!checkGameEnd()) {
-        setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
-      }
-    }, 120);
-  }, [engineDifficulty, playerColor, syncBoard, checkGameEnd, clearLights]);
-
-  const tryMove = useCallback((from: Square, to: Square) => {
-    if (thinking || gameOver) return false;
-    const g = gameRef.current;
-    if (g.turn() !== playerColor) return false;
-    const move = g.move({ from, to, promotion: "q" });
-    if (!move) return false;
-    setLastMove({ from, to });
-    clearLights();
-    setHintStyle({});
-    syncBoard();
-    if (!checkGameEnd()) triggerComputerMove();
-    return true;
-  }, [thinking, gameOver, playerColor, clearLights, syncBoard, checkGameEnd, triggerComputerMove]);
-
-  const onDrop = useCallback((source: string, target: string) => tryMove(source as Square, target as Square), [tryMove]);
-
-  const onSquareClick = useCallback((square: Square) => {
-    if (thinking || gameOver) return;
-    const g = gameRef.current;
-    if (g.turn() !== playerColor) return;
-    if (selectedSquare) {
-      const legal = g.moves({ square: selectedSquare, verbose: true }).some((m) => m.to === square);
-      if (legal) {
-        tryMove(selectedSquare, square);
-        return;
-      }
-    }
-    getMoveOptions(square);
-  }, [thinking, gameOver, playerColor, selectedSquare, getMoveOptions, tryMove]);
-
-  const onPieceDragBegin = useCallback((_piece: string, sourceSquare: string) => {
-    if (thinking || gameOver) return;
-    getMoveOptions(sourceSquare as Square);
-  }, [thinking, gameOver, getMoveOptions]);
-
-  const startNewGame = (asColor: PlayerColor) => {
-    gameRef.current = new Chess(customFen || "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    setPlayerColor(asColor);
-    setOrientation(asColor === "w" ? "white" : "black");
-    setGameOver(false);
-    setResult(null);
-    setLastDelta(null);
-    setThinking(false);
-    setLastMove(null);
-    setHintStyle({});
-    clearLights();
-    syncBoard();
-    if (asColor === "b") {
-      setStatus("Computer is thinking (White)...");
-      setTimeout(() => triggerComputerMove(), 150);
-    } else {
-      setStatus("Your move (White)");
-    }
-  };
-
-  const resign = () => {
-    if (gameOver) return;
-    finishGame("resign");
-    setStatus("You resigned");
-  };
-
-  const showHint = useCallback(() => {
-    if (thinking || gameOver) return;
-    if (gameRef.current.turn() !== playerColor) return;
-    const best = getBestMove(gameRef.current.fen(), "hard");
-    if (!best) return;
-    setHintStyle({
-      [best.from]: { background: "radial-gradient(circle, rgba(251,191,36,0.75) 0%, transparent 70%)" },
-      [best.to]: { background: "radial-gradient(circle, rgba(251,191,36,0.45) 0%, transparent 70%)" },
-    });
-    setTimeout(() => setHintStyle({}), 2500);
-  }, [thinking, gameOver, playerColor]);
-
-  const undoMove = useCallback(() => {
-    if (thinking || gameOver) return;
-    const g = gameRef.current;
-    if (g.history().length < 1) return;
-    g.undo();
-    if (g.history().length > 0 && g.turn() !== playerColor) g.undo();
-    setFen(g.fen());
-    setHistory(g.history());
-    setLastMove(null);
-    setHintStyle({});
-    clearLights();
-    setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
-  }, [thinking, gameOver, playerColor, clearLights]);
-
-  const offerDrawVsAI = useCallback(() => {
-    if (gameOver) return;
-    const g = gameRef.current;
-    const board = g.board();
-    let score = 0;
-    const val: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
-    for (const row of board) {
-      for (const p of row) {
-        if (p) score += (p.color === "w" ? 1 : -1) * (val[p.type] || 0);
-      }
-    }
-    const threshold = level === "beginner" || level === "easy" ? 4 : level === "intermediate" ? 2 : 1;
-    if (Math.abs(score) <= threshold) {
-      finishGame("draw");
-      setStatus("Draw accepted!");
-    } else {
-      setStatus("Computer declines the draw. Keep playing!");
-      setTimeout(() => {
-        if (!gameOver) setStatus(`Your move (${playerColor === "w" ? "White" : "Black"})`);
-      }, 2000);
-    }
-  }, [gameOver, finishGame, playerColor, level]);
-
-  const customSquareStyles = useMemo(() => {
-    const styles: Record<string, React.CSSProperties> = {};
-    if (lastMove) {
-      styles[lastMove.from] = { backgroundColor: "rgba(54, 138, 228, 0.28)" };
-      styles[lastMove.to] = { backgroundColor: "rgba(54, 138, 228, 0.38)" };
-    }
-    const g = gameRef.current;
-    if (g.inCheck()) {
-      const turn = g.turn();
-      const board = g.board();
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const p = board[r][c];
-          if (p && p.type === "k" && p.color === turn) {
-            styles[p.square] = {
-              background: "radial-gradient(circle, rgba(239,68,68,0.9) 0%, rgba(239,68,68,0.4) 45%, transparent 72%)",
-            };
+        try {
+          const move = currentGame.move({ from: best.from, to: best.to, promotion: best.promotion || "q" });
+          if (move) {
+            const nextFen = currentGame.fen();
+            setGame(new Chess(nextFen));
+            setFen(nextFen);
+            setHistory((h) => [...h, move]);
+            setHintSquare(null);
           }
-        }
+        } catch {}
+      }
+      setIsBotThinking(false);
+    }, 400);
+  }, [gameEnded, selectedBot.id]);
+
+  // Handle game end & ELO computation
+  const handleGameEnd = useCallback(async (result: GameResult, reason: string) => {
+    if (gameEnded) return;
+    setGameEnded(true);
+
+    const { newRating, delta } = computeElo(userRating, selectedBot.elo, result);
+    setEloDelta(delta);
+    setEndMessage(reason);
+
+    if (userId) {
+      // Update user ELO
+      await supabase.from("profiles").update({ chess_rating: newRating }).eq("id", userId);
+      // Save game to history
+      await supabase.from("chess_games").insert({
+        user_id: userId,
+        opponent_type: "computer",
+        bot_level: selectedBot.id,
+        result: result === "win" ? "win" : result === "draw" ? "draw" : "loss",
+        user_color: playerColor,
+        fen: game.fen(),
+        rating_after: newRating,
+      });
+    }
+  }, [gameEnded, userRating, selectedBot.elo, selectedBot.id, userId, playerColor, game, supabase]);
+
+  // Check checkmate / draw after every move
+  useEffect(() => {
+    if (gameEnded || inSetup) return;
+
+    if (game.isCheckmate()) {
+      const winner = game.turn() === "w" ? "Black" : "White";
+      const isUserWinner = (winner === "White" && playerColor === "w") || (winner === "Black" && playerColor === "b");
+      handleGameEnd(isUserWinner ? "win" : "loss", `Checkmate! ${winner} wins.`);
+    } else if (game.isDraw() || game.isStalemate() || game.isThreefoldRepetition() || game.isInsufficientMaterial()) {
+      handleGameEnd("draw", "Game drawn by rules.");
+    } else {
+      // If it's bot's turn, trigger bot move
+      const currentTurn = game.turn();
+      const isBotTurn = (currentTurn === "w" && playerColor === "b") || (currentTurn === "b" && playerColor === "w");
+      if (isBotTurn && !isBotThinking) {
+        makeBotMove(fen, game);
       }
     }
-    Object.assign(styles, legalSquares, hintStyle);
-    return styles;
-  }, [lastMove, legalSquares, hintStyle, fen]);
+  }, [fen, game, playerColor, isBotThinking, gameEnded, inSetup, makeBotMove, handleGameEnd]);
 
-  if (loadingUser) return <ContentLoader label="Loading board..." />;
+  // Start match
+  const startGame = () => {
+    const fresh = new Chess(START_FEN);
+    setGame(fresh);
+    setFen(START_FEN);
+    setHistory([]);
+    setGameEnded(false);
+    setEndMessage(null);
+    setEloDelta(null);
+    setHintSquare(null);
+    setInSetup(false);
 
-  const playerName = profile?.full_name || "You";
-  const isPlayerTurn = !thinking && !gameOver && gameRef.current.turn() === playerColor;
+    // If player chose Black, bot moves first
+    if (playerColor === "b") {
+      makeBotMove(START_FEN, fresh);
+    }
+  };
+
+  // Player piece drop
+  const onDrop = (source: string, target: string) => {
+    if (inSetup || gameEnded || isBotThinking) return false;
+
+    const currentTurn = game.turn();
+    const isUserTurn = (currentTurn === "w" && playerColor === "w") || (currentTurn === "b" && playerColor === "b");
+    if (!isUserTurn) return false;
+
+    try {
+      const move = game.move({ from: source, to: target, promotion: "q" });
+      if (!move) return false;
+
+      const nextFen = game.fen();
+      setGame(new Chess(nextFen));
+      setFen(nextFen);
+      setHistory((h) => [...h, move]);
+      setHintSquare(null);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Undo move
+  const undoMove = () => {
+    if (inSetup || history.length < 2 || isBotThinking) return;
+    const g = new Chess(START_FEN);
+    const newHist = history.slice(0, history.length - 2);
+    newHist.forEach((m) => g.move(m));
+    setGame(g);
+    setFen(g.fen());
+    setHistory(newHist);
+    setHintSquare(null);
+    setGameEnded(false);
+  };
+
+  // Hint
+  const requestHint = () => {
+    if (inSetup || gameEnded || isBotThinking) return;
+    const best = getBestMove(fen, "hard");
+    if (best) {
+      setHintSquare({ from: best.from as Square, to: best.to as Square });
+    }
+  };
+
+  // Resign
+  const resign = () => {
+    if (inSetup || gameEnded) return;
+    if (confirm("Are you sure you want to resign?")) {
+      handleGameEnd("loss", "You resigned the match.");
+    }
+  };
+
+  // Custom square styles for hints and last moves
+  const customSquares: Record<string, React.CSSProperties> = {};
+  if (hintSquare) {
+    customSquares[hintSquare.from] = { backgroundColor: "rgba(251, 191, 36, 0.7)" };
+    customSquares[hintSquare.to] = { backgroundColor: "rgba(34, 197, 94, 0.7)" };
+  }
+
+  const orientation = playerColor === "w" ? "white" : "black";
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 sm:space-y-5">
-      <GlassCard className="p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-[#EEF3FA] flex items-center justify-center text-[#368AE4] shrink-0">
-              <Swords className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-[#0B1528]">Play vs Computer</h1>
-                <Badge variant="blue">Live AI</Badge>
-                {customFen && <Badge variant="warning">Custom Position</Badge>}
-              </div>
-              <p className="text-[12px] sm:text-[13px] font-medium text-[#64748B]">
-                6 Difficulty Levels · ACA AI Engine
-              </p>
-            </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      {/* Header */}
+      <GlassCard className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-extrabold text-[#0B1528]">Play vs Computer</h1>
+            <Badge variant="blue">AI Match</Badge>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/60 border border-white/80 px-3 sm:px-4 py-2">
-              <TrendingUp className="h-4 w-4 text-[#368AE4]" />
-              <span className="text-sm font-extrabold text-[#0B1528]">{rating}</span>
-              <span className="text-[11px] font-bold text-[#64748B]">ELO</span>
-            </div>
-            {lastDelta !== null && (
-              <Badge variant={lastDelta >= 0 ? "success" : "danger"}>
-                {lastDelta >= 0 ? `+${lastDelta}` : lastDelta}
-              </Badge>
-            )}
-          </div>
+          <p className="text-xs text-[#64748B] font-medium">
+            Train against custom bot personalities, get hints, and improve your ELO rating.
+          </p>
         </div>
-
-        <div className="mt-4 h-12">
-          {thinking ? (
-            <div className="h-12 flex items-center justify-between gap-3 rounded-2xl bg-[#368AE4] px-4 text-white">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm font-bold">ACA AI is calculating move…</span>
-              </div>
-              <Badge className="bg-white/20 text-white border-0">AI</Badge>
-            </div>
-          ) : (
-            <div className="h-12 flex items-center rounded-2xl bg-white/40 border border-white/70 px-4">
-              <p className="text-sm font-bold text-[#0B1528] truncate">{status}</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="text-xs font-extrabold">
+            Your Rating: <span className="text-[#368AE4] ml-1">{userRating} ELO</span>
+          </Badge>
+          {!inSetup && (
+            <Button variant="glass" size="sm" className="rounded-xl" onClick={() => setInSetup(true)}>
+              <RefreshCw className="h-3.5 w-3.5" /> Change Bot
+            </Button>
           )}
         </div>
       </GlassCard>
 
-      <div className="grid lg:grid-cols-12 gap-4 sm:gap-5 items-start">
-        <div className="lg:col-span-7 space-y-3 sm:space-y-4">
-          <GlassCard className="px-3 sm:px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-xl bg-[#0B1528] text-white flex items-center justify-center shrink-0">
-                <Cpu className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-extrabold text-[#0B1528]">ACA AI Coach</p>
-                <p className="text-[11px] font-bold text-[#64748B] capitalize">
-                  {level} Level · {playerColor === "w" ? "Black" : "White"}
-                </p>
-              </div>
+      {/* SETUP SCREEN */}
+      {inSetup ? (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-extrabold text-[#0B1528] mb-3">1. Select Opponent Bot</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {BOTS.map((bot) => (
+                <GlassCard
+                  key={bot.id}
+                  className={cn(
+                    "p-6 space-y-3 cursor-pointer transition-all border-2",
+                    selectedBot.id === bot.id
+                      ? "border-[#368AE4] bg-white/90 shadow-md scale-[1.02]"
+                      : "border-white/70 hover:bg-white/60"
+                  )}
+                  onClick={() => setSelectedBot(bot)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-4xl">{bot.avatar}</div>
+                    <Badge variant={bot.badge}>{bot.elo} ELO</Badge>
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-[#0B1528] text-base">{bot.name}</h3>
+                    <p className="text-[10px] font-bold text-[#64748B] uppercase">{bot.title}</p>
+                  </div>
+                  <p className="text-xs text-[#64748B] leading-relaxed">{bot.description}</p>
+                </GlassCard>
+              ))}
             </div>
-            <Circle className={`h-2.5 w-2.5 fill-current ${thinking ? "text-amber-400" : "text-[#64748B]/40"}`} />
-          </GlassCard>
+          </div>
 
-          <GlassCard className="p-2 sm:p-4 overflow-hidden">
-            <div ref={boardWrapRef} className="w-full max-w-[560px] mx-auto">
-              <div className="w-full overflow-hidden rounded-2xl contain-board">
+          <div>
+            <h2 className="text-lg font-extrabold text-[#0B1528] mb-3">2. Choose Your Color</h2>
+            <div className="grid grid-cols-2 gap-4 max-w-md">
+              <Button
+                variant={playerColor === "w" ? "primary" : "outline"}
+                className="h-14 rounded-2xl text-sm font-extrabold"
+                onClick={() => setPlayerColor("w")}
+              >
+                ⚪ Play as White (First move)
+              </Button>
+              <Button
+                variant={playerColor === "b" ? "primary" : "outline"}
+                className="h-14 rounded-2xl text-sm font-extrabold"
+                onClick={() => setPlayerColor("b")}
+              >
+                ⚫ Play as Black (Second move)
+              </Button>
+            </div>
+          </div>
+
+          <Button variant="primary" className="h-14 px-8 rounded-2xl text-base font-extrabold shadow-lg" onClick={startGame}>
+            <Play className="h-5 w-5" /> Start Match vs {selectedBot.name}
+          </Button>
+        </div>
+      ) : (
+        /* LIVE GAME SCREEN */
+        <div className="grid lg:grid-cols-12 gap-6 items-start">
+          {/* Board Column */}
+          <div className="lg:col-span-7 space-y-3">
+            {/* Top Bot Card */}
+            <GlassCard className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">{selectedBot.avatar}</div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-extrabold text-[#0B1528] text-sm">{selectedBot.name}</p>
+                    <Badge variant={selectedBot.badge}>{selectedBot.elo} ELO</Badge>
+                  </div>
+                  <p className="text-[10px] font-bold text-[#64748B]">
+                    {isBotThinking ? "🤔 Thinking..." : "Waiting for turn"}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+
+            {/* Chessboard */}
+            <GlassCard className="p-3 sm:p-4">
+              <div className="rounded-2xl overflow-hidden shadow-md">
                 <Chessboard
-                  id="aca-play-board"
+                  id="aca-vs-computer-board"
                   position={fen}
-                  onPieceDrop={onDrop}
-                  onSquareClick={onSquareClick}
-                  onPieceDragBegin={onPieceDragBegin}
                   boardOrientation={orientation}
-                  boardWidth={boardWidth}
-                  arePiecesDraggable={isPlayerTurn}
-                  animationDuration={120}
+                  onPieceDrop={onDrop}
+                  arePiecesDraggable={!gameEnded && !isBotThinking}
+                  customSquareStyles={customSquares}
                   customLightSquareStyle={{ backgroundColor: "#EAF2FB" }}
                   customDarkSquareStyle={{ backgroundColor: "#368AE4" }}
-                  customSquareStyles={customSquareStyles}
-                  customBoardStyle={{ borderRadius: "16px", overflow: "hidden" }}
+                  customBoardStyle={{ borderRadius: "14px" }}
+                  animationDuration={150}
                 />
               </div>
-            </div>
-          </GlassCard>
+            </GlassCard>
 
-          <GlassCard className="px-3 sm:px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#368AE4] to-[#60A5FA] text-white flex items-center justify-center font-extrabold shrink-0">
-                {playerName.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-extrabold text-[#0B1528] truncate">{playerName}</p>
-                <p className="text-[11px] font-bold text-[#64748B]">
-                  {rating} ELO · {playerColor === "w" ? "White" : "Black"}
-                </p>
-              </div>
-            </div>
-            <span className="text-[11px] font-bold text-[#64748B]">
-              {isPlayerTurn ? "Your turn" : gameOver ? "Over" : "Wait"}
-            </span>
-          </GlassCard>
-        </div>
-
-        <div className="lg:col-span-5 space-y-4">
-          <GlassCard className="p-4 sm:p-6 space-y-4">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#64748B] mb-2">Level Selection</p>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                {(["beginner", "easy", "intermediate", "advanced", "expert", "master"] as ExtendedLevel[]).map((lvl) => (
-                  <button
-                    key={lvl}
-                    type="button"
-                    onClick={() => setLevel(lvl)}
-                    className={`rounded-xl border px-1.5 py-2 text-[11px] font-extrabold capitalize transition-all ${
-                      level === lvl
-                        ? "border-[#368AE4] bg-white/80 text-[#368AE4] shadow-sm"
-                        : "border-white/70 bg-white/30 text-[#64748B]"
-                    }`}
-                  >
-                    {lvl}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" className="rounded-2xl" onClick={() => startNewGame("w")}>
-                <RotateCcw className="h-4 w-4" /> White
-              </Button>
-              <Button variant="outline" className="rounded-2xl" onClick={() => startNewGame("b")}>
-                Black
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <Button variant="glass" size="sm" className="rounded-xl" onClick={showHint} disabled={thinking || gameOver || !isPlayerTurn}>
-                <Lightbulb className="h-3.5 w-3.5" /> Hint
-              </Button>
-              <Button variant="glass" size="sm" className="rounded-xl" onClick={undoMove} disabled={thinking || gameOver || history.length < 1}>
-                <Undo2 className="h-3.5 w-3.5" /> Undo
-              </Button>
-              <Button variant="glass" size="sm" className="rounded-xl" onClick={offerDrawVsAI} disabled={gameOver}>
-                <Handshake className="h-3.5 w-3.5" /> Draw
-              </Button>
-            </div>
-
-            <Button variant="ghost" className="w-full rounded-2xl text-red-600 hover:bg-red-50" onClick={resign} disabled={gameOver}>
-              <Flag className="h-4 w-4" /> Resign
-            </Button>
-
-            <div className="min-h-[72px]">
-              {gameOver && result && (
-                <div className={`rounded-2xl p-4 border text-sm font-extrabold ${
-                  result === "win" ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                  : result === "draw" ? "bg-white/60 border-white/80 text-[#0B1528]"
-                  : "bg-red-50 border-red-200 text-red-700"
-                }`}>
-                  Game over · {result.toUpperCase()}
-                  <div className="mt-1 text-xs font-bold opacity-80">ELO now {rating}</div>
+            {/* Bottom Player Card */}
+            <GlassCard className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-[#368AE4] text-white flex items-center justify-center font-extrabold text-sm">
+                  YOU
                 </div>
-              )}
-            </div>
-          </GlassCard>
+                <div>
+                  <p className="font-extrabold text-[#0B1528] text-sm">Your Account</p>
+                  <p className="text-[10px] font-bold text-[#64748B]">{userRating} ELO</p>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
 
-          <GlassCard className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-extrabold text-[#0B1528]">Move List</p>
-              <Badge variant="outline" className="normal-case tracking-normal">{history.length}</Badge>
-            </div>
-            <div className="h-48 sm:h-64 overflow-y-auto rounded-2xl bg-white/35 border border-white/60 p-3">
-              {history.length === 0 ? (
-                <p className="text-xs text-[#64748B] text-center py-6">No moves yet</p>
-              ) : (
-                <div className="space-y-1">
-                  {Array.from({ length: Math.ceil(history.length / 2) }).map((_, i) => (
-                    <div key={i} className="grid grid-cols-[36px_1fr_1fr] gap-2 text-xs font-mono px-2 py-1">
-                      <span className="text-[#64748B] font-sans font-bold">{i + 1}.</span>
-                      <span>{history[i * 2] || ""}</span>
-                      <span>{history[i * 2 + 1] || ""}</span>
+          {/* Side Panel Column */}
+          <div className="lg:col-span-5 space-y-4">
+            {/* Game Result Banner */}
+            {gameEnded && (
+              <GlassCard className="p-6 text-center space-y-3 bg-gradient-to-br from-[#368AE4]/10 to-transparent border-[#368AE4]/40">
+                <div className="h-12 w-12 mx-auto rounded-2xl bg-[#368AE4] text-white flex items-center justify-center">
+                  <Crown className="h-6 w-6" />
+                </div>
+                <h3 className="text-xl font-extrabold text-[#0B1528]">{endMessage}</h3>
+                {eloDelta !== null && (
+                  <Badge variant={eloDelta >= 0 ? "success" : "danger"} className="text-xs px-3 py-1">
+                    Rating Change: {eloDelta >= 0 ? `+${eloDelta}` : eloDelta} ELO
+                  </Badge>
+                )}
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <Button variant="primary" className="rounded-xl" onClick={startGame}>
+                    <RotateCcw className="h-4 w-4" /> Rematch
+                  </Button>
+                  <Link href={`/dashboard/editor?fen=${encodeURIComponent(fen)}`}>
+                    <Button variant="glass" className="rounded-xl w-full">
+                      <Edit3 className="h-4 w-4" /> Analyze Position
+                    </Button>
+                  </Link>
+                </div>
+              </GlassCard>
+            )}
+
+            {/* In-Game Actions */}
+            <GlassCard className="p-5 space-y-3">
+              <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Game Controls</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="glass" className="rounded-xl" onClick={requestHint} disabled={gameEnded || isBotThinking}>
+                  <Lightbulb className="h-4 w-4 text-amber-500" /> Get Hint
+                </Button>
+                <Button variant="glass" className="rounded-xl" onClick={undoMove} disabled={gameEnded || history.length < 2 || isBotThinking}>
+                  <RotateCcw className="h-4 w-4" /> Takeback Move
+                </Button>
+              </div>
+              <Button variant="outline" className="w-full rounded-xl text-red-600 hover:bg-red-50" onClick={resign} disabled={gameEnded}>
+                <Flag className="h-4 w-4" /> Resign Game
+              </Button>
+            </GlassCard>
+
+            {/* Move History */}
+            <GlassCard className="p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Move History</p>
+                <Badge variant="outline" className="text-[10px]">{history.length} moves</Badge>
+              </div>
+              <div className="max-h-48 overflow-y-auto font-mono text-xs space-y-1 divide-y divide-white/60">
+                {history.length === 0 ? (
+                  <p className="text-[#64748B] text-center py-4 italic">No moves made yet.</p>
+                ) : (
+                  history.reduce((acc: any[], move, idx) => {
+                    if (idx % 2 === 0) {
+                      acc.push({ num: Math.floor(idx / 2) + 1, white: move.san, black: "" });
+                    } else {
+                      acc[acc.length - 1].black = move.san;
+                    }
+                    return acc;
+                  }, []).map((pair: any) => (
+                    <div key={pair.num} className="grid grid-cols-3 pt-1.5 text-center font-bold">
+                      <span className="text-[#64748B]">{pair.num}.</span>
+                      <span className="text-[#0B1528]">{pair.white}</span>
+                      <span className="text-[#368AE4]">{pair.black || "..."}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </GlassCard>
+                  ))
+                )}
+              </div>
+            </GlassCard>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
