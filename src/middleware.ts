@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const protectedPrefixes = ["/dashboard", "/coach", "/admin"];
+  const protectedPrefixes = ["/dashboard", "/coach", "/admin", "/explore"];
   const needsAuth = protectedPrefixes.some((p) => request.nextUrl.pathname.startsWith(p));
 
   if (!user && needsAuth) {
@@ -40,5 +40,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/coach/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/coach/:path*", "/admin/:path*", "/explore/:path*"],
 };
