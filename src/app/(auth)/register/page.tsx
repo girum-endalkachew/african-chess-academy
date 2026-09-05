@@ -141,7 +141,7 @@ export default function RegisterPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full h-12 rounded-2xl bg-white/80 border-slate-200 text-[#0B1528] font-bold text-xs flex items-center justify-center gap-3 hover:bg-white"
+            className="w-full h-12 rounded-2xl bg-white/80 border-slate-200 text-[#0B1528] font-bold text-xs flex items-center justify-center gap-3 hover:bg-white shadow-sm transition"
             onClick={handleGoogleSignUp}
             disabled={googleBusy || busy}
           >
