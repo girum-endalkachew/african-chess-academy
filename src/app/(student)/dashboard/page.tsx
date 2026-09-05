@@ -5,14 +5,14 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { StreakCard } from "@/components/dashboard/streak-card";
 import {
-  BookOpen, Trophy, Calendar, Award, ArrowRight, Swords, Edit3,
-  Bell, Search, Clock, Zap, PlayCircle, ChevronLeft, ChevronRight,
-  Puzzle, Brain, Users, Gamepad2, TrendingUp, Target
+  BookOpen, Trophy, Calendar, Award, ArrowRight, Bell, Search,
+  Clock, Zap, PlayCircle, ChevronLeft, ChevronRight, Puzzle, Brain,
+  Gamepad2, TrendingUp, Target
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -138,59 +138,18 @@ export default function StudentDashboard() {
   const rating = profile?.chess_rating || 1200;
   const firstName = (profile?.full_name || "Player").split(" ")[0];
   const isToday = (day: number) => day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
-return (
+
+  return (
     <div className="mx-auto max-w-[1400px] space-y-6">
-      {/* Hero */}
-      <GlassCard className="relative overflow-hidden p-6 sm:p-8 border-white/70">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#368AE4]/20 via-white/30 to-amber-100/30 pointer-events-none" />
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#368AE4]/20 blur-3xl" />
-        <div className="relative z-10 grid lg:grid-cols-[1.4fr_1fr] gap-6 items-center">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="blue">Student Portal</Badge>
-              <Badge variant="outline" className="normal-case tracking-normal">{eloTier.name} Level</Badge>
-            </div>
-            <div>
-              <p className="text-sm font-bold text-[#368AE4] mb-1">👋 Hey, {firstName}!</p>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0B1528] tracking-tight leading-tight">
-                You&apos;ve got <span className="text-[#368AE4]">{rating}</span> ELO
-              </h1>
-              <p className="text-sm text-[#64748B] mt-2 font-medium max-w-xl">
-                Keep your streak alive. Train vision, solve puzzles, or jump into a game — your next rating jump starts today.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {quickActions.map((a) => {
-                const Icon = a.icon;
-                return (
-                  <Link key={a.href} href={a.href}>
-                    <button className={cn("inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-extrabold border border-white/70 shadow-sm transition hover:-translate-y-0.5", a.tone)}>
-                      <Icon className="h-3.5 w-3.5" /> {a.label}
-                    </button>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+      {/* Clean Greeting Header */}
+      <div>
+        <p className="text-sm font-bold text-[#368AE4] mb-1">👋 Hey, {firstName}!</p>
+        <h1 className="text-[36px] sm:text-[42px] font-extrabold text-[#0B1528] tracking-tight leading-[1.05]">
+          You&apos;ve got <span className="text-[#368AE4]">{rating} ELO</span> Points!
+        </h1>
+      </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: "Games", value: games.length, icon: Zap, color: "text-amber-500" },
-              { label: "Courses", value: courseStats.total, icon: BookOpen, color: "text-[#368AE4]" },
-              { label: "Tournaments", value: tournamentsCount, icon: Trophy, color: "text-purple-500" },
-              { label: "Certificates", value: certsCount, icon: Award, color: "text-emerald-500" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-2xl bg-white/65 border border-white/80 p-4 backdrop-blur">
-                <s.icon className={cn("h-4 w-4 mb-2", s.color)} />
-                <p className="text-2xl font-extrabold text-[#0B1528]">{s.value}</p>
-                <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </GlassCard>
-
-      {/* Search row */}
+      {/* Search Row */}
       <div className="flex items-center gap-3">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
@@ -207,7 +166,6 @@ return (
       </div>
 
       <div className="grid xl:grid-cols-[1.55fr_0.9fr] gap-6">
-        {/* LEFT */}
         <div className="space-y-6">
           <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-5">
@@ -328,7 +286,6 @@ return (
             </div>
           </div>
 
-          {/* Continue learning strip */}
           {featuredCourse && (
             <GlassCard className="p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -359,7 +316,6 @@ return (
           )}
         </div>
 
-        {/* RIGHT */}
         <div className="space-y-5">
           <GlassCard className="p-5">
             <div className="flex items-center justify-between mb-4">
@@ -426,7 +382,7 @@ return (
                 { icon: Award, label: "Certificates", value: certsCount },
                 { icon: Zap, label: "Games played", value: games.length },
               ].map((row, idx) => (
-                <div key={row.label} className={cn("flex items-center justify-between", idx === 3 && "pt-3 border-t border-white/60") }>
+                <div key={row.label} className={cn("flex items-center justify-between", idx === 3 && "pt-3 border-t border-white/60")}>
                   <div className="flex items-center gap-2">
                     <row.icon className={cn("h-4 w-4", idx === 3 ? "text-amber-500" : "text-[#368AE4]")} />
                     <span className="text-xs font-bold text-[#0B1528]">{row.label}</span>
@@ -441,4 +397,3 @@ return (
     </div>
   );
 }
-
