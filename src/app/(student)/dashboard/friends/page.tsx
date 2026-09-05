@@ -8,7 +8,8 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Users, Plus, Copy, PlayCircle, Clock } from "lucide-react";
+import { ContentLoader } from "@/components/ui/content-loader";
+import { Users, Plus, PlayCircle, Clock, Swords } from "lucide-react";
 
 export default function PlayFriendsPage() {
   const router = useRouter();
@@ -25,7 +26,6 @@ export default function PlayFriendsPage() {
     const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).single();
     setProfile(prof || { full_name: user.email?.split("@")[0], chess_rating: 1200 });
 
-    // Fetch open rooms
     const { data: openRooms } = await supabase
       .from("friend_games")
       .select("*")
@@ -38,7 +38,6 @@ export default function PlayFriendsPage() {
 
   useEffect(() => { load(); }, []);
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel("friend_games_lobby")
@@ -46,7 +45,6 @@ export default function PlayFriendsPage() {
         load();
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, []);
 
@@ -63,9 +61,15 @@ export default function PlayFriendsPage() {
       host_color: Math.random() > 0.5 ? "w" : "b",
       status: "waiting",
       fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      host_time_ms: 10 * 60 * 1000,
+      guest_time_ms: 10 * 60 * 1000,
     }).select().single();
 
     setCreating(false);
+    if (error) {
+      alert(error.message + "\n\nIf columns host_time_ms are missing, run the SQL migration.");
+      return;
+    }
     if (data) router.push(`/dashboard/friends/${data.id}`);
   };
 
@@ -82,7 +86,7 @@ export default function PlayFriendsPage() {
     else alert("Room not found or already in progress");
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="h-8 w-8 rounded-full border-4 border-[#368AE4] border-t-transparent animate-spin" /></div>;
+  if (loading) return <ContentLoader label="Loading friends lobby..." />;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -90,9 +94,9 @@ export default function PlayFriendsPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#368AE4]/10 to-transparent pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <Badge variant="blue" className="mb-2">Multiplayer</Badge>
+            <Badge variant="blue" className="mb-2">Multiplayer · Live</Badge>
             <h1 className="text-2xl font-extrabold text-[#0B1528]">Play With Friends</h1>
-            <p className="text-sm text-[#64748B] mt-1">Real-time chess matches. Create a room or join with a code.</p>
+            <p className="text-sm text-[#64748B] mt-1">Create a room, share the code, and play real-time chess with clocks.</p>
           </div>
           <Users className="h-10 w-10 text-[#368AE4] opacity-50" />
         </div>
@@ -104,7 +108,7 @@ export default function PlayFriendsPage() {
             <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
             <h2 className="text-base font-extrabold text-[#0B1528]">Create Room</h2>
           </div>
-          <p className="text-xs text-[#64748B]">Generate a private room code to share with a friend.</p>
+          <p className="text-xs text-[#64748B]">You become the host. Share the 6-letter code or invite link with a friend.</p>
           <Button variant="primary" onClick={createRoom} disabled={creating} className="w-full h-12 rounded-2xl">
             <Plus className="h-4 w-4" /> {creating ? "Creating..." : "Create New Room"}
           </Button>
@@ -115,9 +119,15 @@ export default function PlayFriendsPage() {
             <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
             <h2 className="text-base font-extrabold text-[#0B1528]">Join Room</h2>
           </div>
-          <p className="text-xs text-[#64748B]">Enter a room code from your friend to join their game.</p>
+          <p className="text-xs text-[#64748B]">Enter a room code from your friend to jump into their board.</p>
           <div className="flex gap-2">
-            <Input placeholder="ROOM CODE" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} className="uppercase text-center font-mono font-bold" maxLength={6} />
+            <Input
+              placeholder="ROOM CODE"
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              className="uppercase text-center font-mono font-bold"
+              maxLength={6}
+            />
             <Button variant="primary" onClick={joinByCode} className="rounded-2xl">Join</Button>
           </div>
         </GlassCard>
@@ -138,11 +148,13 @@ export default function PlayFriendsPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-3">
-            {rooms.map(r => (
+            {rooms.map((r) => (
               <Link key={r.id} href={`/dashboard/friends/${r.id}`}>
                 <div className="rounded-2xl bg-white/50 border border-white/70 p-4 hover:bg-white/70 hover:-translate-y-0.5 transition cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-extrabold text-[#0B1528] text-sm">{r.host_name}</p>
+                    <p className="font-extrabold text-[#0B1528] text-sm flex items-center gap-2">
+                      <Swords className="h-3.5 w-3.5 text-[#368AE4]" /> {r.host_name}
+                    </p>
                     <Badge variant="blue" className="font-mono">{r.room_code}</Badge>
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-bold text-[#64748B]">
