@@ -1,5 +1,4 @@
 ﻿import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   Users,
@@ -12,216 +11,11 @@ import {
   HelpCircle,
   Network,
   Award,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
-
-/* ───────── SVG illustrations (screenshot-style) ───────── */
-
-function StructuredPathsArt() {
-  return (
-    <svg viewBox="0 0 200 120" className="w-full h-[110px]" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="step" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F8FAFC" />
-          <stop offset="100%" stopColor="#E2E8F0" />
-        </linearGradient>
-        <linearGradient id="pawnB" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7DD3FC" />
-          <stop offset="100%" stopColor="#0284C7" />
-        </linearGradient>
-        <linearGradient id="kingB" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="100%" stopColor="#1D4ED8" />
-        </linearGradient>
-      </defs>
-      {/* steps */}
-      <rect x="28" y="78" width="44" height="22" rx="4" fill="url(#step)" />
-      <rect x="72" y="56" width="48" height="44" rx="4" fill="url(#step)" />
-      <rect x="120" y="30" width="52" height="70" rx="4" fill="url(#step)" />
-      {/* small pawn */}
-      <circle cx="50" cy="66" r="7" fill="url(#pawnB)" />
-      <rect x="44" y="72" width="12" height="8" rx="3" fill="url(#pawnB)" />
-      <rect x="41" y="78" width="18" height="4" rx="2" fill="#0369A1" />
-      {/* mid pawn */}
-      <circle cx="96" cy="40" r="9" fill="url(#pawnB)" />
-      <rect x="88" y="48" width="16" height="10" rx="4" fill="url(#pawnB)" />
-      <rect x="84" y="56" width="24" height="5" rx="2" fill="#0369A1" />
-      {/* king on top */}
-      <path d="M146 18h8v4h-3v3h6v-3h-3v-4h8v4h-3l2 8h-12l2-8h-3v-4z" fill="url(#kingB)" />
-      <rect x="140" y="30" width="28" height="14" rx="4" fill="url(#kingB)" />
-      <rect x="144" y="44" width="20" height="18" rx="3" fill="url(#kingB)" />
-      <rect x="136" y="60" width="36" height="6" rx="2" fill="#1E3A8A" />
-    </svg>
-  );
-}
-
-function VerifiedMentorsArt() {
-  return (
-    <svg viewBox="0 0 200 120" className="w-full h-[110px]" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="kingS" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#E2E8F0" />
-          <stop offset="45%" stopColor="#94A3B8" />
-          <stop offset="100%" stopColor="#475569" />
-        </linearGradient>
-        <linearGradient id="cap" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#1E293B" />
-          <stop offset="100%" stopColor="#0F172A" />
-        </linearGradient>
-      </defs>
-      {/* king body */}
-      <path d="M100 28c-2 0-4 2-4 5v3h-6v5h6l-2 10h16l-2-10h6v-5h-6v-3c0-3-2-5-4-5h-4z" fill="url(#kingS)" />
-      <ellipse cx="100" cy="28" rx="8" ry="6" fill="url(#kingS)" />
-      <rect x="88" y="48" width="24" height="28" rx="6" fill="url(#kingS)" />
-      <rect x="82" y="74" width="36" height="8" rx="3" fill="#334155" />
-      <rect x="78" y="82" width="44" height="6" rx="2" fill="#1E293B" />
-      {/* graduation cap */}
-      <path d="M70 22l30-12 30 12-30 12-30-12z" fill="url(#cap)" />
-      <rect x="118" y="22" width="3" height="18" rx="1" fill="#0F172A" />
-      <circle cx="121" cy="42" r="3" fill="#F59E0B" />
-      <path d="M70 22v8c8 6 52 6 60 0v-8" fill="#1E293B" opacity="0.85" />
-    </svg>
-  );
-}
-
-function LiveTournamentsArt() {
-  return (
-    <svg viewBox="0 0 200 120" className="w-full h-[110px]" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FDE68A" />
-          <stop offset="40%" stopColor="#FBBF24" />
-          <stop offset="100%" stopColor="#D97706" />
-        </linearGradient>
-        <linearGradient id="goldDark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F59E0B" />
-          <stop offset="100%" stopColor="#B45309" />
-        </linearGradient>
-      </defs>
-      {/* handles */}
-      <path d="M68 36c-12 4-16 18-10 28" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" fill="none" />
-      <path d="M132 36c12 4 16 18 10 28" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" fill="none" />
-      {/* cup */}
-      <path d="M78 30h44c2 20 2 36-8 48H86c-10-12-10-28-8-48z" fill="url(#gold)" />
-      <ellipse cx="100" cy="30" rx="22" ry="6" fill="#FDE68A" />
-      {/* stem + base */}
-      <rect x="94" y="76" width="12" height="12" rx="2" fill="url(#goldDark)" />
-      <rect x="84" y="88" width="32" height="6" rx="2" fill="url(#goldDark)" />
-      <rect x="76" y="94" width="48" height="8" rx="3" fill="#B45309" />
-      {/* star */}
-      <path d="M100 44l2.5 5 5.5.8-4 3.9.9 5.5L100 56l-4.9 2.6.9-5.5-4-3.9 5.5-.8L100 44z" fill="#FFFBEB" />
-    </svg>
-  );
-}
-
-function GlobalCommunityArt() {
-  return (
-    <svg viewBox="0 0 200 120" className="w-full h-[110px]" fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="globe" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#DBEAFE" />
-          <stop offset="100%" stopColor="#3B82F6" />
-        </linearGradient>
-        <linearGradient id="pawnP" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#93C5FD" />
-          <stop offset="100%" stopColor="#2563EB" />
-        </linearGradient>
-      </defs>
-      {/* network dots */}
-      <circle cx="46" cy="40" r="3" fill="#93C5FD" />
-      <circle cx="160" cy="36" r="3" fill="#93C5FD" />
-      <circle cx="170" cy="70" r="2.5" fill="#BFDBFE" />
-      <circle cx="30" cy="72" r="2.5" fill="#BFDBFE" />
-      <path d="M46 40l30 12M160 36l-28 14M30 72l40 8M170 70l-36 6" stroke="#BFDBFE" strokeWidth="1.5" />
-      {/* globe */}
-      <circle cx="100" cy="48" r="28" fill="url(#globe)" opacity="0.95" />
-      <ellipse cx="100" cy="48" rx="12" ry="28" stroke="#EFF6FF" strokeWidth="2" fill="none" />
-      <path d="M72 48h56M100 20v56M78 32h44M78 64h44" stroke="#EFF6FF" strokeWidth="1.5" opacity="0.8" />
-      {/* pawns around */}
-      {[
-        [62, 88],
-        [88, 96],
-        [112, 96],
-        [138, 88],
-      ].map(([x, y], i) => (
-        <g key={i}>
-          <circle cx={x} cy={y - 10} r="6" fill="url(#pawnP)" />
-          <rect x={x - 5} y={y - 5} width="10" height="8" rx="3" fill="url(#pawnP)" />
-          <rect x={x - 8} y={y + 2} width="16" height="4" rx="2" fill="#1D4ED8" />
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function PawnArt({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 100" className={className} fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="pawnMain" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7DD3FC" />
-          <stop offset="50%" stopColor="#38BDF8" />
-          <stop offset="100%" stopColor="#0284C7" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="40" cy="92" rx="28" ry="6" fill="#BAE6FD" opacity="0.7" />
-      <circle cx="40" cy="28" r="16" fill="url(#pawnMain)" />
-      <path d="M24 48c0-2 4-6 16-6s16 4 16 6c2 14-2 28-16 28S22 62 24 48z" fill="url(#pawnMain)" />
-      <rect x="18" y="76" width="44" height="10" rx="3" fill="url(#pawnMain)" />
-      <rect x="12" y="84" width="56" height="8" rx="3" fill="#0369A1" />
-    </svg>
-  );
-}
-
-function KnightArt({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 100" className={className} fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="knightMain" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6EE7B7" />
-          <stop offset="50%" stopColor="#34D399" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="40" cy="92" rx="28" ry="6" fill="#A7F3D0" opacity="0.7" />
-      <path
-        d="M54 78c2-16 4-28-6-40 2-6 8-10 12-14 2-2 1-6-2-6-6 2-14 8-18 14-8 2-14 8-16 16 0 4 2 6 6 6 0 8-2 16-2 24h26z"
-        fill="url(#knightMain)"
-      />
-      <circle cx="44" cy="30" r="2.5" fill="#064E3B" />
-      <rect x="18" y="76" width="44" height="10" rx="3" fill="url(#knightMain)" />
-      <rect x="12" y="84" width="56" height="8" rx="3" fill="#047857" />
-    </svg>
-  );
-}
-
-function QueenArt({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 80 100" className={className} fill="none" aria-hidden>
-      <defs>
-        <linearGradient id="queenMain" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#C4B5FD" />
-          <stop offset="50%" stopColor="#A78BFA" />
-          <stop offset="100%" stopColor="#7C3AED" />
-        </linearGradient>
-      </defs>
-      <ellipse cx="40" cy="92" rx="28" ry="6" fill="#DDD6FE" opacity="0.7" />
-      {/* crown spikes */}
-      <circle cx="20" cy="22" r="4" fill="url(#queenMain)" />
-      <circle cx="40" cy="14" r="5" fill="url(#queenMain)" />
-      <circle cx="60" cy="22" r="4" fill="url(#queenMain)" />
-      <circle cx="28" cy="18" r="3" fill="url(#queenMain)" />
-      <circle cx="52" cy="18" r="3" fill="url(#queenMain)" />
-      <path d="M18 26l6 20h32l6-20-10 8-6-12-6 12-10-8z" fill="url(#queenMain)" />
-      <rect x="26" y="46" width="28" height="30" rx="8" fill="url(#queenMain)" />
-      <rect x="18" y="76" width="44" height="10" rx="3" fill="url(#queenMain)" />
-      <rect x="12" y="84" width="56" height="8" rx="3" fill="#6D28D9" />
-    </svg>
-  );
-}
-
-/* ───────── Page ───────── */
 
 export default function HomePage() {
   const journey = [
@@ -230,348 +24,1070 @@ export default function HomePage() {
       desc: "Clear level-by-level training from first moves to mastery.",
       iconBg: "bg-blue-100 text-blue-600",
       Icon: Target,
-      Art: StructuredPathsArt,
     },
     {
       title: "Verified Mentors",
       desc: "Learn with verified FIDE coaches and experienced guides.",
       iconBg: "bg-emerald-100 text-emerald-600",
       Icon: GraduationCap,
-      Art: VerifiedMentorsArt,
     },
     {
       title: "Live Tournaments",
       desc: "Compete, track ratings, and grow under real pressure.",
       iconBg: "bg-amber-100 text-amber-600",
       Icon: Trophy,
-      Art: LiveTournamentsArt,
     },
     {
       title: "Global Community",
       desc: "Train and connect with players across Africa and beyond.",
       iconBg: "bg-violet-100 text-violet-600",
       Icon: Network,
-      Art: GlobalCommunityArt,
     },
   ];
 
   const skills = [
-    { t: "Critical Calculation", d: "Evaluating choices under pressure." },
-    { t: "Strategic Planning", d: "Formulating long-term advantages." },
-    { t: "Emotional Control", d: "Resilience in competitive play." },
-    { t: "Pattern Recognition", d: "Instant tactical vision." },
+    {
+      t: "Critical Calculation",
+      d: "Evaluating choices under pressure.",
+    },
+    {
+      t: "Strategic Planning",
+      d: "Formulating long-term advantages.",
+    },
+    {
+      t: "Emotional Control",
+      d: "Resilience in competitive play.",
+    },
+    {
+      t: "Pattern Recognition",
+      d: "Instant tactical vision.",
+    },
   ];
 
   const path = [
     {
-      n: "1",
+      n: "01",
       level: "Level 1",
       title: "Fundamentals",
       d: "Piece dynamics, rules, and essential mates.",
-      ring: "bg-[#368AE4]",
-      Art: PawnArt,
+      icon: "♟",
     },
     {
-      n: "2",
+      n: "02",
       level: "Level 2",
       title: "Tactical Pattern",
       d: "Forks, pins, skewers, and combination play.",
-      ring: "bg-emerald-500",
-      Art: KnightArt,
+      icon: "♞",
     },
     {
-      n: "3",
+      n: "03",
       level: "Level 3",
       title: "Advanced Mastery",
       d: "Positional nuances, calculation, and endgames.",
-      ring: "bg-violet-500",
-      Art: QueenArt,
+      icon: "♛",
     },
   ];
 
   return (
-    <div className="px-3 sm:px-8 pb-16 sm:pb-20 max-w-full overflow-hidden space-y-12">
-      {/* 1. HERO SECTION */}
-      <section className="relative pt-4 sm:pt-10 pb-6 lg:pb-12">
-        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-          <div className="lg:col-span-5 space-y-5 sm:space-y-6 relative z-30">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/50 border border-white/70 px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold tracking-[0.1em] text-[#64748B] uppercase backdrop-blur-md shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-[#368AE4] animate-pulse" />
-              BUILDING CHAMPIONS. SHAPING LEADERS.
+    <main className="w-full overflow-hidden bg-[#F8FAFD] text-[#0B1528]">
+
+      {/* =========================================================
+          HERO
+      ========================================================== */}
+
+      <section
+        className="
+          relative isolate min-h-[720px] overflow-hidden
+          bg-[#F7F9FC]
+          bg-cover bg-no-repeat
+          bg-[position:62%_center]
+          sm:min-h-[760px]
+          lg:min-h-[calc(100vh-80px)]
+          lg:bg-[position:center_center]
+        "
+        style={{
+          backgroundImage: "url('/aca-hero-bg.jpg')",
+        }}
+      >
+
+        {/* Soft overlay only on the left.
+            This keeps the woman's side natural. */}
+        <div
+          className="
+            absolute inset-y-0 left-0 -z-10
+            w-full lg:w-[64%]
+            bg-gradient-to-r
+            from-[#F8FAFD]
+            via-[#F8FAFD]/95
+            to-transparent
+          "
+        />
+
+        {/* Very subtle overall lightening */}
+        <div className="absolute inset-0 -z-20 bg-white/5" />
+
+        {/* Decorative blue glow */}
+        <div
+          className="
+            absolute -left-32 top-20 -z-10
+            h-72 w-72 rounded-full
+            bg-[#368AE4]/10 blur-3xl
+          "
+        />
+
+        <div
+          className="
+            absolute -right-32 bottom-10 -z-10
+            h-96 w-96 rounded-full
+            bg-[#368AE4]/10 blur-3xl
+          "
+        />
+
+        <div
+          className="
+            mx-auto flex min-h-[720px] max-w-[1400px]
+            items-center px-5 py-20
+            sm:min-h-[760px] sm:px-8
+            lg:min-h-[calc(100vh-80px)]
+            lg:px-12 xl:px-16
+          "
+        >
+
+          {/* HERO CONTENT */}
+
+          <div className="relative z-10 w-full max-w-[610px] pt-12 lg:pt-0">
+
+            {/* Eyebrow */}
+
+            <div
+              className="
+                mb-5 inline-flex items-center gap-2
+                rounded-full
+                border border-[#368AE4]/20
+                bg-white/65
+                px-4 py-2
+                text-[10px] font-extrabold
+                uppercase tracking-[0.16em]
+                text-[#368AE4]
+                shadow-sm backdrop-blur-md
+                sm:text-[11px]
+              "
+            >
+              <span className="h-2 w-2 rounded-full bg-[#368AE4]" />
+              Welcome to African Chess Academy
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-[3.6rem] font-extrabold tracking-tight text-[#0B1528] leading-[1.06]">
-              Where African
+            {/* Heading */}
+
+            <h1
+              className="
+                max-w-[620px]
+                text-[3.3rem]
+                font-black
+                leading-[0.98]
+                tracking-[-0.045em]
+                text-[#0B1528]
+                sm:text-6xl
+                lg:text-[5rem]
+                xl:text-[5.4rem]
+              "
+            >
+              Think.
               <br />
-              Chess Talent
+
+              Strategize.
               <br />
-              Becomes <span className="text-[#368AE4]">Global
-              <br />
-              Excellence.</span>
+
+              <span className="text-[#368AE4]">
+                Become.
+              </span>
             </h1>
 
-            <p className="text-sm sm:text-base text-[#64748B] max-w-[420px] leading-relaxed font-medium">
-              We Don’t Just Teach Chess. We Build Strategic Thinkers. Learn from experienced coaches, compete in tournaments, and master the game.
+            {/* Description */}
+
+            <p
+              className="
+                mt-7 max-w-[500px]
+                text-sm font-medium leading-7
+                text-[#526174]
+                sm:text-base
+              "
+            >
+              We empower students across Africa to learn, compete,
+              and grow through the game of chess. Every move builds
+              a stronger mind and a brighter future.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-1">
-              <Link
-                href="/register"
-                className="btn-blue inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5"
-              >
-                Start Your Chess Journey <ArrowRight className="h-4 w-4" />
-              </Link>
+            {/* Buttons */}
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
               <Link
                 href="/programs"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white/60 border border-white px-6 py-3.5 text-sm font-bold text-[#0B1528] shadow-sm backdrop-blur transition hover:bg-white"
+                className="
+                  group inline-flex items-center
+                  justify-center gap-3
+                  rounded-xl
+                  bg-[#368AE4]
+                  px-6 py-4
+                  text-sm font-bold text-white
+                  shadow-[0_12px_30px_rgba(54,138,228,0.25)]
+                  transition-all duration-300
+                  hover:-translate-y-1
+                  hover:bg-[#2679D2]
+                  hover:shadow-[0_16px_35px_rgba(54,138,228,0.3)]
+                "
               >
                 Explore Programs
-              </Link>
-            </div>
-          </div>
 
-          <div className="lg:col-span-7 relative z-10">
-            <div className="relative mx-auto h-[400px] sm:h-[500px] lg:h-[560px] w-full max-w-[560px] flex items-center justify-center">
-              <div className="absolute left-1/2 top-1/2 h-[240px] sm:h-[340px] w-[240px] sm:w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#368AE4]/20 blur-[50px] sm:blur-[80px]" />
-              <div className="absolute left-1/2 top-1/2 h-[280px] sm:h-[400px] w-[280px] sm:w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50" />
-              <div className="absolute bottom-[12%] left-1/2 h-6 sm:h-8 w-36 sm:w-52 -translate-x-1/2 rounded-full bg-white/70 blur-xl" />
-
-              <div className="relative h-[72%] w-[72%] sm:h-[78%] sm:w-[78%] z-10">
-                <Image
-                  src="/africa-map.png"
-                  alt="Map of Africa"
-                  fill
-                  priority
-                  className="object-contain drop-shadow-[0_20px_40px_rgba(54,138,228,0.25)]"
+                <ArrowRight
+                  className="
+                    h-4 w-4
+                    transition-transform
+                    group-hover:translate-x-1
+                  "
                 />
-              </div>
+              </Link>
 
-              <GlassCard className="absolute left-1/2 top-[2%] z-20 flex -translate-x-1/2 items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 shadow-lg min-w-[108px] sm:min-w-[150px]">
-                <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#EEF3FA] flex items-center justify-center shrink-0">
-                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#368AE4]" />
-                </div>
-                <div>
-                  <p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">500+</p>
-                  <p className="text-[8px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Students</p>
-                </div>
-              </GlassCard>
-
-              <GlassCard className="absolute right-0 sm:right-1 top-[30%] z-20 flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 shadow-lg min-w-[100px] sm:min-w-[140px]">
-                <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#EEF3FA] flex items-center justify-center shrink-0">
-                  <GraduationCap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#368AE4]" />
-                </div>
-                <div>
-                  <p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">20+</p>
-                  <p className="text-[8px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Coaches</p>
-                </div>
-              </GlassCard>
-
-              <GlassCard className="absolute left-1/2 bottom-[4%] z-20 flex -translate-x-1/2 items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 shadow-lg min-w-[108px] sm:min-w-[150px]">
-                <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#EEF3FA] flex items-center justify-center shrink-0">
-                  <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#368AE4]" />
-                </div>
-                <div>
-                  <p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">100+</p>
-                  <p className="text-[8px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Tournaments</p>
-                </div>
-              </GlassCard>
-
-              <GlassCard className="absolute left-0 sm:left-1 top-[30%] z-20 flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2.5 shadow-lg min-w-[100px] sm:min-w-[140px]">
-                <div className="h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#EEF3FA] flex items-center justify-center shrink-0">
-                  <Globe2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#368AE4]" />
-                </div>
-                <div>
-                  <p className="text-sm sm:text-base font-extrabold text-[#0B1528] leading-none">15</p>
-                  <p className="text-[8px] sm:text-[10px] font-bold text-[#64748B] mt-0.5">Countries</p>
-                </div>
-              </GlassCard>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. WHY ACA EXISTS */}
-      <section className="space-y-6">
-        <GlassCard className="p-7 space-y-3 max-w-3xl mx-auto text-center">
-          <div className="flex items-center justify-center gap-2">
-            <span className="h-5 w-1.5 rounded-full bg-[#368AE4]" />
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#0B1528]">Why ACA Exists</h2>
-          </div>
-          <p className="text-sm text-[#64748B] leading-relaxed font-medium">
-            African Chess Academy bridges the gap between potential and global performance. We provide
-            structured training, verified FIDE coaches, and competitive opportunities to nurture champions.
-          </p>
-        </GlassCard>
-
-        {/* Built for Every Chess Journey */}
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#0B1528]">
-              Built for Every Chess Journey
-            </h3>
-            <div className="mx-auto h-1 w-12 rounded-full bg-[#368AE4]" />
-          </div>
-
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            {journey.map(({ title, desc, iconBg, Icon, Art }) => (
-              <div
-                key={title}
-                className="rounded-[1.6rem] bg-white/80 border border-white p-5 shadow-sm backdrop-blur-sm hover:-translate-y-1 hover:shadow-md transition"
+              <Link
+                href="/tournaments"
+                className="
+                  group inline-flex items-center
+                  justify-center gap-3
+                  rounded-xl
+                  border border-slate-200
+                  bg-white/75
+                  px-6 py-4
+                  text-sm font-bold
+                  text-[#0B1528]
+                  shadow-sm
+                  backdrop-blur-md
+                  transition-all duration-300
+                  hover:-translate-y-1
+                  hover:bg-white
+                  hover:shadow-md
+                "
               >
-                <div className="flex items-center gap-2.5 mb-2">
-                  <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${iconBg}`}>
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <h4 className="text-sm font-extrabold text-[#0B1528]">{title}</h4>
+                View Tournaments
+
+                <ArrowRight
+                  className="
+                    h-4 w-4 text-[#368AE4]
+                    transition-transform
+                    group-hover:translate-x-1
+                  "
+                />
+              </Link>
+
+            </div>
+
+            {/* TRUST / STATS */}
+
+            <div
+              className="
+                mt-10 flex flex-wrap
+                items-center gap-x-7 gap-y-5
+              "
+            >
+
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="
+                    flex h-11 w-11 items-center
+                    justify-center rounded-full
+                    border border-white
+                    bg-white/70
+                    shadow-sm
+                    backdrop-blur
+                  "
+                >
+                  <Users className="h-5 w-5 text-[#368AE4]" />
                 </div>
-                <Art />
-                <p className="text-[11px] text-[#64748B] leading-relaxed mt-1">{desc}</p>
+
+                <div>
+                  <p className="text-lg font-black text-[#0B1528]">
+                    2,500+
+                  </p>
+
+                  <p className="text-[11px] font-medium text-[#64748B]">
+                    Students
+                  </p>
+                </div>
+
               </div>
-            ))}
+
+              <div className="hidden h-10 w-px bg-slate-300 sm:block" />
+
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="
+                    flex h-11 w-11 items-center
+                    justify-center rounded-full
+                    border border-white
+                    bg-white/70
+                    shadow-sm
+                    backdrop-blur
+                  "
+                >
+                  <Trophy className="h-5 w-5 text-[#368AE4]" />
+                </div>
+
+                <div>
+                  <p className="text-lg font-black text-[#0B1528]">
+                    150+
+                  </p>
+
+                  <p className="text-[11px] font-medium text-[#64748B]">
+                    Tournaments
+                  </p>
+                </div>
+
+              </div>
+
+              <div className="hidden h-10 w-px bg-slate-300 sm:block" />
+
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="
+                    flex h-11 w-11 items-center
+                    justify-center rounded-full
+                    border border-white
+                    bg-white/70
+                    shadow-sm
+                    backdrop-blur
+                  "
+                >
+                  <Globe2 className="h-5 w-5 text-[#368AE4]" />
+                </div>
+
+                <div>
+                  <p className="text-lg font-black text-[#0B1528]">
+                    Africa
+                  </p>
+
+                  <p className="text-[11px] font-medium text-[#64748B]">
+                    Growing together
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
         </div>
+
+        {/* Bottom fade */}
+
+        <div
+          className="
+            absolute bottom-0 left-0 right-0
+            h-24
+            bg-gradient-to-t
+            from-[#F8FAFD]
+            to-transparent
+            pointer-events-none
+          "
+        />
+
       </section>
 
-      {/* 3. WHAT WE DEVELOP */}
-      <section className="space-y-6">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B1528]">What We Develop</h2>
-          <div className="mx-auto h-1 w-12 rounded-full bg-[#368AE4]" />
-        </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {skills.map((item) => (
-            <GlassCard key={item.t} className="p-5 space-y-2 hover:-translate-y-0.5 transition">
-              <div className="h-9 w-9 rounded-xl bg-[#EEF3FA] flex items-center justify-center">
-                <Award className="h-4 w-4 text-[#368AE4]" />
-              </div>
-              <p className="text-sm font-extrabold text-[#0B1528]">{item.t}</p>
-              <p className="text-xs text-[#64748B] leading-relaxed">{item.d}</p>
-            </GlassCard>
-          ))}
-        </div>
-      </section>
+      {/* =========================================================
+          TRUST STRIP
+      ========================================================== */}
 
-      {/* 4. THE ACA DEVELOPMENT PATH */}
-      <section className="space-y-8">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0B1528]">
-            The ACA Development Path
-          </h2>
-          <div className="mx-auto h-1 w-12 rounded-full bg-[#368AE4]" />
-        </div>
+      <section className="border-y border-slate-200/70 bg-white">
 
-        <div className="grid md:grid-cols-3 gap-4 md:gap-5">
-          {path.map((step, idx) => (
-            <div key={step.n} className="relative">
-              <div className="rounded-[1.6rem] bg-white/80 border border-white p-5 sm:p-6 shadow-sm backdrop-blur-sm min-h-[200px] flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-2">
-                    <span
-                      className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${step.ring} text-white text-xs font-extrabold shadow-sm`}
-                    >
-                      {step.n}
-                    </span>
-                    <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#368AE4]">
-                      {step.level}
-                    </p>
-                    <h3 className="text-base font-extrabold text-[#0B1528]">{step.title}</h3>
-                    <p className="text-xs text-[#64748B] leading-relaxed max-w-[160px]">{step.d}</p>
-                  </div>
-                  <step.Art className="w-[72px] h-[92px] shrink-0" />
-                </div>
-              </div>
+        <div
+          className="
+            mx-auto max-w-7xl
+            px-5 py-7
+            sm:px-8
+            lg:px-12
+          "
+        >
 
-              {idx < path.length - 1 && (
-                <div className="hidden md:block absolute top-1/2 -right-3 w-6 border-t-2 border-dashed border-slate-300 z-10" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-center">
-          <Link
-            href="/programs"
-            className="inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-5 py-2.5 text-sm font-bold text-[#0B1528] shadow-sm hover:bg-slate-50 transition"
+          <div
+            className="
+              flex flex-col gap-5
+              sm:flex-row sm:items-center
+              sm:justify-between
+            "
           >
-            View Programs <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
 
-      {/* 5. FOR SCHOOLS, PARENTS, COMMUNITY */}
-      <div className="grid md:grid-cols-3 gap-5">
-        <GlassCard className="p-6 space-y-3">
-          <Building className="h-8 w-8 text-[#368AE4]" />
-          <h3 className="text-base font-extrabold text-[#0B1528]">For Schools</h3>
-          <p className="text-xs text-[#64748B] leading-relaxed">
-            Integrate accredited chess curricula into your school academic programs.
-          </p>
-          <Link href="/contact" className="text-xs font-bold text-[#368AE4] block pt-2">
-            School Programs →
-          </Link>
-        </GlassCard>
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-wider text-[#64748B]">
+                A community of learners
+              </p>
 
-        <GlassCard className="p-6 space-y-3">
-          <HeartHandshake className="h-8 w-8 text-amber-500" />
-          <h3 className="text-base font-extrabold text-[#0B1528]">For Parents</h3>
-          <p className="text-xs text-[#64748B] leading-relaxed">
-            Track your child’s cognitive development, ratings, and course certificates.
-          </p>
-          <Link href="/register" className="text-xs font-bold text-[#368AE4] block pt-2">
-            Parent Portal →
-          </Link>
-        </GlassCard>
-
-        <GlassCard className="p-6 space-y-3">
-          <Globe2 className="h-8 w-8 text-emerald-500" />
-          <h3 className="text-base font-extrabold text-[#0B1528]">Experience Online</h3>
-          <p className="text-xs text-[#64748B] leading-relaxed">
-            Play AI, challenge friends in real-time, solve daily puzzles, and join webinars.
-          </p>
-          <Link href="/register" className="text-xs font-bold text-[#368AE4] block pt-2">
-            Join ACA Online →
-          </Link>
-        </GlassCard>
-      </div>
-
-      {/* 6. FAQ & FINAL CTA */}
-      <div className="grid lg:grid-cols-12 gap-6">
-        <GlassCard className="lg:col-span-7 p-7 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <HelpCircle className="h-5 w-5 text-[#368AE4]" />
-            <h3 className="text-lg font-extrabold text-[#0B1528]">Frequently Asked Questions</h3>
-          </div>
-          <div className="space-y-3 text-xs">
-            <div className="p-3.5 rounded-xl bg-white/40 border border-white/60">
-              <p className="font-extrabold text-[#0B1528] mb-1">Is ACA suitable for complete beginners?</p>
-              <p className="text-[#64748B]">Yes! Our Level 1 path assumes zero previous knowledge.</p>
-            </div>
-            <div className="p-3.5 rounded-xl bg-white/40 border border-white/60">
-              <p className="font-extrabold text-[#0B1528] mb-1">How do online multiplayer games work?</p>
-              <p className="text-[#64748B]">
-                Games use real-time WebSockets with live clocks and instant move syncing.
+              <p className="mt-1 text-sm font-bold text-[#0B1528]">
+                A legacy of champions.
               </p>
             </div>
-          </div>
-        </GlassCard>
 
-        <GlassCard className="lg:col-span-5 p-7 relative overflow-hidden flex flex-col justify-between">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#368AE4]/15 to-transparent pointer-events-none" />
-          <div className="relative z-10 space-y-3">
-            <Badge variant="blue">Get Started Today</Badge>
-            <h3 className="text-2xl font-extrabold text-[#0B1528]">Ready to elevate your game?</h3>
-            <p className="text-xs text-[#64748B] leading-relaxed">
-              Create your account to unlock interactive lessons, play against AI, and join tournaments.
-            </p>
+            <div className="flex flex-wrap items-center gap-8">
+
+              {[
+                "Schools",
+                "Chess Clubs",
+                "Coaches",
+                "Communities",
+                "Players",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="
+                    flex items-center gap-2
+                    text-xs font-bold
+                    text-slate-400
+                  "
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#368AE4]/40" />
+                  {item}
+                </div>
+              ))}
+
+            </div>
+
           </div>
-          <Link href="/register" className="relative z-10 pt-4">
-            <button className="btn-blue w-full rounded-full py-3.5 text-sm font-bold text-white shadow-lg">
-              Start Free Trial →
-            </button>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================================
+          WHY ACA
+      ========================================================== */}
+
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
+
+        <div className="mx-auto max-w-3xl text-center">
+
+          <div
+            className="
+              mx-auto mb-4 flex h-11 w-11
+              items-center justify-center
+              rounded-2xl bg-[#368AE4]/10
+            "
+          >
+            <Sparkles className="h-5 w-5 text-[#368AE4]" />
+          </div>
+
+          <p
+            className="
+              text-xs font-extrabold
+              uppercase tracking-[0.15em]
+              text-[#368AE4]
+            "
+          >
+            Why ACA exists
+          </p>
+
+          <h2
+            className="
+              mt-3 text-3xl font-black
+              tracking-tight text-[#0B1528]
+              sm:text-4xl
+            "
+          >
+            From potential to global performance.
+          </h2>
+
+          <p
+            className="
+              mt-5 text-sm leading-7
+              text-[#64748B] sm:text-base
+            "
+          >
+            African Chess Academy bridges the gap between potential
+            and global performance. We provide structured training,
+            verified FIDE coaches, and competitive opportunities
+            to nurture champions.
+          </p>
+
+        </div>
+
+
+        {/* Journey cards */}
+
+        <div className="mt-14">
+
+          <div className="mb-7">
+
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#368AE4]">
+              The ACA experience
+            </p>
+
+            <h3 className="mt-2 text-2xl font-black text-[#0B1528] sm:text-3xl">
+              Built for every chess journey.
+            </h3>
+
+          </div>
+
+
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+
+            {journey.map(({ title, desc, iconBg, Icon }) => (
+
+              <div
+                key={title}
+                className="
+                  group rounded-[1.5rem]
+                  border border-slate-200/80
+                  bg-white p-6
+                  shadow-[0_8px_30px_rgba(15,23,42,0.04)]
+                  transition-all duration-300
+                  hover:-translate-y-1
+                  hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]
+                "
+              >
+
+                <div
+                  className={`
+                    flex h-11 w-11
+                    items-center justify-center
+                    rounded-xl
+                    ${iconBg}
+                  `}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+
+                <h4 className="mt-5 text-base font-black text-[#0B1528]">
+                  {title}
+                </h4>
+
+                <p className="mt-2 text-sm leading-6 text-[#64748B]">
+                  {desc}
+                </p>
+
+                <div
+                  className="
+                    mt-6 h-1 w-8
+                    rounded-full
+                    bg-[#368AE4]/20
+                    transition-all
+                    group-hover:w-14
+                    group-hover:bg-[#368AE4]
+                  "
+                />
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================================
+          WHAT WE DEVELOP
+      ========================================================== */}
+
+      <section className="bg-[#F1F6FC]">
+
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
+
+          <div className="max-w-2xl">
+
+            <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#368AE4]">
+              Beyond the board
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black text-[#0B1528] sm:text-4xl">
+              Skills that last beyond chess.
+            </h2>
+
+            <p className="mt-4 text-sm leading-7 text-[#64748B]">
+              Chess becomes a framework for developing the thinking,
+              discipline, and decision-making skills students can
+              carry into every part of life.
+            </p>
+
+          </div>
+
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            {skills.map((item, index) => (
+
+              <GlassCard
+                key={item.t}
+                className="
+                  border-white/80
+                  bg-white/80
+                  p-6
+                  transition-all
+                  hover:-translate-y-1
+                "
+              >
+
+                <div
+                  className="
+                    flex h-10 w-10
+                    items-center justify-center
+                    rounded-xl
+                    bg-[#368AE4]/10
+                  "
+                >
+                  <Award className="h-5 w-5 text-[#368AE4]" />
+                </div>
+
+                <p className="mt-5 text-sm font-black text-[#0B1528]">
+                  {item.t}
+                </p>
+
+                <p className="mt-2 text-xs leading-6 text-[#64748B]">
+                  {item.d}
+                </p>
+
+                <span className="mt-5 block text-[10px] font-black text-[#368AE4]">
+                  0{index + 1}
+                </span>
+
+              </GlassCard>
+
+            ))}
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================================
+          DEVELOPMENT PATH
+      ========================================================== */}
+
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
+
+        <div className="text-center">
+
+          <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#368AE4]">
+            Your progression
+          </p>
+
+          <h2 className="mt-3 text-3xl font-black text-[#0B1528] sm:text-4xl">
+            The ACA Development Path
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#64748B]">
+            A clear progression from learning the fundamentals
+            to mastering advanced strategic concepts.
+          </p>
+
+        </div>
+
+
+        <div className="relative mt-14 grid gap-5 md:grid-cols-3">
+
+          {/* Connecting line */}
+
+          <div
+            className="
+              absolute left-[16.5%]
+              right-[16.5%]
+              top-16 hidden
+              h-px bg-slate-200
+              md:block
+            "
+          />
+
+          {path.map((step) => (
+
+            <div
+              key={step.n}
+              className="
+                relative z-10
+                rounded-[1.5rem]
+                border border-slate-200
+                bg-white
+                p-7
+                shadow-[0_8px_30px_rgba(15,23,42,0.04)]
+              "
+            >
+
+              <div className="flex items-start justify-between">
+
+                <div
+                  className="
+                    flex h-12 w-12
+                    items-center justify-center
+                    rounded-2xl
+                    bg-[#368AE4]
+                    text-lg font-black text-white
+                    shadow-lg
+                    shadow-[#368AE4]/20
+                  "
+                >
+                  {step.n}
+                </div>
+
+                <span className="text-5xl leading-none opacity-20">
+                  {step.icon}
+                </span>
+
+              </div>
+
+              <p className="mt-8 text-[10px] font-black uppercase tracking-[0.15em] text-[#368AE4]">
+                {step.level}
+              </p>
+
+              <h3 className="mt-2 text-xl font-black text-[#0B1528]">
+                {step.title}
+              </h3>
+
+              <p className="mt-3 text-sm leading-6 text-[#64748B]">
+                {step.d}
+              </p>
+
+              <div className="mt-6 flex items-center gap-2 text-xs font-bold text-emerald-600">
+                <CheckCircle2 className="h-4 w-4" />
+                Structured learning
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+
+        <div className="mt-9 flex justify-center">
+
+          <Link
+            href="/programs"
+            className="
+              inline-flex items-center gap-2
+              rounded-full
+              border border-slate-200
+              bg-white
+              px-6 py-3
+              text-sm font-bold
+              text-[#0B1528]
+              shadow-sm
+              transition
+              hover:-translate-y-0.5
+              hover:shadow-md
+            "
+          >
+            View All Programs
+            <ArrowRight className="h-4 w-4 text-[#368AE4]" />
           </Link>
-        </GlassCard>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================================
+          FOR SCHOOLS / PARENTS / ONLINE
+      ========================================================== */}
+
+      <section className="bg-[#0B1528]">
+
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
+
+          <div className="max-w-2xl">
+
+            <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#72B3FF]">
+              Built for everyone
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
+              Chess education without limits.
+            </h2>
+
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              Whether you are a school, parent, coach, or player,
+              ACA provides the tools and opportunities to grow.
+            </p>
+
+          </div>
+
+
+          <div className="mt-12 grid gap-5 md:grid-cols-3">
+
+            <DarkFeatureCard
+              icon={<Building className="h-6 w-6" />}
+              title="For Schools"
+              description="Integrate structured chess curricula into your school academic programs."
+              href="/contact"
+              linkText="School Programs"
+            />
+
+            <DarkFeatureCard
+              icon={<HeartHandshake className="h-6 w-6" />}
+              title="For Parents"
+              description="Track your child's development, ratings, progress, and certificates."
+              href="/register"
+              linkText="Parent Portal"
+            />
+
+            <DarkFeatureCard
+              icon={<Globe2 className="h-6 w-6" />}
+              title="Experience Online"
+              description="Play AI, challenge friends, solve puzzles, and join online events."
+              href="/register"
+              linkText="Join ACA Online"
+            />
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================================
+          FAQ + CTA
+      ========================================================== */}
+
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-12">
+
+        <div className="grid gap-6 lg:grid-cols-12">
+
+          {/* FAQ */}
+
+          <GlassCard className="lg:col-span-7 p-7 sm:p-8">
+
+            <div className="flex items-center gap-3">
+
+              <div
+                className="
+                  flex h-10 w-10
+                  items-center justify-center
+                  rounded-xl
+                  bg-[#368AE4]/10
+                "
+              >
+                <HelpCircle className="h-5 w-5 text-[#368AE4]" />
+              </div>
+
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#368AE4]">
+                  FAQ
+                </p>
+
+                <h3 className="mt-1 text-xl font-black text-[#0B1528]">
+                  Frequently Asked Questions
+                </h3>
+              </div>
+
+            </div>
+
+
+            <div className="mt-8 space-y-3">
+
+              <FAQItem
+                question="Is ACA suitable for complete beginners?"
+                answer="Yes. Our Level 1 path assumes zero previous chess knowledge."
+              />
+
+              <FAQItem
+                question="How do online multiplayer games work?"
+                answer="Games use real-time technology with live clocks and instant move syncing."
+              />
+
+              <FAQItem
+                question="Can students participate in tournaments?"
+                answer="Yes. Students can participate in ACA tournaments and competitive events."
+              />
+
+            </div>
+
+          </GlassCard>
+
+
+          {/* CTA */}
+
+          <div
+            className="
+              relative overflow-hidden
+              rounded-[1.7rem]
+              bg-[#368AE4]
+              p-8
+              text-white
+              lg:col-span-5
+            "
+          >
+
+            <div
+              className="
+                absolute -right-20 -top-20
+                h-56 w-56 rounded-full
+                bg-white/10 blur-2xl
+              "
+            />
+
+            <div
+              className="
+                absolute -bottom-24 -left-20
+                h-64 w-64 rounded-full
+                bg-white/10 blur-2xl
+              "
+            />
+
+            <div className="relative z-10 flex h-full flex-col justify-between">
+
+              <div>
+
+                <Badge variant="blue">
+                  Get Started Today
+                </Badge>
+
+                <h3 className="mt-6 text-3xl font-black leading-tight">
+                  Ready to elevate your game?
+                </h3>
+
+                <p className="mt-4 text-sm leading-6 text-blue-50">
+                  Create your account to unlock interactive lessons,
+                  play against AI, and join tournaments.
+                </p>
+
+              </div>
+
+              <Link
+                href="/register"
+                className="
+                  mt-10 inline-flex
+                  items-center justify-center
+                  gap-2
+                  rounded-xl
+                  bg-white
+                  px-5 py-4
+                  text-sm font-black
+                  text-[#0B1528]
+                  transition
+                  hover:-translate-y-0.5
+                  hover:bg-blue-50
+                "
+              >
+                Start Your Chess Journey
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+  );
+}
+
+
+/* =============================================================
+   DARK FEATURE CARD
+============================================================= */
+
+function DarkFeatureCard({
+  icon,
+  title,
+  description,
+  href,
+  linkText,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  href: string;
+  linkText: string;
+}) {
+  return (
+    <div
+      className="
+        rounded-[1.5rem]
+        border border-white/10
+        bg-white/[0.04]
+        p-7
+        transition
+        hover:-translate-y-1
+        hover:bg-white/[0.07]
+      "
+    >
+
+      <div
+        className="
+          flex h-11 w-11
+          items-center justify-center
+          rounded-xl
+          bg-[#368AE4]
+          text-white
+        "
+      >
+        {icon}
       </div>
+
+      <h3 className="mt-6 text-lg font-black text-white">
+        {title}
+      </h3>
+
+      <p className="mt-3 text-sm leading-6 text-slate-400">
+        {description}
+      </p>
+
+      <Link
+        href={href}
+        className="
+          mt-6 inline-flex
+          items-center gap-2
+          text-xs font-bold
+          text-[#72B3FF]
+          transition
+          hover:text-white
+        "
+      >
+        {linkText}
+        <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
+
+    </div>
+  );
+}
+
+
+/* =============================================================
+   FAQ ITEM
+============================================================= */
+
+function FAQItem({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) {
+  return (
+    <div
+      className="
+        rounded-2xl
+        border border-slate-200
+        bg-slate-50/70
+        p-5
+      "
+    >
+
+      <p className="text-sm font-black text-[#0B1528]">
+        {question}
+      </p>
+
+      <p className="mt-2 text-xs leading-6 text-[#64748B]">
+        {answer}
+      </p>
+
     </div>
   );
 }
