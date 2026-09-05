@@ -35,7 +35,6 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
     setMounted(true);
   }, []);
 
-  // Global Ctrl+K / Cmd+K listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -62,18 +61,18 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
   const sidebarWidth = collapsed ? "w-20" : "w-64";
 
   return (
-    <div className="min-h-screen canvas-bg flex font-sans max-w-full overflow-x-hidden">
-      {/* Command Palette Modal */}
+    <div className="h-screen w-screen overflow-hidden canvas-bg flex font-sans">
       <CommandPalette isOpen={cmdOpen} onClose={() => setCmdOpen(false)} />
 
-      {/* STICKY SIDEBAR */}
+      {/* PERMANENT FIXED SIDEBAR */}
       <aside
         className={`
-          fixed lg:sticky top-0 left-0 h-screen z-40 
+          h-screen shrink-0 z-40
           ${sidebarWidth}
           bg-white/70 lg:bg-white/40 backdrop-blur-xl border-r border-white/60 
-          flex flex-col
+          flex flex-col relative
           ${mounted ? "transition-all duration-300 ease-in-out" : ""}
+          fixed lg:relative
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"} 
           lg:translate-x-0
           shadow-[4px_0_24px_rgba(30,60,100,0.08)]
@@ -119,7 +118,7 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
                     flex items-center rounded-xl transition-all
                     ${collapsed ? "justify-center h-10 w-12 mx-auto" : "gap-3 px-3.5 py-2.5"}
                     ${active
-                      ? "bg-white/80 text-[#368AE4] shadow-sm border border-white/90"
+                      ? "bg-white/80 text-[#368AE4] shadow-sm border border-white/90 font-extrabold"
                       : "text-[#64748B] hover:bg-white/50 hover:text-[#0B1528]"}
                   `}
                 >
@@ -146,14 +145,13 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
         </div>
       </aside>
 
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 bg-[#0B1528]/30 backdrop-blur-sm z-30" />
       )}
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        <header className="h-16 sm:h-20 bg-white/30 backdrop-blur-md border-b border-white/50 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 shadow-[0_4px_24px_rgba(30,60,100,0.02)]">
+      {/* INDEPENDENT SCROLLING MAIN CONTENT */}
+      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+        <header className="h-16 sm:h-20 bg-white/30 backdrop-blur-md border-b border-white/50 flex items-center justify-between px-4 sm:px-8 shrink-0 shadow-[0_4px_24px_rgba(30,60,100,0.02)]">
           <div className="flex items-center gap-3">
             <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-xl text-[#0B1528] bg-white/60 border border-white/80 shadow-sm">
               <Menu className="h-5 w-5" />
@@ -164,21 +162,13 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
             >
               <Search className="h-3.5 w-3.5 text-[#368AE4]" />
               <span>Search platform...</span>
-              <kbd className="rounded bg-white/80 border border-white/90 px-1.5 py-0.5 text-[9px] font-extrabold text-[#64748B] shadow-2xs">
+              <kbd className="rounded bg-white/80 border border-white/90 px-1.5 py-0.5 text-[9px] font-extrabold text-[#64748B]">
                 ⌘K
               </kbd>
             </button>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setCmdOpen(true)}
-              className="sm:hidden p-2 rounded-xl text-[#0B1528] bg-white/60 border border-white/80 shadow-sm"
-              title="Search"
-            >
-              <Search className="h-4 w-4 text-[#368AE4]" />
-            </button>
-
             <div className="text-right hidden sm:block">
               <p className="text-[13px] font-extrabold text-[#0B1528] leading-tight">{userName}</p>
               <p className="text-[10px] font-bold text-[#64748B] leading-tight uppercase tracking-wider">{role}</p>
@@ -189,7 +179,8 @@ export function PortalShell({ role, userName, navItems, children }: Props) {
           </div>
         </header>
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8">{children}</main>
+        {/* Page Content Scrolls Separately */}
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
